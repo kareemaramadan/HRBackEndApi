@@ -52,10 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="HR.Application\HR.Application.csproj" />
     <ProjectReference Include="HR.Infrastructure\HR.Infrastructure.csproj" />
   </ItemGroup>
 

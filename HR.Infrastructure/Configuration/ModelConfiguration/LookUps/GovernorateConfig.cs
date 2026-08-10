@@ -40,24 +40,7 @@ namespace HR.Infrastructure.Configuration.ModelConfiguration.LookUps
                 .WithMany(co => co.Governorates)
                 .HasForeignKey(g => g.Country_Id)
                 .OnDelete(DeleteBehavior.Restrict);
-            //====================================================================
-            // Configure the relationship between Governorate and Company entities, specifying that a company belongs to one Governorate,
-            // and a Governorate can have many companies. The foreign key is Gov_Id,
-            // and the delete behavior is set to restrict to prevent deletion of a Governorate if it has associated companies.
 
-            builder.HasMany(g => g.Companies)
-                .WithOne(comp => comp.Governorate)
-                .HasForeignKey(comp => comp.Gov_Id)
-                .OnDelete(DeleteBehavior.Restrict);
-            //====================================================================
-            // Configure the relationship between City and Governorate entities, specifying that a city belongs to one governorate,
-            // and a governorate can have many cities. The foreign key is Gov_Id,
-            // and the delete behavior is set to restrict to prevent deletion of a governorate if it has associated cities.
-
-            builder.HasMany(g => g.Cities)
-                .WithOne(ci => ci.Governorate)
-                .HasForeignKey(ci => ci.Gov_Id)
-                .OnDelete(DeleteBehavior.Restrict);
 
         }
     }

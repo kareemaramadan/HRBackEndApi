@@ -35,15 +35,6 @@ namespace HR.Infrastructure.Configuration.ModelConfiguration.LookUps
             // Relationships
             //==============
             //====================================================================
-            // Configure the relationship between Country and Company entities, specifying that a company belongs to one Country,
-            // and a Country can have many companies. The foreign key is Country_Id,
-            // and the delete behavior is set to restrict to prevent deletion of a Country if it has associated companies.
-
-            builder.HasMany(c => c.Companies)
-                .WithOne(comp => comp.Country)
-                .HasForeignKey(comp => comp.Country_Id)
-                .OnDelete(DeleteBehavior.Restrict);
-            //====================================================================
             // Configure the relationship between Country and Governorates entities, specifying that a Governorate belongs to one Country,
             // and a Country can have many Governorates. The foreign key is Country_Id,
             // and the delete behavior is set to restrict to prevent deletion of a Country if it has associated Governorates.
@@ -52,15 +43,7 @@ namespace HR.Infrastructure.Configuration.ModelConfiguration.LookUps
                 .WithOne(g => g.Country)
                 .HasForeignKey(g => g.Country_Id)
                 .OnDelete(DeleteBehavior.Restrict);
-            //====================================================================
-            // Configure the relationship between Country and City entities, specifying that a City belongs to one Country,
-            // and a Country can have many Cities. The foreign key is Country_Id,
-            // and the delete behavior is set to restrict to prevent deletion of a Country if it has associated Cities.
 
-            builder.HasMany(c=>c.Cities)
-                .WithOne(ci => ci.Country)
-                .HasForeignKey(ci => ci.Country_Id)
-                .OnDelete(DeleteBehavior.Restrict);
 
         }
     }

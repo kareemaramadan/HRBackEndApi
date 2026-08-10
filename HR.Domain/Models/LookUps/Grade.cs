@@ -1,6 +1,6 @@
 ﻿namespace HR.Domain.Models.LookUps 
 {
-    public class Grade
+    public class Grade 
     {
         public int Id { get; set; }
         public required string GradeName_en { get; set; }

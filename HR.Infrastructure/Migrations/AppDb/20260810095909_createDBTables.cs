@@ -5,7 +5,7 @@
 namespace HR.Infrastructure.Migrations.AppDb
 {
     /// <inheritdoc />
-    public partial class CreateAppDb : Migration
+    public partial class createDBTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,10 +52,10 @@ namespace HR.Infrastructure.Migrations.AppDb
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Country_Id = table.Column<int>(type: "int", nullable: false),
                     GovName_en = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     GovName_ar = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    GovCode = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: false)
+                    GovCode = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: false),
+                    Country_Id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -76,7 +76,6 @@ namespace HR.Infrastructure.Migrations.AppDb
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Country_Id = table.Column<int>(type: "int", nullable: false),
                     Gov_Id = table.Column<int>(type: "int", nullable: false),
                     CityName_en = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     CityName_ar = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false)
@@ -84,13 +83,6 @@ namespace HR.Infrastructure.Migrations.AppDb
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_City", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_City_Country_Country_Id",
-                        column: x => x.Country_Id,
-                        principalSchema: "LookUps",
-                        principalTable: "Country",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_City_Governorate_Gov_Id",
                         column: x => x.Gov_Id,
@@ -109,8 +101,6 @@ namespace HR.Infrastructure.Migrations.AppDb
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CompName_en = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     CompName_ar = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Country_Id = table.Column<int>(type: "int", nullable: false),
-                    Gov_Id = table.Column<int>(type: "int", nullable: false),
                     City_Id = table.Column<int>(type: "int", nullable: false),
                     Address_en = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Address_ar = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
@@ -124,20 +114,6 @@ namespace HR.Infrastructure.Migrations.AppDb
                         column: x => x.City_Id,
                         principalSchema: "LookUps",
                         principalTable: "City",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Company_Country_Country_Id",
-                        column: x => x.Country_Id,
-                        principalSchema: "LookUps",
-                        principalTable: "Country",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Company_Governorate_Gov_Id",
-                        column: x => x.Gov_Id,
-                        principalSchema: "LookUps",
-                        principalTable: "Governorate",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -155,12 +131,6 @@ namespace HR.Infrastructure.Migrations.AppDb
                 table: "City",
                 column: "CityName_en",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_City_Country_Id",
-                schema: "LookUps",
-                table: "City",
-                column: "Country_Id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_City_Gov_Id",
@@ -187,18 +157,6 @@ namespace HR.Infrastructure.Migrations.AppDb
                 table: "Company",
                 column: "CompName_en",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Company_Country_Id",
-                schema: "LookUps",
-                table: "Company",
-                column: "Country_Id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Company_Gov_Id",
-                schema: "LookUps",
-                table: "Company",
-                column: "Gov_Id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Country_Country_ar",

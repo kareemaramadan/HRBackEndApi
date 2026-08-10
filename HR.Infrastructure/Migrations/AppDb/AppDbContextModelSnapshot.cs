@@ -39,9 +39,6 @@ namespace HR.Infrastructure.Migrations.AppDb
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar");
 
-                    b.Property<int>("Country_Id")
-                        .HasColumnType("int");
-
                     b.Property<int>("Gov_Id")
                         .HasColumnType("int");
 
@@ -54,8 +51,6 @@ namespace HR.Infrastructure.Migrations.AppDb
                     b.HasIndex("CityName_en")
                         .IsUnique()
                         .HasDatabaseName("IX_City_CityName_en");
-
-                    b.HasIndex("Country_Id");
 
                     b.HasIndex("Gov_Id");
 
@@ -97,12 +92,6 @@ namespace HR.Infrastructure.Migrations.AppDb
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar");
 
-                    b.Property<int>("Country_Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Gov_Id")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("City_Id");
@@ -114,10 +103,6 @@ namespace HR.Infrastructure.Migrations.AppDb
                     b.HasIndex("CompName_en")
                         .IsUnique()
                         .HasDatabaseName("IX_Company_CompName_en");
-
-                    b.HasIndex("Country_Id");
-
-                    b.HasIndex("Gov_Id");
 
                     b.ToTable("Company", "LookUps");
                 });
@@ -233,19 +218,11 @@ namespace HR.Infrastructure.Migrations.AppDb
 
             modelBuilder.Entity("HR.Domain.Models.LookUps.City", b =>
                 {
-                    b.HasOne("HR.Domain.Models.LookUps.Country", "Country")
-                        .WithMany("Cities")
-                        .HasForeignKey("Country_Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("HR.Domain.Models.LookUps.Governorate", "Governorate")
                         .WithMany("Cities")
                         .HasForeignKey("Gov_Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Country");
 
                     b.Navigation("Governorate");
                 });
@@ -258,23 +235,7 @@ namespace HR.Infrastructure.Migrations.AppDb
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("HR.Domain.Models.LookUps.Country", "Country")
-                        .WithMany("Companies")
-                        .HasForeignKey("Country_Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("HR.Domain.Models.LookUps.Governorate", "Governorate")
-                        .WithMany("Companies")
-                        .HasForeignKey("Gov_Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("City");
-
-                    b.Navigation("Country");
-
-                    b.Navigation("Governorate");
                 });
 
             modelBuilder.Entity("HR.Domain.Models.LookUps.Governorate", b =>
@@ -295,18 +256,12 @@ namespace HR.Infrastructure.Migrations.AppDb
 
             modelBuilder.Entity("HR.Domain.Models.LookUps.Country", b =>
                 {
-                    b.Navigation("Cities");
-
-                    b.Navigation("Companies");
-
                     b.Navigation("Governorates");
                 });
 
             modelBuilder.Entity("HR.Domain.Models.LookUps.Governorate", b =>
                 {
                     b.Navigation("Cities");
-
-                    b.Navigation("Companies");
                 });
 #pragma warning restore 612, 618
         }

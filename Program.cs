@@ -1,10 +1,16 @@
 
+using Azure.Core;
+using HR.Application.Interfaces;
+using HR.Application.Mapping.LookUpsMapping;
+using HR.Application.Services;
 using HR.Domain.Models.Identity;
 using HR.Infrastructure.Context;
+using HR.Infrastructure.Repository;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using static System.Net.WebRequestMethods;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HRBackEndApi
 {
@@ -20,12 +26,12 @@ namespace HRBackEndApi
 
             //Add Identity DataBase Connection
             //=================================
-            builder.Services.AddDbContext<HR.Infrastructure.Context.IdentityContext>(options =>
+            builder.Services.AddDbContext<IdentityContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
 
             //Add Application DataBase Connection
             //=================================
-            builder.Services.AddDbContext<HR.Infrastructure.Context.AppDbContext>(options =>
+            builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection")));
             //=========================================================================
 
@@ -89,16 +95,25 @@ namespace HRBackEndApi
             //Register Repositoriesand Interfaces Services
             //=============================================
 
-            //builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+            //AddTransient for IBaseRepository and BaseRepository==> This means that a new instance of the repository will be created each time it is requested.
+            //This is useful for lightweight, stateless services that do not maintain any state between requests.
+
+            builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+
+            //AddScoped =>A single object is made for the duration of an entire request (e.g., an HTTP web request).
+            //If two classes ask for the service in the same HTTP request, they share the exact same instance.
+            //A new instance is only created when a new HTTP request begins.
+
+            builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
 
             #endregion
 
             #region RegisterMappers
 
-            //builder.Services.AddAutoMapper(m => { }, typeof(CityMappingProfile));
-            //builder.Services.AddAutoMapper(m => { }, typeof(CountryMappingProfile));
-            //builder.Services.AddAutoMapper(m => { }, typeof(CompanyMappingProfile));
-            //builder.Services.AddAutoMapper(m => { }, typeof(GovernorateMappingProfile));
+            builder.Services.AddAutoMapper(m => { }, typeof(CityMappingProfile));
+            builder.Services.AddAutoMapper(m => { }, typeof(CountryMappingProfile));
+            builder.Services.AddAutoMapper(m => { }, typeof(CompanyMappingProfile));
+            builder.Services.AddAutoMapper(m => { }, typeof(GovernorateMappingProfile));
 
             #endregion
 

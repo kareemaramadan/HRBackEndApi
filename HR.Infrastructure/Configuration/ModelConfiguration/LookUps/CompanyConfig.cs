@@ -17,8 +17,6 @@ namespace HR.Infrastructure.Configuration.ModelConfiguration.LookUps
             builder.Property(c => c.Id).UseIdentityColumn(1, 1).HasColumnType("int");
             builder.Property(c => c.CompName_en).HasColumnType("nvarchar").HasMaxLength(100).IsRequired();
             builder.Property(c => c.CompName_ar).HasColumnType("nvarchar").HasMaxLength(100).IsRequired();
-            builder.Property(c => c.Country_Id).HasColumnType("int").IsRequired();
-            builder.Property(c => c.Gov_Id).HasColumnType("int").IsRequired();
             builder.Property(c => c.City_Id).HasColumnType("int").IsRequired();
             builder.Property(c => c.Address_en).HasColumnType("nvarchar").HasMaxLength(200);
             builder.Property(c => c.Address_ar).HasColumnType("nvarchar").HasMaxLength(200);
@@ -40,26 +38,6 @@ namespace HR.Infrastructure.Configuration.ModelConfiguration.LookUps
             //====================================================================
             // Relationships
             //=================
-            // Configure the relationship between Country and Company entities, specifying that a company belongs to one country,
-            // and a country can have many companies. The foreign key is Country_Id,
-            // and the delete behavior is set to restrict to prevent deletion of a country if it has associated companies.
-
-            // One-to-many relationship with Country
-            builder.HasOne(comp => comp.Country) 
-                .WithMany(co => co.Companies)
-                .HasForeignKey(comp => comp.Country_Id)
-                .OnDelete(DeleteBehavior.Restrict);
-            //====================================================================
-            // Configure the relationship between Governorate and Company entities, specifying that a company belongs to one Governorate,
-            // and a Governorate can have many companies. The foreign key is Gov_Id,
-            // and the delete behavior is set to restrict to prevent deletion of a Governorate if it has associated companies.
-
-            // One-to-many relationship with Governorate
-            builder.HasOne(comp => comp.Governorate)
-              .WithMany(g => g.Companies)
-              .HasForeignKey(comp => comp.Gov_Id)
-              .OnDelete(DeleteBehavior.Restrict);
-            //====================================================================
             // Configure the relationship between City and Company entities, specifying that a company belongs to one City,
             // and a City can have many companies. The foreign key is City_Id,
             // and the delete behavior is set to restrict to prevent deletion of a City if it has associated companies.
