@@ -1,0 +1,13 @@
+﻿*for add migration for IdentityDbContext, use the following command:*
+======================================================================
+
+ add-migration CreateIdentityDb -context IdentityContext
+ update-database -context IdentityContext
+
+ *for add migration for AppDbContext, use the following command:*
+======================================================================
+
+ add-migration CreateAppDb -context AppDbContext
+ update-database -context AppDbContext
+
+
