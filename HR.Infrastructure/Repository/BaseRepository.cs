@@ -7,7 +7,7 @@ using System.Text;
 
 namespace HR.Infrastructure.Repository
 {
-    public class BaseRepository<T> : IBaseRepository<T> where T : class
+    internal class BaseRepository<T> : IBaseRepository<T> where T : class
     {
         protected readonly AppDbContext _Dbcontext;
         public BaseRepository(AppDbContext Dbcontext)
@@ -26,7 +26,7 @@ namespace HR.Infrastructure.Repository
         {
             await _Dbcontext.Set<T>().AddRangeAsync(entities);
             await _Dbcontext.SaveChangesAsync();
-            return entities;    
+            return entities;
         }
 
         public void DeleteAsync(int id)
@@ -39,7 +39,7 @@ namespace HR.Infrastructure.Repository
             throw new NotImplementedException();
         }
 
-        public Task<T> FindAsync(Expression<Func<T, bool>> predicate, string[] includes = null)
+        public Task<T> FindAsync(Expression<Func<T, bool>> predicate, string[]? includes = null)
         {
             throw new NotImplementedException();
         }
@@ -64,4 +64,5 @@ namespace HR.Infrastructure.Repository
             throw new NotImplementedException();
         }
     }
+
 }

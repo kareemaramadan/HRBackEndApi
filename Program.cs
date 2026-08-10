@@ -20,12 +20,12 @@ namespace HRBackEndApi
 
             //Add Identity DataBase Connection
             //=================================
-            builder.Services.AddDbContext<IdentityContext>(options =>
+            builder.Services.AddDbContext<HR.Infrastructure.Context.IdentityContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
 
             //Add Application DataBase Connection
             //=================================
-            builder.Services.AddDbContext<AppDbContext>(options =>
+            builder.Services.AddDbContext<HR.Infrastructure.Context.AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection")));
             //=========================================================================
 
@@ -37,7 +37,7 @@ namespace HRBackEndApi
             //=========================
 
             builder.Services.AddIdentity<AppUser, AppRole>()
-                .AddEntityFrameworkStores<IdentityContext>()
+                .AddEntityFrameworkStores<HR.Infrastructure.Context.IdentityContext>()
                 .AddDefaultTokenProviders()
                 .AddApiEndpoints();
 

@@ -15,7 +15,7 @@ namespace HR.Application.Interfaces
         Task<T> UpdateAsync(T entity);
         void DeleteAsync(int id);
         void DeleteRangeAsync(IEnumerable<T> entities);
-        Task<T> FindAsync(Expression<Func<T, bool>> predicate, string[] includes = null);
+        Task<T> FindAsync(Expression<Func<T, bool>> predicate, string[]? includes = null);
     }
     
 }

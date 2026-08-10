@@ -4,6 +4,7 @@ using HR.Domain.Models.LookUps;
 
 
 
+
 namespace HR.Application.Mapping.LookUpsMapping
 {
     public class CityMappingProfile:Profile

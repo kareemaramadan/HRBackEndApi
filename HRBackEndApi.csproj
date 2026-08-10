@@ -1,10 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+      <!-- Suppress CS0436 warnings about conflicting type definitions when building the solution -->
+      <NoWarn>$(NoWarn);0436</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="HR.Application\**" />
+    <Compile Remove="HR.Domain\**" />
+    <Compile Remove="HR.Infrastructure\**" />
+    <Content Remove="HR.Application\**" />
+    <Content Remove="HR.Domain\**" />
+    <Content Remove="HR.Infrastructure\**" />
+    <EmbeddedResource Remove="HR.Application\**" />
+    <EmbeddedResource Remove="HR.Domain\**" />
+    <EmbeddedResource Remove="HR.Infrastructure\**" />
+    <None Remove="HR.Application\**" />
+    <None Remove="HR.Domain\**" />
+    <None Remove="HR.Infrastructure\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.2.0" />
@@ -34,11 +52,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HR.Infrastructure\HR.Infrastructure.csproj" />
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="HR.Infrastructure\HR.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

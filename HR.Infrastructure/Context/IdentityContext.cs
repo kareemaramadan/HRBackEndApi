@@ -1,14 +1,21 @@
-﻿
+﻿using HR.Domain.Models.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using HR.Domain.Models.Identity;
-using Microsoft.AspNetCore.Identity;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
 namespace HR.Infrastructure.Context
 {
-    public class IdentityContext(DbContextOptions<IdentityContext> options, IConfiguration configuration) : IdentityDbContext<AppUser,AppRole,string>(options)
+    public class IdentityContext : IdentityDbContext<AppUser, AppRole, string>
     {
-        private readonly IConfiguration _configuration = configuration;
+        private readonly IConfiguration _configuration;
+        public IdentityContext(DbContextOptions<IdentityContext> options, IConfiguration configuration) : base(options)
+        {
+            _configuration = configuration;
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
