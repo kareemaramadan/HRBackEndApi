@@ -12,12 +12,14 @@ namespace HR.Application.Interfaces
     {
         //Task<TDto> GetByNameAsync(Expression<Func<TDto, bool>> predicate);
         //Task<TDto> GetByIdAsync(int id);
-        //Task<IEnumerable<TDto>> GetAllAsync();
+        Task<IEnumerable<T>> GetAllAsync();
         Task<T> CreateAsync(T entity);
         //Task<IEnumerable<TDto>> AddRangeAsync(IEnumerable<TDto> entities);
         //Task<TDto> UpdateAsync(TDto entity);
         //void DeleteAsync(int id);
         //void DeleteRangeAsync(IEnumerable<TDto> entities);
         //Task<TDto> FindAsync(Expression<Func<TDto, bool>> predicate, string[]? includes = null);
+        Task<int> CUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters);
+        Task<List<T>> GetStoredProcedureAsync(string spName);
     }
 }

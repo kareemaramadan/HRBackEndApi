@@ -2,10 +2,13 @@
 using HR.Domain.Models;
 using HR.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Data.SqlClient;
+using System.Data;
 using System.Linq.Expressions;
-using System.Text;
+using System.Runtime.CompilerServices;
+using HR.Application.Helpers;
+
 
 namespace HR.Infrastructure.Repository
 {
@@ -13,63 +16,100 @@ namespace HR.Infrastructure.Repository
     {
         protected readonly AppDbContext _Dbcontext;
         protected readonly DbSet<T> _dbSet;
+
         public BaseRepository(AppDbContext Dbcontext)
         {
             _Dbcontext = Dbcontext;
-            _dbSet = _Dbcontext.Set<T>();   
+            _dbSet = _Dbcontext.Set<T>();
         }
 
-        public async Task AddAsync(T entity)
+        public async Task<T> AddAsync(T entity)
         {
-           await _dbSet.AddAsync(entity);
+            await _dbSet.AddAsync(entity);
+            await _Dbcontext.SaveChangesAsync();
+            return entity;
         }
 
-        public Task<bool> SaveChangesAsync()
+        public async Task<int> CountAsync()
         {
-            return _Dbcontext.SaveChangesAsync().ContinueWith(task => task.Result > 0);
+            return await _dbSet.CountAsync();
         }
 
-        //public async Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities)
-        //{
-        //    await _Dbcontext.Set<T>().AddRangeAsync(entities);
-        //    await _Dbcontext.SaveChangesAsync();
-        //    return entities;
-        //}
+        public async Task<int> CountAsync(Expression<Func<T, bool>> criteria)
+        {
+            return await _dbSet.CountAsync(criteria);
+        }
 
-        //public void DeleteAsync(int id)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<object> CRUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters, HttpRequestType httpRequest)
+        {
+            SqlParameter[] sqlParameters = parameters.Select(
+                p => new SqlParameter(p.Key.StartsWith("@") ? p.Key : $"@{p.Key}", p.Value ?? DBNull.Value)).ToArray();
+            string parameterNames = string.Join(", ", sqlParameters.Select(p => p.ParameterName));
 
-        //public void DeleteRangeAsync(IEnumerable<T> entities)
-        //{
-        //    throw new NotImplementedException();
-        //}
+            int parametersCount = sqlParameters.Length;
+            string sqlQuery = string.Empty;
+            if (parametersCount > 0)
+            {
+                sqlQuery = $"EXEC {spName} {parameterNames}";
+            }
+            else
+            {
+                sqlQuery = $"EXEC {spName}";
+            }
 
-        //public Task<T> FindAsync(Expression<Func<T, bool>> predicate, string[]? includes = null)
-        //{
-        //    throw new NotImplementedException();
-        //}
+            FormattableString interpolatedQuery = FormattableStringFactory.Create(sqlQuery, sqlParameters);
 
-        //public Task<IEnumerable<T>> GetAllAsync()
-        //{
-        //    throw new NotImplementedException();
-        //}
+            switch(httpRequest)
+            {
+                case HttpRequestType.Get:
 
-        //public Task<T> GetByIdAsync(int id)
-        //{
-        //    throw new NotImplementedException();
-        //}
+                    return await _Dbcontext.Database.SqlQuery<T>(interpolatedQuery).ToListAsync();
 
-        //public Task<T> GetByNameAsync(Expression<Func<T, bool>> predicate)
-        //{
-        //    throw new NotImplementedException();
-        //}
+                case HttpRequestType.Post:
+                case HttpRequestType.Put:
+                case HttpRequestType.Delete:
+                    return await _Dbcontext.Database.ExecuteSqlAsync(interpolatedQuery);
 
-        //public void UpdateAsync(T entity)
-        //{
-        //    throw new NotImplementedException();
-        //}
+                default:
+                    throw new ArgumentException("Invalid HTTP request type for CRUD operations.");
+            }
+        }
+
+        public async Task DeleteByConditionAsync(Expression<Func<T, bool>> criteria)
+        {
+            var entities = await _dbSet.Where(criteria).ToListAsync();
+            foreach (var entity in entities)
+            {
+                _dbSet.Remove(entity);
+            }
+            await _Dbcontext.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> criteria)
+        {
+           IQueryable<T> query = _dbSet.Where(criteria);
+           return await query.ToListAsync();
+        }
+
+        public async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await _dbSet.ToListAsync();
+        }
+
+        public async Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> criteria)
+        {
+            IQueryable<T> query = _dbSet.Where(criteria);
+            return await query.ToListAsync();
+        }
+
+        public void UpdateByConditionAsync(T entity, Expression<Func<T, bool>> criteria)
+        {
+            var existingEntity = _dbSet.FirstOrDefaultAsync(criteria);
+            if (existingEntity != null)
+            {
+                _Dbcontext.Entry(existingEntity).CurrentValues.SetValues(entity);
+                _Dbcontext.SaveChangesAsync();
+            }
+        }
     }
-
 }

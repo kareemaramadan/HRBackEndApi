@@ -1,4 +1,5 @@
-﻿using HR.Domain.Models;
+﻿using HR.Application.Helpers;
+using HR.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -9,16 +10,14 @@ namespace HR.Application.Interfaces
 {
     public interface IBaseRepository<T> where T : class
     {
-        //Task<T> GetByNameAsync(Expression<Func<T, bool>> predicate);
-        //Task<T> GetByIdAsync(int id);
-        //Task<IEnumerable<T>> GetAllAsync();
-        Task AddAsync(T entity);
-        //Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities);
-        //void UpdateAsync(T entity);
-        //void DeleteAsync(int id);
-        //void DeleteRangeAsync(IEnumerable<T> entities);
-        //Task<T> FindAsync(Expression<Func<T, bool>> predicate, string[]? includes = null);
-        Task<bool> SaveChangesAsync();
+        Task<IEnumerable<T>> GetAllAsync();
+        Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> criteria);
+        Task<T> AddAsync(T entity);
+        void UpdateByConditionAsync(T entity, Expression<Func<T, bool>> criteria);
+        Task DeleteByConditionAsync(Expression<Func<T, bool>> criteria);
+        Task<object> CRUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters, HttpRequestType httpRequest);
+        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> criteria);
+        Task<int> CountAsync();
+        Task<int> CountAsync(Expression<Func<T, bool>> criteria);
     }
-    
 }

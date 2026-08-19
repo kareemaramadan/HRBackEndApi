@@ -18,5 +18,21 @@ namespace HR.Application.Services
             await _repository.SaveChangesAsync();
             return entity;
         }
+
+        public async Task<int> CUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters)
+        {
+           return await _repository.CUDUsingStoredProcedureAsync(spName, parameters);
+        }
+
+
+        public async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        public async Task<List<T>> GetStoredProcedureAsync(string spName)
+        {
+            return await _repository.GetStoredProcedureAsync(spName);
+        }
     }
 }
