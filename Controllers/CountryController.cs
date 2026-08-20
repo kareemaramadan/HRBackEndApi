@@ -1,10 +1,14 @@
 ﻿using AutoMapper;
 using HR.Application.Dtos.LookUpDtos.Country;
+using HR.Application.Helpers;
 using HR.Application.Interfaces;
 using HR.Domain.Models.LookUps;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
 using System.Configuration;
+using System.Linq.Expressions;
 
 
 namespace HRBackEndApi.Controllers
@@ -18,7 +22,7 @@ namespace HRBackEndApi.Controllers
 
 
         [HttpPost]
-        [Route("AddCountryByORM")]
+        [Route("CreateCountry")]
         public async Task<IActionResult> CreateCountry([FromBody] CreateCountryDto CreateCountry)
         {
             if (CreateCountry == null)
@@ -34,11 +38,11 @@ namespace HRBackEndApi.Controllers
 
         [HttpPost]
         [Route("AddCountry")]
-        public async Task<ActionResult<GetCountryDto>> CUDUsingStoredProcedure([FromBody] CreateCountryDto? CreateCountry)
+        public async Task<ActionResult> CUDUsingStoredProcedure([FromBody] CreateCountryDto? CreateCountry)
         {
             if (CreateCountry == null)
             {
-                return BadRequest("Invalid stored procedure data.");
+                return BadRequest("You Cannot add an Empty values");
             }
             if (string.IsNullOrWhiteSpace(CreateCountry.CountryName_en) || string.IsNullOrWhiteSpace(CreateCountry.CountryName_ar))
             {
@@ -53,11 +57,15 @@ namespace HRBackEndApi.Controllers
                 { "CountryName_ar", mappedCountry.CountryName_ar! }
             };
 
-            var  createdCountry =  await _countryService.CUDUsingStoredProcedureAsync("SP_Insert_Country", parametres);
-            return Ok(new { message = $"{createdCountry}Your Country has been created successfully." });
+            Expression<Func<Country, bool>> expression = cou => cou.CountryName_en == mappedCountry.CountryName_en || cou.CountryName_ar == mappedCountry.CountryName_ar;
+            
+
+            var createdCountry = await _countryService.CUDUsingStoredProcedureAsync("SP_Insert_Country", parametres,expression, HttpRequestType.Post);
+            
+            return (createdCountry > 0) ? Ok(new { message = "Your Country has been created successfully." }) : BadRequest(new { message = "This item is already exists" });
+
+
         }
-
-
 
         [HttpGet]
         [Route("GetAllCountriesByORM")]
@@ -66,6 +74,17 @@ namespace HRBackEndApi.Controllers
             var countries = await _countryService.GetAllAsync();
             var countryDtos = _mapper.Map<IEnumerable<GetCountryDto>>(countries);
             return Ok(countryDtos); 
+        }
+        //
+        [HttpGet]
+        [Route("SP_GetAllCountries")]
+        public async Task<IActionResult> GetAll()
+        {
+            Dictionary<string,object> parameters = new Dictionary<string, object> { };
+            var countries = await _countryService.GetUsingStoredProcedureAsync("SP_GetAll_Countries",parameters);
+
+            var countryDtos = _mapper.Map<IEnumerable<GetCountryDto>>(countries);
+            return Ok(countryDtos.Where(static c => c.CountryName_en!.StartsWith('F')).ToList());
         }
 
 

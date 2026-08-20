@@ -11,11 +11,12 @@ namespace HR.Application.Interfaces
     public interface IBaseRepository<T> where T : class
     {
         Task<IEnumerable<T>> GetAllAsync();
-        Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> criteria);
-        Task<T> AddAsync(T entity);
-        void UpdateByConditionAsync(T entity, Expression<Func<T, bool>> criteria);
-        Task DeleteByConditionAsync(Expression<Func<T, bool>> criteria);
-        Task<object> CRUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters, HttpRequestType httpRequest);
+        Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> criteria);
+        Task<T> CreateAsync(T entity);
+        Task<T> UpdateAsync(T entity, Expression<Func<T, bool>> criteria);
+        Task DeleteAsync(Expression<Func<T, bool>> criteria);
+        Task<int> CUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters, HttpRequestType httpRequest);
+        Task<IEnumerable<T>> GetUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters);
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> criteria);
         Task<int> CountAsync();
         Task<int> CountAsync(Expression<Func<T, bool>> criteria);
