@@ -1,5 +1,3 @@
-
-using Azure.Core;
 using HR.Application.Interfaces;
 using HR.Application.Mapping.LookUpsMapping;
 using HR.Application.Services;
@@ -9,8 +7,10 @@ using HR.Infrastructure.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
-using static System.Net.WebRequestMethods;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using HR.Application.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace HRBackEndApi
 {
@@ -43,7 +43,7 @@ namespace HRBackEndApi
             //=========================
 
             builder.Services.AddIdentity<AppUser, AppRole>()
-                .AddEntityFrameworkStores<HR.Infrastructure.Context.IdentityContext>()
+                .AddEntityFrameworkStores<IdentityContext>()
                 .AddDefaultTokenProviders()
                 .AddApiEndpoints();
 
@@ -105,6 +105,30 @@ namespace HRBackEndApi
             //A new instance is only created when a new HTTP request begins.
 
             builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            
+            builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(o =>
+            {
+                o.RequireHttpsMetadata = true;
+                o.SaveToken = true;
+                o.TokenValidationParameters = new TokenValidationParameters
+                {
+
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidIssuer = builder.Configuration["JWT:Issuer"],
+                    ValidAudience = builder.Configuration["JWT:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+
+                };
+            });
 
             #endregion
 
