@@ -90,7 +90,7 @@ namespace HRBackEndApi
 
             #endregion
 
-            #region RegisterRepositoriesServices
+            #region RegisterServices
 
             //Register Repositoriesand Interfaces Services
             //=============================================
@@ -105,9 +105,10 @@ namespace HRBackEndApi
             //A new instance is only created when a new HTTP request begins.
 
             builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
+            builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             
-            builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
+            builder.Services.Configure<JWTProp>(builder.Configuration.GetSection("JWT"));
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -125,8 +126,32 @@ namespace HRBackEndApi
                     ValidateLifetime = true,
                     ValidIssuer = builder.Configuration["JWT:Issuer"],
                     ValidAudience = builder.Configuration["JWT:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
-
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"])),
+                    ClockSkew = TimeSpan.Zero
+                };
+                o.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = ctx =>
+                    {
+                        // Console logging so developer can see details in dev environment
+                        Console.WriteLine("JwtBearer: OnMessageReceived");
+                        return Task.CompletedTask;
+                    },
+                    OnAuthenticationFailed = ctx =>
+                    {
+                        Console.WriteLine($"JwtBearer: Authentication failed - {ctx.Exception?.Message}");
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = ctx =>
+                    {
+                        Console.WriteLine("JwtBearer: Token validated");
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = ctx =>
+                    {
+                        Console.WriteLine($"JwtBearer: OnChallenge - {ctx.Error} : {ctx.ErrorDescription}");
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

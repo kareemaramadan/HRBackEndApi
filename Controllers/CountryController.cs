@@ -5,9 +5,6 @@ using HR.Application.Interfaces;
 using HR.Domain.Models.LookUps;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.EntityFrameworkCore;
-using System.Configuration;
 using System.Linq.Expressions;
 
 

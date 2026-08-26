@@ -4,12 +4,12 @@ using System.Text;
 
 namespace HR.Application.Helpers
 {
-    public class JWT
+    public class JWTProp
     {
-        public string Key { get; set; }
-        public string Issuer { get; set; }
-        public string Audience { get; set; }
-        public string ExpireAt { get; set; }
+        public string? Key { get; set; }
+        public string? Issuer { get; set; }
+        public string? Audience { get; set; }
+        public double ExpireAt { get; set; }
 
     }
 }
