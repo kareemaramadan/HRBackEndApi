@@ -11,6 +11,7 @@ namespace HR.Domain.Models.Identity
         [Required, MaxLength(150)]
         public string LastName { get; set; } = string.Empty;
         public DateTime CreationTime { get; set; } = DateTime.UtcNow;
+        public bool IsActivatedAccount { get; set; } = true;
 
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";

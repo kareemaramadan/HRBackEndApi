@@ -11,6 +11,7 @@ using HR.Application.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using HR.Application.Mapping.AuthMapping;
 
 namespace HRBackEndApi
 {
@@ -44,6 +45,7 @@ namespace HRBackEndApi
 
             builder.Services.AddIdentity<AppUser, AppRole>()
                 .AddEntityFrameworkStores<IdentityContext>()
+                .AddSignInManager()
                 .AddDefaultTokenProviders()
                 .AddApiEndpoints();
 
@@ -107,13 +109,18 @@ namespace HRBackEndApi
             builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped <IRoleService, RoleService>();
+
             
-            builder.Services.Configure<JWTProp>(builder.Configuration.GetSection("JWT"));
+            var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>();
+
+            builder.Services.AddSingleton(jwtOptions);
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(o =>
+            }).AddJwtBearer( JwtBearerDefaults.AuthenticationScheme,o =>
             {
                 o.RequireHttpsMetadata = true;
                 o.SaveToken = true;
@@ -124,9 +131,9 @@ namespace HRBackEndApi
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
-                    ValidIssuer = builder.Configuration["JWT:Issuer"],
-                    ValidAudience = builder.Configuration["JWT:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"])),
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidAudience = jwtOptions.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key)),
                     ClockSkew = TimeSpan.Zero
                 };
                 o.Events = new JwtBearerEvents
@@ -163,7 +170,8 @@ namespace HRBackEndApi
             builder.Services.AddAutoMapper(m => { }, typeof(CountryMappingProfile));
             builder.Services.AddAutoMapper(m => { }, typeof(CompanyMappingProfile));
             builder.Services.AddAutoMapper(m => { }, typeof(GovernorateMappingProfile));
-
+            builder.Services.AddAutoMapper(m => { }, typeof(AuthMappingProfile));
+            builder.Services.AddAutoMapper(m => { }, typeof(RoleMappingProfile));
             #endregion
 
 

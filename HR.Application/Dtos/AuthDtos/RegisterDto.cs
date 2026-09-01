@@ -18,6 +18,8 @@ namespace HR.Application.Dtos.AuthDtos
         [Required, StringLength(80)]
         public required string Password { get; set; }
 
-        public DateTime CreatedOn = DateTime.Now;
+        public bool IsActivatedAccount { get; set; } = true;
+
+        public DateTime CreatedOn = DateTime.Today;
     }
 }

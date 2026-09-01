@@ -12,5 +12,7 @@ namespace HR.Application.Interfaces
 
        // public Task<JwtSecurityToken> CreateJwtToken(AppUser user);
 
+        public Task<AuthDto> LoginAsync(LoginDto login);
+
     }
 }

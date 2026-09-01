@@ -1,0 +1,20 @@
+﻿using AutoMapper;
+using HR.Application.Dtos.RoleDtos;
+using HR.Domain.Models.Identity;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace HR.Application.Mapping.AuthMapping
+{
+    public class RoleMappingProfile:Profile
+    {
+        public RoleMappingProfile()
+        {
+            CreateMap<RoleDto, AppRole>();
+            CreateMap<CreateRoleDto,AppRole>();
+
+        }
+
+    }
+}
