@@ -3,36 +3,32 @@ using HR.Application.Dtos.AuthDtos;
 using HR.Application.Dtos.RoleDtos;
 using HR.Application.Interfaces;
 using HR.Domain.Models.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRBackEndApi.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
-    public class RoleController : ControllerBase
+    [Authorize (Roles = "Admin")]
+    public class RoleController( IRoleService roleService,RoleManager<AppRole> roleManager) : ControllerBase
     {
-        private readonly IRoleService _roleService;
-        private readonly RoleManager<AppRole> _roleManager;
-        private readonly IMapper _mapper;
-        public RoleController(IRoleService roleService,RoleManager<AppRole> roleManager,IMapper mapper)
+        [HttpPost("AddNewRole")]
+        public async Task<ActionResult<RoleDto>> createRoleAsync ( [FromBody] CreateRoleDto role )
         {
-            _roleService = roleService;
-            _roleManager = roleManager;
-            _mapper = mapper;
-        }
+            if ( !ModelState.IsValid )
+                return BadRequest ( ModelState );
 
-        [HttpPost]
-        public async Task<IActionResult> createRoleAsync([FromBody] CreateRoleDto role)
-        {
-            if(!ModelState.IsValid) 
-                return BadRequest(ModelState);
+            var createdRole = await roleService.CreateRoleAsync ( role );
 
-            var roleDto = await _roleService.CreateRoleAsync(role);
+            if( createdRole.Message is not null )
+                return BadRequest( createdRole.Message );
 
-            return Ok(roleDto);
-            
+            return Created ("", createdRole );
+
 
         }
     }

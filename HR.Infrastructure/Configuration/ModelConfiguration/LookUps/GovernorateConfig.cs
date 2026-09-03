@@ -8,7 +8,7 @@ namespace HR.Infrastructure.Configuration.ModelConfiguration.LookUps
     {
         public void Configure(EntityTypeBuilder<Governorate> builder)
         {
-            builder.ToTable("Governorate", "LookUps");
+            builder.ToTable("Governorate", "LookUps" );
             builder.HasKey(c => c.Id);
             builder.Property(c => c.Id).UseIdentityColumn(1, 1).HasColumnType("int");
             builder.Property(c => c.Country_Id).HasColumnType("int").IsRequired();

@@ -12,7 +12,7 @@ namespace HR.Infrastructure.Configuration.ModelConfiguration.LookUps
     {
         public void Configure(EntityTypeBuilder<Country> builder)
         {
-            builder.ToTable("Country", "LookUps");
+            builder.ToTable("Country", "LookUps" );
             builder.HasKey(c => c.Id);
             builder.Property(c => c.Id).UseIdentityColumn(1, 1).HasColumnType("int");
             builder.Property(c => c.CountryName_en).HasColumnType("nvarchar").HasMaxLength(150).IsRequired();

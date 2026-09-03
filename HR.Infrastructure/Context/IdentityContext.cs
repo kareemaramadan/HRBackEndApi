@@ -1,4 +1,6 @@
-﻿using HR.Domain.Models.Identity;
+﻿using HR.Domain.Models.Authorization;
+using HR.Domain.Models.Identity;
+using HR.Infrastructure.Configuration.AuthConfiguration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +29,7 @@ namespace HR.Infrastructure.Context
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<AppUser>().ToTable("Users", "Auth");
@@ -36,6 +39,23 @@ namespace HR.Infrastructure.Context
             modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins", "Auth");
             modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims", "Auth");
             modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserTokens", "Auth");
+            modelBuilder.Entity<Permission> ( ).ToTable ( "Permissions", "Auth" );
+            modelBuilder.Entity<Module>().ToTable ( "Modules", "Auth" );
+            modelBuilder.Entity<ModulePage> ( ).ToTable ( "ModulePages", "Auth" );
+            modelBuilder.Entity<RolePagePermission> ( ).ToTable ( "RolePagePermissions", "Auth" );
+            modelBuilder.Entity<UserPagePermission> ( ).ToTable ( "UserPagePermissions", "Auth" );
+
+
+            //modelBuilder.ApplyConfigurationsFromAssembly ( typeof ( ModuleConfig ).Assembly );
+            //modelBuilder.ApplyConfigurationsFromAssembly ( typeof ( ModulePagesConfig ).Assembly );
+            //modelBuilder.ApplyConfigurationsFromAssembly ( typeof ( PermissionConfig ).Assembly );
+            //modelBuilder.ApplyConfigurationsFromAssembly ( typeof ( RoleConfig ).Assembly );
+            //modelBuilder.ApplyConfigurationsFromAssembly ( typeof ( RolePagePermissionsConfig ).Assembly );
+            //modelBuilder.ApplyConfigurationsFromAssembly ( typeof ( UserConfig ).Assembly );
+            //modelBuilder.ApplyConfigurationsFromAssembly ( typeof ( UserPagePermissionsConfig ).Assembly );
+            //modelBuilder.ApplyConfigurationsFromAssembly ( typeof ( IdentityContext ).Assembly );
+
+            modelBuilder.ApplyConfigurationsFromAssembly ( typeof ( IdentityContext ).Assembly );
 
         }
     }

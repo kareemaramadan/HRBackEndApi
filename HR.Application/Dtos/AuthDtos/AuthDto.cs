@@ -8,7 +8,7 @@ namespace HR.Application.Dtos.AuthDtos
 {
     public class AuthDto
     {
-        public UserRequest User { get; set; }
+        public UserRequest? User { get; set; }
         //public string? UserId { get; set; }
         public List<string>? Roles { get; set; }
 

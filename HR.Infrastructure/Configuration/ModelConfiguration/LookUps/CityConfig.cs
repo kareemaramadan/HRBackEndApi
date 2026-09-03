@@ -9,7 +9,7 @@ namespace HR.Infrastructure.Configuration.ModelConfiguration.LookUps
         public void Configure(EntityTypeBuilder<City> builder)
         {
 
-            builder.ToTable("City", "LookUps");
+            builder.ToTable("City","LookUps");
             builder.HasKey(c => c.Id);
             builder.Property(c => c.Id).UseIdentityColumn(1, 1).HasColumnType("int");
             builder.Property(c => c.CityName_en).HasColumnType("nvarchar").HasMaxLength(150).IsRequired();

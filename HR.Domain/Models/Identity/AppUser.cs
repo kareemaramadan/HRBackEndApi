@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using HR.Domain.Models.Authorization;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -15,5 +16,12 @@ namespace HR.Domain.Models.Identity
 
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
+
+
+
+        public virtual ICollection<UserPagePermission>? UserPagePermissions { get; set; }
+
+
+
     }
 }

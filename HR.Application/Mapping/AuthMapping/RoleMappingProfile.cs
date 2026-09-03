@@ -11,7 +11,7 @@ namespace HR.Application.Mapping.AuthMapping
     {
         public RoleMappingProfile()
         {
-            CreateMap<RoleDto, AppRole>();
+            CreateMap<RoleDto, AppRole>().ReverseMap();
             CreateMap<CreateRoleDto,AppRole>();
 
         }

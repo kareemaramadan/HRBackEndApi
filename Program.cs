@@ -21,19 +21,31 @@ namespace HRBackEndApi
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+
 
             #region AddDataBaseConnection
 
             //Add Identity DataBase Connection
             //=================================
+            // Configure a separate MigrationsHistoryTable (and migrations assembly) so Identity migrations
+            // are stored separately from the application DbContext migrations and do not conflict.
             builder.Services.AddDbContext<IdentityContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("IdentityConnection"),
+                    sqlOptions => sqlOptions
+                        .MigrationsAssembly(typeof(IdentityContext).Assembly.FullName)));
+                        //.MigrationsHistoryTable("__Identity_MigrationsHistory", "Auth")
 
             //Add Application DataBase Connection
             //=================================
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection")));
+            // Configure a distinct MigrationsHistoryTable for application DbContext to avoid mixing
+            // migrations with the Identity context. Optionally place App migrations in the default schema.
+            //builder.Services.AddDbContext<AppDbContext>(options =>
+            //    options.UseSqlServer(
+            //        builder.Configuration.GetConnectionString("DbConnection"),
+            //        sqlOptions => sqlOptions
+            //            .MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
+                        //.MigrationsHistoryTable("__App_MigrationsHistory", "dbo")
             //=========================================================================
 
             #endregion
@@ -48,6 +60,8 @@ namespace HRBackEndApi
                 .AddSignInManager()
                 .AddDefaultTokenProviders()
                 .AddApiEndpoints();
+
+            
 
             #endregion
 
@@ -111,10 +125,16 @@ namespace HRBackEndApi
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped <IRoleService, RoleService>();
 
-            
-            var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>();
 
-            builder.Services.AddSingleton(jwtOptions);
+
+            // Register JwtOptions from configuration
+           builder.Services.Configure<JwtOptions> ( builder.Configuration.GetSection ( "Jwt" ) );
+
+            // If JwtOptions is required as a direct injectable type (not IOptions), register as singleton
+            builder.Services.AddSingleton ( resolver => resolver.GetRequiredService<Microsoft.Extensions.Options.IOptions<JwtOptions>> ( ).Value );
+
+
+            //builder.Services.AddSingleton ( jwtOptions );
 
             builder.Services.AddAuthentication(options =>
             {
@@ -131,9 +151,9 @@ namespace HRBackEndApi
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
-                    ValidIssuer = jwtOptions.Issuer,
-                    ValidAudience = jwtOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key)),
+                    ValidIssuer = builder.Configuration [ "Jwt:Issuer" ],
+                    ValidAudience = builder.Configuration [ "Jwt:Audience" ],
+                    IssuerSigningKey = new SymmetricSecurityKey ( Encoding.UTF8.GetBytes ( builder.Configuration[ "Jwt:Key" ] ) ),
                     ClockSkew = TimeSpan.Zero
                 };
                 o.Events = new JwtBearerEvents

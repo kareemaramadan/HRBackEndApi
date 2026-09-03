@@ -2,6 +2,7 @@
 using HR.Application.Dtos.RoleDtos;
 using HR.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using NuGet.Protocol;
 
 namespace HRBackEndApi.Controllers
@@ -19,7 +20,7 @@ namespace HRBackEndApi.Controllers
 
         [HttpPost("RegisterUser")]
 
-        public async Task<IActionResult> RegisterAsync([FromBody] RegisterDto register)
+        public async Task<ActionResult<AuthDto>> RegisterAsync([FromBody] RegisterDto register)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -34,7 +35,7 @@ namespace HRBackEndApi.Controllers
 
         [HttpPost("Login")]
 
-        public async Task<IActionResult> Login([FromBody] LoginDto login)
+        public async Task<ActionResult<AuthDto>> Login([FromBody] LoginDto login)
         {
             if(!ModelState.IsValid)
             {
@@ -47,8 +48,5 @@ namespace HRBackEndApi.Controllers
             }
             return Ok(result);
         }
-
-
-
     }
 }

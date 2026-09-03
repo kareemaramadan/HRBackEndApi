@@ -14,10 +14,10 @@ namespace HR.Infrastructure.Repository
 {
     public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        protected readonly AppDbContext _Dbcontext;
+        protected readonly IdentityContext _Dbcontext;
         protected readonly DbSet<T> _dbSet;
 
-        public BaseRepository(AppDbContext Dbcontext)
+        public BaseRepository(IdentityContext Dbcontext)
         {
             _Dbcontext = Dbcontext;
             _dbSet = _Dbcontext.Set<T>();

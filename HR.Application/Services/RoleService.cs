@@ -18,31 +18,34 @@ namespace HR.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<string> CreateRoleAsync(CreateRoleDto Newrole)
+        public async Task<RoleDto> CreateRoleAsync(CreateRoleDto Newrole)
         {
-            //string message = string.Empty;
+            string message = string.Empty;
 
-            //if (await _roleManager.RoleExistsAsync(Newrole.Name)) 
-            //{
-            //    message = "This Role already exists.";
-            //    return message;
-            //}
-            
-            //AppRole identityRole = _mapper.Map<AppRole>(Newrole);
-            
-            //IdentityResult result = await _roleManager.CreateAsync(identityRole);
+            if ( await _roleManager.RoleExistsAsync ( Newrole.Name ) )
+            {
+                message = "This Role already exists.";
+               // return new RoleDto { Message = message };
+            }
 
-            //if (!result.Succeeded)
-            //{
-            //    string errors = string.Empty;
-            //    foreach (var error in result.Errors)
-            //    {
-            //        errors += $"{error.Description}, ";
-            //    }
-            //    return errors;
-            //}
+            AppRole identityRole = _mapper.Map<AppRole> ( Newrole );
 
-            return "This role is Created Successfully";
+            var result = await _roleManager.CreateAsync ( identityRole );
+
+            if ( !result.Succeeded )
+            {
+                string errors = string.Empty;
+                foreach ( var error in result.Errors )
+                {
+                    errors += $"{error.Description}, ";
+                }
+                message = errors.TrimEnd ( ',', ' ' );
+               // return new RoleDto { Message = errors.TrimEnd ( ',', ' ' ) };
+            }
+
+            var createdRole = await _roleManager.FindByNameAsync ( Newrole.Name );
+
+            return result.Succeeded ? _mapper.Map<RoleDto> ( createdRole ) : new RoleDto { Message = message };
 
         }
     }

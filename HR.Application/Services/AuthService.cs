@@ -10,7 +10,7 @@ namespace HR.Application.Services
     /// <summary>
     /// Service for handling user authentication, including registration and login.
     /// </summary>
-    public class AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IMapper mapper, IJwtTokenService jwtTokenService) : IAuthService
+    public class AuthService(UserManager<AppUser> userManager,RoleManager<AppRole> roleManager, SignInManager<AppUser> signInManager, IMapper mapper, IJwtTokenService jwtTokenService) : IAuthService
     {
 
         /// <summary>
@@ -29,9 +29,15 @@ namespace HR.Application.Services
                 return new AuthDto { Message = message };
             }
 
+            if(! await roleManager.RoleExistsAsync("User"))
+            {
+                await roleManager.CreateAsync ( new AppRole { Name = "User",Description = "Default role for all Users" } );
+            }
+
             var user = mapper.Map<AppUser>(register);
 
             IdentityResult result = await userManager.CreateAsync(user, register.Password);
+
             await userManager.AddToRoleAsync(user, "User");
 
             if (!result.Succeeded)

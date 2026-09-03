@@ -8,6 +8,6 @@ namespace HR.Application.Interfaces
 {
     public interface IRoleService
     {
-        public Task<string> CreateRoleAsync(CreateRoleDto roleDto);
+        public Task<RoleDto> CreateRoleAsync(CreateRoleDto roleDto);
     }
 }

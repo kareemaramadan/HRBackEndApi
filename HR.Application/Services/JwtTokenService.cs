@@ -26,25 +26,36 @@ namespace HR.Application.Services
         public async Task<JwtSecurityToken> CreateNewJwtSecurityToken(AppUser user)
         {
             var userClaims = await userManager.GetClaimsAsync(user);
+            if (userClaims is null)
+            {
+                var userClaim = new List<Claim>
+                {
+                    new ("UserName", user.UserName!),
+                    new ("FullName", user.FullName),
+                    new (ClaimTypes.NameIdentifier,user.Id),
+                    new (ClaimTypes.Email,user.Email!)
+                };
+                userClaims = userClaim;
+                await userManager.AddClaimsAsync(user, userClaim);
+            }
             var userRoles = await userManager.GetRolesAsync(user);
             var roleClaims = new List<Claim>();
             foreach (var role in userRoles)
             {
                 roleClaims.Add(new Claim("Roles", role));
             }
-            var claims = new[] {
-                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+            var tokenClaims = new[] {
+                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
             }
             .Union(userClaims)
             .Union(roleClaims);
-            await userManager.AddClaimsAsync(user, claims);
-            var SecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key));
-            var signCredintials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256);
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key));
+            var signCredintials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var jwtSecurityToken = new JwtSecurityToken(
                 issuer: jwtOptions.Issuer,
                 audience: jwtOptions.Audience,
-                claims: claims,
+                claims: tokenClaims,
                 expires: DateTime.Today.AddMinutes(jwtOptions.ExpireAt),
                 signingCredentials: signCredintials
                 );
