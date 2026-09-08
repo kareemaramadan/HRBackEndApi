@@ -13,6 +13,7 @@ namespace HR.Application.Mapping.AuthMapping
         {
             CreateMap<RegisterDto, AppUser>().ReverseMap();
             CreateMap<AppUser, UserRequest>().ReverseMap(); 
+            CreateMap<UserProfile, AppUser> ( ).ReverseMap ( );
         }
     }
 }

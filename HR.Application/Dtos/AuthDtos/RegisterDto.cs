@@ -18,6 +18,12 @@ namespace HR.Application.Dtos.AuthDtos
         [Required, StringLength(80)]
         public required string Password { get; set; }
 
+        [Required, StringLength ( 11 )]
+        public string ?PhoneNumber { get; set; }
+
+
+        public byte [ ]? ProfilePicture { get; set; }
+
         public bool IsActivatedAccount { get; set; } = true;
 
         public DateTime CreatedOn = DateTime.Today;

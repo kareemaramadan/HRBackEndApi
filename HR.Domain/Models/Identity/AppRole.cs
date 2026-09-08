@@ -8,6 +8,9 @@ namespace HR.Domain.Models.Identity
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string Description { get; set; } = string.Empty;
+        public bool IsDeleted { get; set; } = false;
+
+        public DateTime? DeletedAt { get; set; }
 
 
 

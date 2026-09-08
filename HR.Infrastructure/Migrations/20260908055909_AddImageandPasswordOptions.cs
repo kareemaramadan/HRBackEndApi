@@ -1,0 +1,31 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace HR.Infrastructure.Migrations
+{
+    /// <inheritdoc />
+    public partial class AddImageandPasswordOptions : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<byte[]>(
+                name: "Image",
+                schema: "Auth",
+                table: "Users",
+                type: "varbinary(max)",
+                nullable: false,
+                defaultValue: new byte[0]);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "Image",
+                schema: "Auth",
+                table: "Users");
+        }
+    }
+}

@@ -13,6 +13,7 @@ namespace HR.Domain.Models.Identity
         public string LastName { get; set; } = string.Empty;
         public DateTime CreationTime { get; set; } = DateTime.UtcNow;
         public bool IsActivatedAccount { get; set; } = true;
+        public byte [ ] ProfilePicture { get; set; } = Array.Empty<byte> ( );
 
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";

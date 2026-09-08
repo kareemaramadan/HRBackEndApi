@@ -13,7 +13,7 @@ namespace HR.Application.Mapping.AuthMapping
         {
             CreateMap<RoleDto, AppRole>().ReverseMap();
             CreateMap<CreateRoleDto,AppRole>();
-
+            CreateMap<UpdateRoleDto, AppRole> ( ).ReverseMap ( );
         }
 
     }
