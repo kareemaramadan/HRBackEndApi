@@ -9,10 +9,9 @@ namespace HR.Application.Interfaces
     {
         Task<AuthDto> RegisterAsync ( RegisterDto register );
         Task<AuthDto> LoginAsync ( LoginDto login );
-        Task<string> AddRoleToUserAsync ( AddRoleToUserDto addRoleToUser );
-        Task<string> RemoveUserRoleAsync ( AddRoleToUserDto removeRoleFromUser );
-       
-        Task<UserRolesDto> GetUserRolesAsync ( string Username );
+        Task<(string message, bool isSuccess)> AddRoleToUserAsync ( AddRoleToUserDto addRoleToUser );
+        Task<(string message, bool isSuccess)> RemoveUserRoleAsync ( AddRoleToUserDto removeRoleFromUser );
+        Task<IList<string>> GetUserRolesAsync ( string Username );
         Task<string> ActivateUserAccountAsync ( string Username, bool isActivated );
         Task<string> LockUserAccountAsync ( string Username, TimeSpan lockoutDuration );
         Task<string> UnlockUserAccountAsync ( string Username );

@@ -182,7 +182,7 @@ namespace HRBackEndApi
                     OnMessageReceived = ctx =>
                     {
                         // Console logging so developer can see details in dev environment
-                        Console.WriteLine ( "JwtBearer: OnMessageReceived" );
+                        Console.WriteLine ( $"JwtBearer: OnMessageReceived - {ctx.Result?.ToString()}");
                         return Task.CompletedTask;
                     },
                     OnAuthenticationFailed = ctx =>

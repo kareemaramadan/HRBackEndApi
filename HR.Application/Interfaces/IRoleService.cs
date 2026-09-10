@@ -8,14 +8,13 @@ namespace HR.Application.Interfaces
 {
     public interface IRoleService
     {
-        public Task<RoleDto> GetRoleByNameAsync ( string roleName );
-        public Task<IEnumerable<RoleDto>> GetAllRolesAsync();
-        public Task<RoleDto> CreateRoleAsync(CreateRoleDto roleDto);
-
-        public Task<IEnumerable<RoleDto>> UpdateRoleAsync(UpdateRoleDto roleDto, string roleAction);
-        public Task<IEnumerable<RoleDto>> DeleteRoleAsync(string roleName);
-
-        Task<RoleUsersDto> GetRoleUsersAsync ( string RoleName );
+        Task<RoleDto> GetRoleByNameAsync ( string roleName );
+        Task<IEnumerable<RoleDto>> GetAllRolesAsync ( );
+        Task<(RoleDto newRole, bool isSuccess)> CreateRoleAsync ( CreateRoleDto roleDto );
+        Task<IEnumerable<RoleDto>> UpdateRoleAsync ( UpdateRoleDto roleDto);
+        Task<(string message, bool isSuccess)> DeleteRoleAsync ( string roleName );
+        Task<IList<string>> GetRoleUsersAsync ( string RoleName );
+        Task<(string message, bool isSuccess)> RemoveUsersFromRoleAsync (string roleName);
 
     }
 }

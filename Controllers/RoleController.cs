@@ -13,58 +13,35 @@ namespace HRBackEndApi.Controllers
 {
 
     [ApiController]
-    [Route("api/[controller]")]
-   
-    public class RoleController( IRoleService roleService) : ControllerBase
+    [Route ( "api/[controller]" )]
+
+    public class RoleController ( IRoleService roleService ) : ControllerBase
     {
-        [HttpPost("AddNewRole")]
-        public async Task<ActionResult<RoleDto>> createRoleAsync ( [FromBody] CreateRoleDto role )
-        {
-            if ( !ModelState.IsValid )
-                return BadRequest ( ModelState );
-
-            var createdRole = await roleService.CreateRoleAsync ( role );
-
-            if( createdRole.Message is not null )
-                return BadRequest( createdRole.Message );
-
-            return Created ("", createdRole );
-        }
-
+        /// <summary>
+        /// Gets a list of all roles in the system
+        /// </summary>
+        /// <returns>
+        /// A list of all roles in the system
+        /// </returns>
         [HttpGet ( "GetAllRoles" )]
-        public async Task<ActionResult<IEnumerable<RoleDto>>> getAllRolesAsync()
+        public async Task<ActionResult<IEnumerable<RoleDto>>> getAllRolesAsync ( )
         {
-            var roles = await roleService.GetAllRolesAsync();
-            return Ok(roles);
+            var roles = await roleService.GetAllRolesAsync ( );
+            return Ok ( roles );
         }
 
+        /// <summary>
+        /// Gets a specific role by its name
+        /// </summary>
+        /// <param name="roleName"></param>
+        /// <returns>
+        /// The role with the specified name
+        /// </returns>
         [HttpGet ( "GetRoleByName" )]
-        public async Task<ActionResult<RoleDto>> getRoleByNameAsync (string roleName )
+        public async Task<ActionResult<RoleDto>> getRoleByNameAsync ( string roleName )
         {
             var role = await roleService.GetRoleByNameAsync ( roleName );
             return Ok ( role );
-        }
-
-        [HttpPut]
-        [Route ( "UpdateRole/{roleAction}" )]
-        public async Task<ActionResult<IEnumerable<RoleDto>>> updateRoleAsync ( [FromBody] UpdateRoleDto role,string roleAction )
-        {
-            if ( !ModelState.IsValid )
-                return BadRequest ( ModelState );
-            IEnumerable<RoleDto> updatedRoles = await roleService.UpdateRoleAsync ( role, roleAction );
-            if ( updatedRoles == null || !updatedRoles.Any ( ) )
-                return NotFound ( "No roles were found matching the update criteria." );
-            return Ok ( updatedRoles );
-        }
-
-        [HttpDelete]
-        [Route ( "DeleteRole/{roleName}" )]
-        public async Task<ActionResult<IEnumerable<RoleDto>>> deleteRoleAsync ([FromBody] string roleName )
-        {
-            IEnumerable<RoleDto> deletedRole = await roleService.DeleteRoleAsync ( roleName );
-            if ( deletedRole == null || !deletedRole.Any ( ) )
-                return NotFound ( "No roles were found matching the delete criteria." );
-            return Ok ( deletedRole );
         }
 
         /// <summary>
@@ -81,8 +58,85 @@ namespace HRBackEndApi.Controllers
             {
                 return BadRequest ( "Role name is required" );
             }
-            RoleUsersDto result = await roleService.GetRoleUsersAsync ( roleName );
+            IList<string> result = await roleService.GetRoleUsersAsync ( roleName );
+            if ( result.Count == 0 )
+                return BadRequest ( "No users found for the specified role." );
             return Ok ( result );
+        }
+
+        /// <summary>
+        /// Creates a new role in the system
+        /// </summary>
+        /// <param name="role"></param>
+        /// <returns>
+        /// The created role
+        /// </returns>
+        [HttpPost ( "AddNewRole" )]
+        public async Task<ActionResult> createRoleAsync ( [FromBody] CreateRoleDto role )
+        {
+            if ( !ModelState.IsValid )
+                return BadRequest ( ModelState );
+
+            var (createdRole, isSuccess) = await roleService.CreateRoleAsync ( role );
+
+            if ( !isSuccess )
+                return BadRequest ( createdRole.Message );
+
+            return Created ("",createdRole);
+        }
+
+        /// <summary>
+        /// Updates an existing role in the system
+        /// </summary>
+        /// <param name="role"></param>
+        /// <param name="roleAction"></param>
+        /// <returns>
+        /// The updated role
+        /// </returns>
+        [HttpPut]
+        [Route ( "UpdateRole" )]
+        public async Task<ActionResult<IEnumerable<RoleDto>>> updateRoleAsync ( [FromBody] UpdateRoleDto role)
+        {
+            if ( !ModelState.IsValid )
+                return BadRequest ( ModelState );
+            IEnumerable<RoleDto> updatedRoles = await roleService.UpdateRoleAsync ( role);
+            if ( updatedRoles == null || !updatedRoles.Any ( ) )
+                return NotFound ( "No roles were found matching the update criteria." );
+            return Ok ( updatedRoles );
+        }
+       
+        /// <summary>
+        /// Deletes a role from the system
+        /// </summary>
+        /// <param name="roleName"></param>
+        /// <returns>
+        /// The deleted role
+        /// </returns>
+        [HttpDelete]
+        [Route ( "DeleteRole" )]
+        public async Task<ActionResult> deleteRoleAsync ([FromBody]string roleName )
+        {
+            var (message, isSuccess) = await roleService.DeleteRoleAsync ( roleName );
+            if ( !isSuccess )
+                return  BadRequest(message);
+            return Ok ( message);
+        }
+
+        /// <summary>
+        /// Removes all users from a specific role
+        /// </summary>
+        /// <param name="roleName"></param>
+        /// <returns>
+        /// A message indicating the success or failure of the operation
+        /// </returns>
+        [HttpDelete]
+        [Route ( "RemoveUsersFromRole" )]
+        public async Task<ActionResult> removeUsersFromRoleAsync ( [FromBody] string roleName )
+        {
+            var (message, isSuccess) = await roleService.RemoveUsersFromRoleAsync ( roleName );
+            if ( !isSuccess )
+                return BadRequest ( message );
+            return Ok ( message );
         }
 
     }

@@ -7,14 +7,9 @@ namespace HR.Application.Dtos.RoleDtos
 {
     public class RoleDto
     {
-      
         public string Id { get; set;  } = Guid.NewGuid().ToString();
         public string? Name { get; set; }
-
         public string? Description { get; set; } = string.Empty;
-        public bool IsDeleted { get; set; } = false;
-        public bool IsActive { get; set; } = true;
-
         public string Message { get; set; } = string.Empty; 
     }
 }

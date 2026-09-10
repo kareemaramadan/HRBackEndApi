@@ -23,6 +23,7 @@ namespace HRBackEndApi.Controllers
             IList<string> result = await authService.GetAllUsersAsync ( );
             return Ok ( result );
         }
+
         /// <summary>
         /// Registers a new user in the system
         /// </summary>
@@ -43,6 +44,7 @@ namespace HRBackEndApi.Controllers
 
             return Ok ( result );
         }
+
         /// <summary>
         /// Logs in a user and returns an authentication token
         /// </summary>
@@ -64,6 +66,7 @@ namespace HRBackEndApi.Controllers
             }
             return Ok ( result );
         }
+
         /// <summary>
         /// Adds a role to a user
         /// </summary>
@@ -72,18 +75,19 @@ namespace HRBackEndApi.Controllers
         /// A message indicating the result of the operation
         /// </returns>
         [HttpPost ( "AddRoleToUser" )]
-        public async Task<ActionResult<string>> AddRoleToUser ( [FromBody] AddRoleToUserDto addRoleToUser )
+        public async Task<ActionResult> AddRoleToUser ( [FromBody] AddRoleToUserDto addRoleToUser )
         {
             if ( !ModelState.IsValid )
             {
                 return BadRequest ( ModelState );
             }
 
-            string result = await authService.AddRoleToUserAsync ( addRoleToUser );
+            var(message,isSuccess) = await authService.AddRoleToUserAsync ( addRoleToUser );
+            if(!isSuccess)
+            return BadRequest ( message );
+            return Ok ( message );
+        }    
 
-            return Ok ( result );
-        }
-      
         /// <summary>
         /// Gets a list of roles assigned to a specific user
         /// </summary>
@@ -92,15 +96,16 @@ namespace HRBackEndApi.Controllers
         /// A list of roles assigned to the specified user
         /// </returns>
         [HttpGet ( "GetUserRoles/{username}" )]
-        public async Task<ActionResult<UserRolesDto>> GetUserRoles ( string username )
+        public async Task<ActionResult<IList<string>>> GetUserRoles ( string username )
         {
             if ( string.IsNullOrEmpty ( username ) )
             {
                 return BadRequest ( "Username is required" );
             }
-            UserRolesDto result = await authService.GetUserRolesAsync ( username );
+            IList<string> result = await authService.GetUserRolesAsync ( username );
             return Ok ( result );
         }
+
         /// <summary>
         /// Changes the password for a user
         /// </summary>
@@ -118,6 +123,7 @@ namespace HRBackEndApi.Controllers
             string result = await authService.ChangePasswordAsync ( changePasswordDto );
             return Ok ( result );
         }
+
         /// <summary>
         /// Activates or deactivates a user account
         /// </summary>
@@ -136,6 +142,7 @@ namespace HRBackEndApi.Controllers
             string result = await authService.ActivateUserAccountAsync ( username, isActivated );
             return Ok ( result );
         }
+
         /// <summary>
         /// Locks a user account for a specified duration
         /// </summary>
@@ -154,6 +161,7 @@ namespace HRBackEndApi.Controllers
             string result = await authService.LockUserAccountAsync ( username, lockoutDuration );
             return Ok ( result );
         }
+
         /// <summary>
         /// Unlocks a user account
         /// </summary>
@@ -171,6 +179,7 @@ namespace HRBackEndApi.Controllers
             string result = await authService.UnlockUserAccountAsync ( username );
             return Ok ( result );
         }
+
         /// <summary>
         /// Updates the profile information of a user
         /// </summary>
@@ -188,6 +197,7 @@ namespace HRBackEndApi.Controllers
             UserProfile result = await authService.UpdateUserProfileAsync ( userProfile );
             return Ok ( result );
         }
+
         /// <summary>
         /// Deletes a user account from the system
         /// </summary>
@@ -206,6 +216,7 @@ namespace HRBackEndApi.Controllers
             return Ok ( result );
 
         }
+
         /// <summary>
         /// Removes a role from a user
         /// </summary>
@@ -220,8 +231,12 @@ namespace HRBackEndApi.Controllers
             {
                 return BadRequest ( ModelState );
             }
-            string result = await authService.RemoveUserRoleAsync ( removeRoleFromUser );
-            return Ok ( result );
+            var (message, isSuccess) = await authService.RemoveUserRoleAsync ( removeRoleFromUser );
+            if (!isSuccess)
+            {
+                return BadRequest ( message );
+            }
+            return Ok ( message );
         }
 
     }

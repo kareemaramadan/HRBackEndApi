@@ -5,6 +5,7 @@ using HR.Application.Interfaces;
 using HR.Domain.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata.Ecma335;
 
 
 namespace HR.Application.Services
@@ -120,10 +121,10 @@ namespace HR.Application.Services
         /// <returns> 
         /// A message indicating the result of the operation, either success or an error message.
         /// </returns>
-        public async Task<string> AddRoleToUserAsync ( AddRoleToUserDto addRoleToUser )
+        public async Task<(string message, bool isSuccess)> AddRoleToUserAsync ( AddRoleToUserDto addRoleToUser )
         {
 
-            string validationMessage = await ValidateUserAndRole ( addRoleToUser, "add" );
+            var validationMessage = await ValidateUserAndRole ( addRoleToUser, "add" );
 
             // return ( validationMessage is null ) ?  "Role added to user successfully." : validationMessage;
 
@@ -140,30 +141,32 @@ namespace HR.Application.Services
         /// A message indicating the result of the validation, either null (if valid) or an error message.
         /// </returns>
 
-        public async Task<string> ValidateUserAndRole ( AddRoleToUserDto addRoleToUser, string action )
+        public async Task<(string message, bool isSuccess)> ValidateUserAndRole ( AddRoleToUserDto addRoleToUser, string action )
         {
             AppUser? user = await GetUserDataAsync ( addRoleToUser.Username );
             AppRole? role = await roleManager.FindByNameAsync ( addRoleToUser.RoleName );
 
-
-            string? validationMessage = ( user is null || role is null ) ? "User or Role is not found" :
-            ( !user.IsActivatedAccount ) ? "User account is not activated" :
-            ( await userManager.IsInRoleAsync ( user, role.Name! ) ) ? "User already assigned to this role" : null;
-
-            if ( validationMessage != null )
+            if ( user is null || role is null )
             {
-                return validationMessage;
+                return ("User or Role is not found", false);
             }
 
-            if ( action.Equals ( "add", StringComparison.CurrentCultureIgnoreCase ) )
+            if ( user != null && role != null && action.Equals ( "add", StringComparison.CurrentCultureIgnoreCase ))
             {
+                string? validationMessage = ( !user.IsActivatedAccount ) ? "User account is not activated" :
+                await userManager.IsInRoleAsync ( user, role.Name! ) ? "User already assigned to this role" : null;
+
+                if ( validationMessage != null )
+                {
+                    return (validationMessage, false);
+                }
                 IdentityResult addResult = await userManager.AddToRoleAsync ( user!, role: role.Name! );
-                return addResult.Succeeded ? "Role added to user successfully." : "Failed to add role to user.";
+                return addResult.Succeeded ? ("Role added to user successfully.", true) : ("Failed to add role to user.", false);
             }
             else
             {
                 IdentityResult removeResult = await userManager.RemoveFromRoleAsync ( user!, role: role.Name! );
-                return removeResult.Succeeded ? "Role removed from user successfully." : "Failed to remove role from user.";
+                return removeResult.Succeeded ? ("Role removed from user successfully.", true) : ("Failed to remove role from user.", false);
             }
         }
 
@@ -174,13 +177,11 @@ namespace HR.Application.Services
         /// <returns>
         /// A message indicating the result of the operation, either success or an error message.
         /// </returns>
-        public async Task<string> RemoveUserRoleAsync ( AddRoleToUserDto removeRoleFromUser )
+        public async Task<(string message, bool isSuccess)> RemoveUserRoleAsync ( AddRoleToUserDto removeRoleFromUser )
         {
-            string? validationMessage = await ValidateUserAndRole ( removeRoleFromUser, "remove" );
+            var validationMessage = await ValidateUserAndRole ( removeRoleFromUser, "remove" );
             return validationMessage;
         }
-
-     
 
         /// <summary>
         /// Retrieves a list of roles assigned to a specific user.
@@ -189,19 +190,23 @@ namespace HR.Application.Services
         /// <returns>
         /// A list of roles assigned to the specified user.
         /// </returns>
-        public async Task<UserRolesDto> GetUserRolesAsync ( string Username )
+        public async Task<IList<string>> GetUserRolesAsync ( string Username )
         {
             if ( string.IsNullOrEmpty ( Username ) )
             {
-                return new UserRolesDto { IsSuccess = false, Roles = [ ], ErrorMessage = "Username is required" };
+                return [ "Username is required" ];
             }
             AppUser? user = await GetUserDataAsync ( Username );
             if ( user == null )
             {
-                return new UserRolesDto { IsSuccess = false, Roles = [ ], ErrorMessage = "User not found" };
+                return [ "User not found" ];
             }
             IList<string> roles = await userManager.GetRolesAsync ( user );
-            return new UserRolesDto { IsSuccess = true, Roles = roles, ErrorMessage = null };
+            if ( roles.Count == 0 )
+            {
+                return [ "User has no roles assigned" ];
+            }
+            return roles;
         }
 
         /// <summary>
@@ -271,7 +276,7 @@ namespace HR.Application.Services
             }
             AppUser? user = await GetUserDataAsync ( changePasswordDto.Username );
 
-            if( user == null )
+            if ( user == null )
             {
                 return "User not found";
             }
@@ -287,12 +292,14 @@ namespace HR.Application.Services
         }
 
         /// <summary>
-        /// Activates a user's account, allowing them to log in. This method sets the IsActivatedAccount property of the user to true.
+        /// Activates a user's account, allowing them to log in. 
+        /// This method sets the IsActivatedAccount property of the user to true.
         /// </summary>
         /// <param name="Username"></param>
         /// <returns>
         /// A boolean indicating whether the operation was successful.
         /// </returns>
+        /// 
         public async Task<string> ActivateUserAccountAsync ( string Username, bool isActivated )
         {
             if ( string.IsNullOrEmpty ( Username ) )
@@ -305,7 +312,13 @@ namespace HR.Application.Services
             return ( result.Succeeded && isActivated ) ? "User account activated successfully" : "Failed to activate user account";
         }
 
-
+        /// <summary>
+        /// Deletes a user's account from the system. It first validates the input, retrieves the existing user data, and then attempts to delete the user using the UserManager.
+        /// </summary>
+        /// <param name="Username"></param>
+        /// <returns>
+        /// A string indicating the result of the operation.
+        /// </returns>
         public async Task<string> DeleteUserAccountAsync ( string Username )
         {
             if ( string.IsNullOrEmpty ( Username ) )
@@ -313,7 +326,8 @@ namespace HR.Application.Services
                 return "Username is required";
             }
             AppUser? user = await GetUserDataAsync ( Username );
-            if( user == null ) {
+            if ( user == null )
+            {
                 return "User not found";
             }
             IdentityResult result = await userManager.DeleteAsync ( user );
@@ -335,7 +349,8 @@ namespace HR.Application.Services
                 return new UserProfile { Username = "Username is required" };
             }
             AppUser? user = await GetUserDataAsync ( userProfile.Username );
-            if( user == null ) {
+            if ( user == null )
+            {
                 return new UserProfile { Username = "User not found" };
             }
             new UserProfile
@@ -360,10 +375,16 @@ namespace HR.Application.Services
 
         }
 
+        /// <summary>
+        /// Retrieves a list of all usernames in the system. If no users are found, an empty list is returned.
+        /// </summary>
+        /// <returns>
+        /// A list of all usernames in the system.
+        /// </returns>
         public async Task<List<string?>> GetAllUsersAsync ( )
         {
             List<AppUser> users = await userManager.Users.ToListAsync ( );
-            return  (users is null) ? [] : users.Select ( u => u.UserName ).ToList();
+            return ( users is null ) ? [ ] : users.Select ( u => u.UserName ).ToList ( );
         }
     }
 }
