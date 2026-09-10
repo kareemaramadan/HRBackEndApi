@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using HR.Application.Dtos.AuthDtos;
+using HR.Application.Interfaces;
+using HR.Domain.Models.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using HR.Application.Helpers;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -6,38 +11,46 @@ namespace HRBackEndApi.Controllers
 {
     [Route ( "api/[controller]" )]
     [ApiController]
-    public class ModulesController : ControllerBase
+    public class ModulesController(IBaseService<Module> moduleService, IMapper mapper) : ControllerBase
     {
-        // GET: api/<ModulesController>
-        [HttpGet]
-        public IEnumerable<string> Get ( )
+        [HttpGet("GetAllModules")]
+        public async Task<ActionResult> GetAllModules ( )
         {
-            return new string [ ] { "value1", "value2" };
+            
+            var (Items, IsSuccess) =  await moduleService.GetAllAsync();
+            if( Items == null )
+            {
+                return NotFound("No modules found.");
+            }
+            return Ok(Items);
         }
 
-        // GET api/<ModulesController>/5
-        [HttpGet ( "{id}" )]
-        public string Get ( int id )
+        [HttpGet("GetModuleByName")]
+        public async Task<ActionResult> GetModuleByName (string moduleName )
         {
-            return "value";
+            var (Items, IsSuccess) = await moduleService.GetByConditionAsync ( m => m.ModuleName == moduleName );
+            if ( Items == null || !Items.Any ( ) )
+            {
+                return NotFound ( $"Module with name '{moduleName}' not found." );
+            }
+            return Ok ( Items.First());  
+
         }
 
-        // POST api/<ModulesController>
-        [HttpPost]
-        public void Post ( [FromBody] string value )
+        [HttpPost("AddNewModule")]
+        public async Task<ActionResult> AddNewModule ( [FromBody] ModuleDto newModule )
         {
-        }
-
-        // PUT api/<ModulesController>/5
-        [HttpPut ( "{id}" )]
-        public void Put ( int id, [FromBody] string value )
-        {
-        }
-
-        // DELETE api/<ModulesController>/5
-        [HttpDelete ( "{id}" )]
-        public void Delete ( int id )
-        {
+            if ( newModule == null )
+            {
+                return BadRequest ( "Module data is required." );
+            }
+            Module moduleToCreate = mapper.Map<Module>(newModule);
+            var (createdModule, IsSuccess) = await moduleService.CreateAsync ( moduleToCreate, HttpRequestType.Post, m => m.ModuleName == newModule.ModuleName );
+            if (!IsSuccess)
+            {
+                return BadRequest ( "Failed to create module." );
+            }
+            return CreatedAtAction ( nameof ( GetModuleByName ), new { moduleName = moduleToCreate.ModuleName }, moduleToCreate );
         }
     }
 }

@@ -26,16 +26,19 @@ namespace HR.Application.Services
             return await _repository.CountAsync(criteria);
         }
 
-        public async Task<T> CreateAsync(T entity)
+        public async Task<(T? entity, bool isSuccess)> CreateByForceAsync ( T entity )
         {
-            return await _repository.CreateAsync(entity);
+            var createdEntity = await _repository.CreateAsync ( entity );
+            if ( createdEntity != null )
+                return (createdEntity, true);
+            return (null, false);
         }
 
-        public async Task<T> CreateAsync(T entity, HttpRequestType httpRequest, Expression<Func<T, bool>> checkCriteria)
+        public async Task<(T? entity, bool isSuccess)> CreateAsync(T entity, HttpRequestType httpRequest, Expression<Func<T, bool>> checkCriteria)
         {
             bool IsExist = await IsExistAsync(checkCriteria, httpRequest);
 
-            return (!IsExist) ? await _repository.CreateAsync(entity) : throw new ArgumentException("This item is already exists.");
+            return (!IsExist) ? (await _repository.CreateAsync(entity), true) : (null,false);
         }
 
 
@@ -60,19 +63,25 @@ namespace HR.Application.Services
            await _repository.DeleteAsync(criteria);
         }
 
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> criteria)
+        public async Task<(IEnumerable<T>?, bool isSuccess)> FindAsync(Expression<Func<T, bool>> criteria)
         {
-           return await _repository.FindAsync(criteria);
+           var items = await _repository.FindAsync(criteria);
+           return (items, items != null);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<(IEnumerable<T>?, bool isSuccess)> GetAllAsync()
         {
-            return await _repository.GetAllAsync();
+            var items = await _repository.GetAllAsync ( );
+            if(items == null)
+            return (null, false);
+
+            return (items,true);
         }
 
-        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> criteria)
+        public async Task<(IEnumerable<T>?, bool isSuccess)> GetByConditionAsync(Expression<Func<T, bool>> criteria)
         {
-            return await _repository.GetAsync(criteria);
+            var items = await _repository.GetByConditionAsync(criteria);
+            return (items, items != null);
         }
 
         public async Task<bool> IsExistAsync(Expression<Func<T, bool>> criteria, HttpRequestType httpRequest)
@@ -88,7 +97,7 @@ namespace HR.Application.Services
                     }
 
                 default:
-                    throw new ArgumentException("There is no data for this criteria.");
+                    return false;
             }
         }
 

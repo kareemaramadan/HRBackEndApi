@@ -27,7 +27,7 @@ namespace HRBackEndApi.Controllers
                 return BadRequest("Country object is null");
             }
             Country mappedcountry = _mapper.Map<Country>(CreateCountry);
-            var createdCountry = await _countryService.CreateAsync(mappedcountry);
+            var createdCountry = await _countryService.CreateAsync(mappedcountry, HttpRequestType.Post, c => c.CountryName_en == mappedcountry.CountryName_en || c.CountryName_ar == mappedcountry.CountryName_ar);
 
             return CreatedAtAction(nameof(CreateCountry), _mapper.Map<GetCountryDto>(createdCountry));
         }

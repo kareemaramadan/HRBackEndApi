@@ -13,16 +13,16 @@ namespace HR.Application.Interfaces
     {
         Task<int> CountAsync();
         Task<int> CountAsync(Expression<Func<T, bool>> criteria);
-        Task<T> CreateAsync(T entity);
-        Task<T> CreateAsync(T entity, HttpRequestType httpRequest, Expression<Func<T, bool>> checkCriteria);
+        Task<(T? entity, bool isSuccess)> CreateByForceAsync(T entity);
+        Task<(T? entity, bool isSuccess)> CreateAsync(T entity, HttpRequestType httpRequest, Expression<Func<T, bool>> checkCriteria);
 
         Task<int> CUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters, Expression<Func<T, bool>> checkCriteria, HttpRequestType httpRequest);
         Task<IEnumerable<T>> GetUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters);
         
         Task DeleteAsync(Expression<Func<T, bool>> criteria);
-        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> criteria);
-        Task<IEnumerable<T>> GetAllAsync();
-        Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> criteria);
+        Task<(IEnumerable<T>?, bool isSuccess)> FindAsync(Expression<Func<T, bool>> criteria);
+        Task<(IEnumerable<T>?, bool isSuccess)> GetAllAsync();
+        Task<(IEnumerable<T>?, bool isSuccess)> GetByConditionAsync(Expression<Func<T, bool>> criteria);
         Task <bool> IsExistAsync(Expression<Func<T, bool>> criteria,HttpRequestType httpRequest);
         Task<T> UpdateAsync(T entity, Expression<Func<T, bool>> criteria);
     }

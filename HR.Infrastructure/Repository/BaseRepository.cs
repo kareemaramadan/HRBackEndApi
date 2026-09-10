@@ -111,7 +111,7 @@ namespace HR.Infrastructure.Repository
             return await _dbSet.ToListAsync();
         }
 
-        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> criteria)
+        public async Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> criteria)
         {
             IQueryable<T> query = _dbSet.Where(criteria);
             return await query.ToListAsync();
@@ -119,7 +119,7 @@ namespace HR.Infrastructure.Repository
 
         public async Task<T> UpdateAsync(T entity, Expression<Func<T, bool>> criteria)
         {
-            var existingEntity = _dbSet.FirstOrDefaultAsync(criteria);
+            var existingEntity = await _dbSet.FirstOrDefaultAsync(criteria);
             if (existingEntity == null)
             {
                 throw new NotImplementedException("the item is not found");
@@ -128,7 +128,6 @@ namespace HR.Infrastructure.Repository
             await _Dbcontext.SaveChangesAsync();
             return entity;
         }
-
     }
 }
 

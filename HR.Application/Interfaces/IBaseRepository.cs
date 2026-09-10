@@ -11,7 +11,7 @@ namespace HR.Application.Interfaces
     public interface IBaseRepository<T> where T : class
     {
         Task<IEnumerable<T>> GetAllAsync();
-        Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> criteria);
+        Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> criteria);
         Task<T> CreateAsync(T entity);
         Task<T> UpdateAsync(T entity, Expression<Func<T, bool>> criteria);
         Task DeleteAsync(Expression<Func<T, bool>> criteria);

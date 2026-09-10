@@ -213,6 +213,7 @@ namespace HRBackEndApi
             builder.Services.AddAutoMapper ( m => { }, typeof ( GovernorateMappingProfile ) );
             builder.Services.AddAutoMapper ( m => { }, typeof ( AuthMappingProfile ) );
             builder.Services.AddAutoMapper ( m => { }, typeof ( RoleMappingProfile ) );
+            builder.Services.AddAutoMapper ( m => { }, typeof ( ModuleMappingProfile ));
             #endregion
 
 
