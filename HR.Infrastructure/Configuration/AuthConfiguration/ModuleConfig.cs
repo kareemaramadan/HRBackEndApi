@@ -15,7 +15,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
             builder.HasKey ( p => p.ModuleId );
             builder.Property ( p => p.ModuleId ).UseIdentityColumn ( 1, 1 ).HasColumnType ( "int" );
             builder.Property ( p => p.ModuleName ).HasColumnType ( "nvarchar" ).HasMaxLength ( 150 ).IsRequired ( );
-            builder.Property ( p => p.ModuleImage ).HasColumnType ( "varbinary").HasMaxLength(500);
+            builder.Property ( p => p.ModuleImage ).HasColumnType ( "varbinary(MAX)" ).IsRequired ( );
 
 
             // Indexes
