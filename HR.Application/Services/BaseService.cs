@@ -26,7 +26,7 @@ namespace HR.Application.Services
             return await _repository.CountAsync(criteria);
         }
 
-        public async Task<(T? entity, bool isSuccess)> CreateByForceAsync ( T entity )
+        public async Task<(T? entity, bool IsSuccess)> CreateByForceAsync ( T entity )
         {
             var createdEntity = await _repository.CreateAsync ( entity );
             if ( createdEntity != null )
@@ -34,17 +34,12 @@ namespace HR.Application.Services
             return (null, false);
         }
 
-        public async Task<(T? entity, bool isSuccess)> CreateAsync(T entity, HttpRequestType httpRequest, Expression<Func<T, bool>> checkCriteria)
+        public async Task<(T? entity, bool IsSuccess)> CreateAsync(T entity, HttpRequestType httpRequest, Expression<Func<T, bool>> checkCriteria)
         {
             bool IsExist = await IsExistAsync(checkCriteria, httpRequest);
 
             return (!IsExist) ? (await _repository.CreateAsync(entity), true) : (null,false);
         }
-
-
-
-
-
         public async Task<IEnumerable<T>> GetUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters)
         {
             return await _repository.GetUsingStoredProcedureAsync(spName, parameters);
@@ -58,18 +53,18 @@ namespace HR.Application.Services
                 : 0;
         }
 
-        public async Task DeleteAsync(Expression<Func<T, bool>> criteria)
+        public async Task<int> DeleteAsync(Expression<Func<T, bool>> criteria)
         {
-           await _repository.DeleteAsync(criteria);
+           return await _repository.DeleteAsync(criteria);
         }
 
-        public async Task<(IEnumerable<T>?, bool isSuccess)> FindAsync(Expression<Func<T, bool>> criteria)
+        public async Task<(IEnumerable<T>?, bool IsSuccess)> FindAsync ( Expression<Func<T, bool>> criteria )
         {
            var items = await _repository.FindAsync(criteria);
-           return (items, items != null);
+            return ( items != null ) ? (items, true) : (null, false);
         }
 
-        public async Task<(IEnumerable<T>?, bool isSuccess)> GetAllAsync()
+        public async Task<(IEnumerable<T>?, bool IsSuccess)> GetAllAsync()
         {
             var items = await _repository.GetAllAsync ( );
             if(items == null)
@@ -78,10 +73,13 @@ namespace HR.Application.Services
             return (items,true);
         }
 
-        public async Task<(IEnumerable<T>?, bool isSuccess)> GetByConditionAsync(Expression<Func<T, bool>> criteria)
+        public async Task<(IEnumerable<T>?, bool IsSuccess)> GetByConditionAsync(Expression<Func<T, bool>> criteria)
         {
             var items = await _repository.GetByConditionAsync(criteria);
-            return (items, items != null);
+            if(items == null)
+                return (null,false);
+
+            return (items, true);
         }
 
         public async Task<bool> IsExistAsync(Expression<Func<T, bool>> criteria, HttpRequestType httpRequest)
@@ -101,9 +99,18 @@ namespace HR.Application.Services
             }
         }
 
-        public async Task<T> UpdateAsync(T entity, Expression<Func<T, bool>> criteria)
+        public async Task<(T,bool IsSuccess)> UpdateAsync(T entity, Expression<Func<T, bool>> criteria)
         {
-            return await _repository.UpdateAsync(entity, criteria);
+            var (result, IsSuccess) = await _repository.UpdateAsync ( entity, criteria );
+            return (result,IsSuccess);
+        }
+        public async Task<(T,bool IsSuccess)> UpdateAsync ( T entity )
+        {
+            var updatedItem = await _repository.UpdateAsync ( entity );
+            if ( updatedItem == null )
+                return (null, false);
+
+            return (updatedItem,true);
         }
 
     }

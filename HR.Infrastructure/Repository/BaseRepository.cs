@@ -14,30 +14,30 @@ namespace HR.Infrastructure.Repository
 {
     public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        protected readonly IdentityContext _Dbcontext;
-        protected readonly DbSet<T> _dbSet;
-
-        public BaseRepository(IdentityContext Dbcontext)
+        protected readonly IdentityContext dbContext; 
+        protected readonly DbSet<T> dbSet;
+        public BaseRepository ( IdentityContext _dbContext)
         {
-            _Dbcontext = Dbcontext;
-            _dbSet = _Dbcontext.Set<T>();
+            dbContext = _dbContext;
+            dbSet = dbContext.Set<T>();
         }
+
 
         public async Task<T> CreateAsync(T entity)
         {
-            await _dbSet.AddAsync(entity);
-            await _Dbcontext.SaveChangesAsync();
+            await dbSet.AddAsync(entity);
+            await dbContext.SaveChangesAsync();
             return entity;
         }
 
         public async Task<int> CountAsync()
         {
-            return await _dbSet.CountAsync();
+            return await dbSet.CountAsync();
         }
 
         public async Task<int> CountAsync(Expression<Func<T, bool>> criteria)
         {
-            return await _dbSet.CountAsync(criteria);
+            return await dbSet.CountAsync(criteria);
         }
         public async Task<int> CUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters, HttpRequestType httpRequest)
         {
@@ -63,7 +63,7 @@ namespace HR.Infrastructure.Repository
                 case HttpRequestType.Post:
                 case HttpRequestType.Put:
                 case HttpRequestType.Delete:
-                    return await _Dbcontext.Database.ExecuteSqlAsync(interpolatedQuery);
+                    return await dbContext.Database.ExecuteSqlAsync(interpolatedQuery);
                      
                 default:
                     throw new NotImplementedException("Invalid HTTP request type for CRUD operations.");
@@ -87,47 +87,54 @@ namespace HR.Infrastructure.Repository
                 sqlQuery = $"EXEC {spName}";
             }
             FormattableString interpolatedQuery = FormattableStringFactory.Create(sqlQuery, sqlParameters);
-            return await _dbSet.FromSqlInterpolated(interpolatedQuery).ToListAsync();
+            return await dbSet.FromSqlInterpolated(interpolatedQuery).ToListAsync();
         }
 
-        public async Task DeleteAsync(Expression<Func<T, bool>> criteria)
+        public async Task<int> DeleteAsync(Expression<Func<T, bool>> criteria)
         {
-            var entities = await _dbSet.Where(criteria).ToListAsync();
+            var entities = await dbSet.Where(criteria).ToListAsync();
             foreach (var entity in entities)
             {
-                _dbSet.Remove(entity);
+                dbSet.Remove(entity);
             }
-            await _Dbcontext.SaveChangesAsync();
+           return await dbContext.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> criteria)
         {
-           IQueryable<T> query = _dbSet.Where(criteria);
+           IQueryable<T> query = dbSet.Where(criteria);
            return await query.ToListAsync();
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _dbSet.ToListAsync();
+            return await dbSet.ToListAsync();
         }
 
         public async Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> criteria)
         {
-            IQueryable<T> query = _dbSet.Where(criteria);
+            IQueryable<T> query = dbSet.Where(criteria);
             return await query.ToListAsync();
         }
 
-        public async Task<T> UpdateAsync(T entity, Expression<Func<T, bool>> criteria)
+        public async Task<(T,bool IsSuccess)> UpdateAsync(T entity, Expression<Func<T, bool>> criteria)
         {
-            var existingEntity = await _dbSet.FirstOrDefaultAsync(criteria);
+            var existingEntity = await dbSet.FirstOrDefaultAsync(criteria);
             if (existingEntity == null)
             {
                 throw new NotImplementedException("the item is not found");
             }
-            _Dbcontext.Update(entity);
-            await _Dbcontext.SaveChangesAsync();
+            dbContext.Update(entity);
+            await dbContext.SaveChangesAsync();
+            return (entity, true);
+        }
+
+        public async Task<T> UpdateAsync ( T entity )
+        {
+            dbContext.Update( entity );
+            await dbContext.SaveChangesAsync ( );
             return entity;
         }
-    }
+    }           
 }
 

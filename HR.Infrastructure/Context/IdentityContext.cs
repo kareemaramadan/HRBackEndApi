@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -24,7 +25,9 @@ namespace HR.Infrastructure.Context
             if (!optionsBuilder.IsConfigured)
             {
                 var connectionString = _configuration.GetConnectionString("IdentityConnection");
-                optionsBuilder.UseSqlServer(connectionString);
+                optionsBuilder.UseSqlServer ( connectionString )
+                .EnableSensitiveDataLogging ( sensitiveDataLoggingEnabled: true )
+                .LogTo ( Console.WriteLine,LogLevel.Information );
             }
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

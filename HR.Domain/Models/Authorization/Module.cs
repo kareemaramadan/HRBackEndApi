@@ -10,6 +10,5 @@
 
         public virtual ICollection<ModulePage>? ModulePages { get; set; }
 
-
     }
 }

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using HR.Application.Mapping.AuthMapping;
+using Microsoft.Extensions.Options;
 
 namespace HRBackEndApi
 {
@@ -30,10 +31,14 @@ namespace HRBackEndApi
             // Configure a separate MigrationsHistoryTable (and migrations assembly) so Identity migrations
             // are stored separately from the application DbContext migrations and do not conflict.
             builder.Services.AddDbContext<IdentityContext> ( options =>
-                options.UseSqlServer (
+            options.EnableSensitiveDataLogging (true)
+                   .UseSqlServer (
                     builder.Configuration.GetConnectionString ( "IdentityConnection" ),
                     sqlOptions => sqlOptions
-                        .MigrationsAssembly ( typeof ( IdentityContext ).Assembly.FullName ) ) );
+                        .MigrationsAssembly ( typeof ( IdentityContext ).Assembly.FullName ) )
+                   .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking) );
+
+
             //.MigrationsHistoryTable("__Identity_MigrationsHistory", "Auth")
 
             //Add Application DataBase Connection
@@ -81,6 +86,8 @@ namespace HRBackEndApi
                 .AddSignInManager ( )
                 .AddDefaultTokenProviders ( )
                 .AddApiEndpoints ( );
+                
+            
 
 
 
@@ -182,7 +189,7 @@ namespace HRBackEndApi
                     OnMessageReceived = ctx =>
                     {
                         // Console logging so developer can see details in dev environment
-                        Console.WriteLine ( $"JwtBearer: OnMessageReceived - {ctx.Result?.ToString()}");
+                        Console.WriteLine ( $"JwtBearer: OnMessageReceived - {ctx.Result?.ToString ( )}" );
                         return Task.CompletedTask;
                     },
                     OnAuthenticationFailed = ctx =>
@@ -213,7 +220,7 @@ namespace HRBackEndApi
             builder.Services.AddAutoMapper ( m => { }, typeof ( GovernorateMappingProfile ) );
             builder.Services.AddAutoMapper ( m => { }, typeof ( AuthMappingProfile ) );
             builder.Services.AddAutoMapper ( m => { }, typeof ( RoleMappingProfile ) );
-            builder.Services.AddAutoMapper ( m => { }, typeof ( ModuleMappingProfile ));
+            builder.Services.AddAutoMapper ( m => { }, typeof ( ModuleMappingProfile ) );
             #endregion
 
 
@@ -225,6 +232,7 @@ namespace HRBackEndApi
             {
                 app.UseSwagger ( );
                 app.UseSwaggerUI ( );
+
             }
 
             #region AddMiddleWarePipelines

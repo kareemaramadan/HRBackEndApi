@@ -22,7 +22,8 @@ namespace HRBackEndApi.Controllers
             {
                 return NotFound("No modules found.");
             }
-            return Ok(Items);
+            var modules = mapper.Map<IEnumerable<ModuleDto>> ( Items );
+            return Ok(modules);
         }
 
         [HttpGet("GetModuleByName")]
@@ -33,7 +34,7 @@ namespace HRBackEndApi.Controllers
             {
                 return NotFound ( $"Module with name '{moduleName}' not found." );
             }
-            return Ok ( Items.First());  
+            return Ok (mapper.Map<ModuleDto>(Items.First()));  
 
         }
 
@@ -51,6 +52,55 @@ namespace HRBackEndApi.Controllers
                 return BadRequest ( "Failed to create module." );
             }
             return CreatedAtAction ( nameof ( GetModuleByName ), new { moduleName = moduleToCreate.ModuleName }, moduleToCreate );
+        }
+
+        [HttpPut ( "EditModuleByName" )]
+        public async Task<ActionResult> EditModuleByName ( [FromBody] ModuleDto module )
+        {
+            if ( module == null )
+            {
+                return BadRequest ( "Module data is required." );
+            }
+            else
+            {
+                var (item, isexist) = await moduleService.GetByConditionAsync ( m => m.ModuleId == module.ModuleId );
+
+                if ( item == null || !item.Any ( ) )
+                {
+                    return NotFound ( $"Module with name '{module.ModuleName}' not found." );
+                }
+
+                module.ModuleImage = item.First ( ).ModuleImage;
+
+                Module moduleToUpdate = mapper.Map<Module> ( module );
+
+                var (updatedModule, IsSuccess) = await moduleService.UpdateAsync ( moduleToUpdate);
+
+                if ( !IsSuccess )
+                {
+                    return BadRequest ( "updating failed" );
+                }
+
+                return Ok ( mapper.Map<ModuleDto> ( updatedModule ) );
+            }
+
+
+        }
+
+        [HttpDelete ( "DeleteModule" )]
+        public async Task<ActionResult> DeleteModule ( string moduleName )
+        {
+            if ( moduleName == null )
+            {
+                return BadRequest ( "Module Name is required" );
+            }
+            var(item,IsSuccess) = await moduleService.FindAsync(m=>m.ModuleName == moduleName);
+            if( item == null || !item.Any ( ))
+            {
+                return NotFound ( $"The Module {moduleName} is not found." );
+            }
+            int rowsaffected = await moduleService.DeleteAsync ( m => m.ModuleId == item.First ( ).ModuleId );
+            return Ok ($"The Module {moduleName} is deleted Successfully.");
         }
     }
 }
