@@ -17,11 +17,7 @@ namespace HRBackEndApi.Controllers
     [ApiController]
     public class CountryController ( IBaseService<Country> countryService, IMapper mapper,ILogger<CountryController> logger ) : ControllerBase
     {
-        //private readonly IBaseService<Country> _countryService = countryService;
-        //private readonly IMapper _mapper = mapper;
-
-        [HttpPost]
-        [Route ( "AddNewCountry" )]
+        [HttpPost ( "AddNewCountry" )]
         public async Task<IActionResult> CreateCountry ( [FromBody] CreateCountryDto CreateCountry )
         {
             if ( CreateCountry == null )
@@ -34,8 +30,6 @@ namespace HRBackEndApi.Controllers
             return CreatedAtAction ( nameof ( CreateCountry ), mapper.Map<GetCountryDto> ( createdCountry ) );
 
         }
-
-
         //[HttpPost]
         //[Route ( "AddNewCountryBySP" )]
         //public async Task<ActionResult> CreateCountryByStoredProcedure ( [FromBody] CreateCountryDto? CreateCountry, [FromQuery] string language )
@@ -67,9 +61,7 @@ namespace HRBackEndApi.Controllers
 
 
         //}
-
-        [HttpGet]
-        [Route ( "GetAllCountries" )]
+        [HttpGet ( "GetAllCountries" )]
         public async Task<ActionResult> GetAllCountries ( )
         {
             var (countries,IsSuccess) = await countryService.GetAllAsync ( );
@@ -87,9 +79,7 @@ namespace HRBackEndApi.Controllers
         //    var countryDtos = _mapper.Map<IEnumerable<GetCountryDto>> ( countries );
         //    return (countryDtos.Count() > 0)?Ok(countryDtos.ToList()):NotFound("No items found.");
         //}
-
-        [HttpPut]
-        [Route("UpdateCountry/{countryId}")]
+        [HttpPut("UpdateCountry/{countryId}")]
         public async Task<ActionResult> UpdateCountry ( [FromBody] UpdateCountryDto countryDto, [FromQuery] int countryId)
         {
             if(countryDto == null || countryId <=0 )
@@ -101,9 +91,7 @@ namespace HRBackEndApi.Controllers
 
             return ( IsSuccess ) ? Ok ( "The item is updated Successfully" ) : BadRequest("update is failed.");
         }
-
-        [HttpDelete]
-        [Route ( "DeleteCountry/{countryId}" )]
+        [HttpDelete( "DeleteCountry/{countryId}" )]
         public async Task<ActionResult> DeleteCountry ( [FromQuery] string countryName ) 
         {
             
@@ -119,8 +107,6 @@ namespace HRBackEndApi.Controllers
             int rowsaffected = await countryService.DeleteAsync ( c => c.Id == item.First ( ).Id );
             return Ok ( $"The country {countryName} is deleted Successfully." );
         }
-
-
 
     }
 }

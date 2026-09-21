@@ -1,19 +1,20 @@
+using HR.Application.Helpers;
 using HR.Application.Interfaces;
+using HR.Application.Mapping.AuthMapping;
 using HR.Application.Mapping.LookUpsMapping;
 using HR.Application.Services;
 using HR.Domain.Models.Identity;
 using HR.Infrastructure.Context;
 using HR.Infrastructure.Repository;
+using HRBackEndApi.Middlewares;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
-using HR.Application.Helpers;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using HR.Application.Mapping.AuthMapping;
 using Microsoft.Extensions.Options;
-using HRBackEndApi.Middlewares;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using System.Reflection;
+using System.Text;
 
 namespace HRBackEndApi
 {
@@ -114,6 +115,10 @@ namespace HRBackEndApi
                         Email = "kramadan@petroamir.com",
                     }
                 } );
+                var xmlFile = $"{Assembly.GetExecutingAssembly ( ).GetName ( ).Name}.xml";
+                var xmlPath = Path.Combine ( AppContext.BaseDirectory, xmlFile );
+                options.IncludeXmlComments ( xmlPath );
+
             } );
 
             #endregion
@@ -251,6 +256,7 @@ namespace HRBackEndApi
 
             app.UseMiddleware<RateLimitingMiddleware> ();
             app.UseMiddleware<ProfilingMiddleware> ();
+            app.UseMiddleware<LoggingMiddleware> ();
 
             // Enable Authentication and Authorization Middleware
             //===================================================
@@ -261,7 +267,6 @@ namespace HRBackEndApi
             app.MapControllers ( );
             
             #endregion
-
 
             app.Run ( );
         }

@@ -15,14 +15,14 @@ namespace HR.Application.Dtos.AuthDtos
         public byte[ ]? ModuleImage { get; set; }
     }
 
-    public class CreateModuleDto
-    {
-        [Required]
-        public string ModuleName_en { get; set; } = string.Empty;
-        [Required]
-        public string ModuleName_ar { get; set; } = string.Empty;
-        public byte [ ]? ModuleImage { get; set; }
-    }
+    //public class CUDModuleDto
+    //{
+    //    [Required]
+    //    public string ModuleName_en { get; set; } = string.Empty;
+    //    [Required]
+    //    public string ModuleName_ar { get; set; } = string.Empty;
+    //    public byte [ ]? ModuleImage { get; set; }
+    //}
 
 
 
