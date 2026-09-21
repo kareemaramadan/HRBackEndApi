@@ -14,19 +14,26 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
             builder.ToTable ( "ModulePages", "Auth" );
             builder.HasKey ( p => p.PageId );
             builder.Property ( p => p.PageId ).UseIdentityColumn ( 1, 1 ).HasColumnType ( "int" );
-            builder.Property ( p => p.PageName ).HasColumnType ( "nvarchar" ).HasMaxLength ( 150 ).IsRequired ( );
+            builder.Property ( p => p.PageName_en ).HasColumnType ( "nvarchar" ).HasMaxLength ( 150 ).IsRequired ( );
+            builder.Property ( p => p.PageName_ar ).HasColumnType ( "nvarchar" ).HasMaxLength ( 200 ).IsRequired ( );
             builder.Property ( p => p.PageUrl ).HasColumnType ( "nvarchar" ).HasMaxLength ( 256 ).IsRequired ( );
 
 
             // Indexes
             //=========
-            // Create a unique index on the PageName property to ensure that each page name is unique in the database.
-            // The index is named "IX_ModulePage_PageName" and is created on the PageName column of the ModulePage table.
+            // Create a unique index on the PageName_en property to ensure that each page name is unique in the database.
+            // The index is named "IX_ModulePage_PageName_en" and is created on the PageName_en column of the ModulePage table.
 
-            builder.HasIndex ( p => p.PageName )
-                .HasDatabaseName ( "IX_ModulePage_PageName" )
+            builder.HasIndex ( p => p.PageName_en )
+                .HasDatabaseName ( "IX_ModulePage_PageName_en" )
                 .IsUnique ( );
+            //===================================================================
+            // Create a unique index on the PageName_ar property to ensure that each page name is unique in the database.
+            // The index is named "IX_ModulePage_PageName_ar" and is created on the PageName_ar column of the ModulePage table.
 
+            builder.HasIndex ( p => p.PageName_ar )
+                .HasDatabaseName ( "IX_ModulePage_PageName_ar" )
+                .IsUnique ( );
             //====================================================================
             // Relationships
             //=================

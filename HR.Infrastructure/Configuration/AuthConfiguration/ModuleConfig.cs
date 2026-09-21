@@ -14,18 +14,29 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
             builder.ToTable ( "Modules", "Auth" );
             builder.HasKey ( p => p.ModuleId );
             builder.Property ( p => p.ModuleId ).UseIdentityColumn ( 1, 1 ).HasColumnType ( "int" );
-            builder.Property ( p => p.ModuleName ).HasColumnType ( "nvarchar" ).HasMaxLength ( 150 ).IsRequired ( );
+            builder.Property ( p => p.ModuleName_en ).HasColumnType ( "nvarchar" ).HasMaxLength ( 150 ).IsRequired ( );
+            builder.Property ( p => p.ModuleName_ar ).HasColumnType ( "nvarchar" ).HasMaxLength ( 200 ).IsRequired ( );
             builder.Property ( p => p.ModuleImage ).HasColumnType ( "varbinary(MAX)" ).IsRequired ( );
 
 
             // Indexes
             //=========
-            // Create a unique index on the ModuleName property to ensure that each module name is unique in the database.
-            // The index is named "IX_Module_ModuleName" and is created on the ModuleName column of the Module table.
+            // Create a unique index on the ModuleName_en property to ensure that each module name is unique in the database.
+            // The index is named "IX_Module_ModuleName_en" and is created on the ModuleName_en column of the Module table.
 
-            builder.HasIndex ( p => p.ModuleName )
-                .HasDatabaseName ( "IX_Module_ModuleName" )
+            builder.HasIndex ( p => p.ModuleName_en )
+                .HasDatabaseName ( "IX_Module_ModuleName_en" )
                 .IsUnique ( );
+
+            //==================================================================
+            // Create a unique index on the ModuleName_ar property to ensure that each module name is unique in the database.
+            // The index is named "IX_Module_ModuleName_ar" and is created on the ModuleName_ar column of the Module table.
+
+            builder.HasIndex ( p => p.ModuleName_ar )
+                .HasDatabaseName ( "IX_Module_ModuleName_ar" )
+                .IsUnique ( );
+
+
 
             //====================================================================
             // Relationships

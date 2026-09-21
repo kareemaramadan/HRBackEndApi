@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using HR.Application.Mapping.AuthMapping;
 using Microsoft.Extensions.Options;
+using HRBackEndApi.Middlewares;
 
 namespace HRBackEndApi
 {
@@ -44,13 +45,13 @@ namespace HRBackEndApi
             //Add Application DataBase Connection
             //=================================
             // Configure a distinct MigrationsHistoryTable for application DbContext to avoid mixing
-            // migrations with the Identity context. Optionally place App migrations in the default schema.
-            //builder.Services.AddDbContext<AppDbContext>(options =>
-            //    options.UseSqlServer(
-            //        builder.Configuration.GetConnectionString("DbConnection"),
+            // migrations with the Identity context.Optionally place App migrations in the default schema.
+            //builder.Services.AddDbContext<AppDbContext> ( options =>
+            //    options.UseSqlServer (
+            //        builder.Configuration.GetConnectionString ( "HRDbConnection" ),
             //        sqlOptions => sqlOptions
-            //            .MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
-            //.MigrationsHistoryTable("__App_MigrationsHistory", "dbo")
+            //            .MigrationsAssembly ( typeof ( AppDbContext ).Assembly.FullName ) ) );
+            //.MigrationsHistoryTable ( "__App_MigrationsHistory", "dbo" )
             //=========================================================================
 
             #endregion
@@ -247,13 +248,18 @@ namespace HRBackEndApi
             app.UseHttpsRedirection ( );
             app.UseRouting ( );
 
+
+            app.UseMiddleware<RateLimitingMiddleware> ();
+            app.UseMiddleware<ProfilingMiddleware> ();
+
             // Enable Authentication and Authorization Middleware
             //===================================================
             app.UseAuthentication ( );
             app.UseAuthorization ( );
 
-            app.MapControllers ( );
 
+            app.MapControllers ( );
+            
             #endregion
 
 

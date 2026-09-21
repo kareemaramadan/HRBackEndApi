@@ -8,7 +8,8 @@ namespace HR.Domain.Models.Authorization
     {
         public int PageId { get; set; }
         public int ModuleId { get; set; } = 0;
-        public string PageName { get; set; } = string.Empty;
+        public string PageName_en { get; set; } = string.Empty;
+        public string PageName_ar { get; set; } = string.Empty;
         public string PageUrl { get; set; } = string.Empty;
 
 
