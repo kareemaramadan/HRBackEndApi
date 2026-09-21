@@ -13,7 +13,7 @@ namespace HR.Application.Mapping.AuthMapping
         public ModuleMappingProfile ( )
         {
             CreateMap<ModuleDto, Module> ( ).ReverseMap ( );
-            //CreateMap<CUDModuleDto, Module> ( ).ReverseMap ( );
+            CreateMap<CreateModuleDto, Module> ( ).ReverseMap ( );
         }
 
     }

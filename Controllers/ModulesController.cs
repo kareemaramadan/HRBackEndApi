@@ -13,49 +13,40 @@ namespace HRBackEndApi.Controllers
     [ApiController]
     public class ModulesController ( IBaseService<Module> moduleService, IMapper mapper ) : ControllerBase
     {
-        /// <summary>
-        /// Get all Modules data in the system
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet ( "getAllModules" )]
-        public async Task<ActionResult> getAllModules ( )
+        [HttpGet ( "GetAllModules" )]
+        public async Task<ActionResult> GetAllModules ( )
         {
 
-            var (items, isSuccess) = await moduleService.GetAllAsync ( );
-            if ( items == null )
+            var (Items, IsSuccess) = await moduleService.GetAllAsync ( );
+            if ( Items == null )
             {
                 return NotFound ( "No modules found." );
             }
-            var modules = mapper.Map<IEnumerable<ModuleDto>> ( items );
-            return Ok ( modules.OrderBy ( m => m.ModuleName_en ).ToList ( ) );
+            var modules = mapper.Map<IEnumerable<ModuleDto>> ( Items );
+            if(modules.Count() > 0)
+            return Ok ( modules );
+
+            return BadRequest ( "No Modules found." );
         }
-        /// <summary>
-        /// get module data by name
-        /// </summary>
-        /// <param name="moduleName"></param>
-        /// <returns></returns>
-        [HttpGet ( "getModuleByName/{moduleName}" )]
-        public async Task<ActionResult> getModuleByName ( string moduleName )
+
+        [HttpGet ( "GetModuleByName" )]
+        public async Task<ActionResult> GetModuleByName ( [FromBody] ModuleDto module )
         {
-            if ( moduleName is null )
+            if ( module.ModuleName_en == null || module.ModuleName_ar == null )
             {
-                return BadRequest ( "module name is required." );
+                return BadRequest ( "module name engilsh and arabic are required." );
             }
-            var (items, isSuccess) = await moduleService.FindAsync ( m => m.ModuleName_en == moduleName || m.ModuleName_ar == moduleName );
-            if ( items == null || !items.Any ( ) )
+            var (Items, IsSuccess) = await moduleService.GetByConditionAsync ( m => m.ModuleName_en == module.ModuleName_en && m.ModuleName_ar == module.ModuleName_ar );
+            if ( Items == null || !Items.Any ( ) )
             {
-                return NotFound ( $"No module is found by this name {moduleName}" );
+                return NotFound ( $"Module with name '{module.ModuleName_en}' and '{module.ModuleName_ar}' not found." );
             }
-            return Ok ( mapper.Map<ModuleDto> ( items.First ( ) ) );
+            return Ok ( mapper.Map<ModuleDto> ( Items.First ( ) ) );
 
         }
-        /// <summary>
-        /// Add new Module to the system
-        /// </summary>
-        /// <param name="newModule"></param>
-        /// <returns></returns>
-        [HttpPost ( "addNewModule" )]
-        public async Task<ActionResult> addNewModule ( [FromBody] ModuleDto newModule )
+
+        [HttpPost ( "AddNewModule" )]
+        public async Task<ActionResult> AddNewModule ( [FromBody] CreateModuleDto newModule )
         {
             if ( newModule.ModuleName_en == null || newModule.ModuleName_ar == null )
             {
@@ -69,40 +60,36 @@ namespace HRBackEndApi.Controllers
                 return BadRequest ( "Failed to create module." );
             }
 
-            return CreatedAtAction ( nameof ( getModuleByName ), new { moduleName = newModule.ModuleName_en }, mapper.Map<ModuleDto> ( createdModule ) );
+            return CreatedAtAction ( nameof ( GetModuleByName ), new { moduleName_en = moduleToCreate.ModuleName_en, moduleName_ar = moduleToCreate.ModuleName_ar },mapper.Map<ModuleDto>(createdModule));
         }
-        /// <summary>
-        /// Update module image and name
-        /// </summary>
-        /// <param name="cUModule"></param>
-        /// <returns></returns>
-        [HttpPut ( "updateModule" )]
-        public async Task<ActionResult> updateModule ( [FromBody] ModuleDto cUModule )
+
+        [HttpPut ( "UpdateModule" )]
+        public async Task<ActionResult> UpdateModule ( [FromBody] ModuleDto module)
         {
-            if ( cUModule.ModuleName_en is null || cUModule.ModuleName_ar is null )
+            if ( module.ModuleName_en is null || module.ModuleName_ar is null)
             {
                 return BadRequest ( "Module data is required." );
             }
             else
             {
-                var (item, isExist) = await moduleService.FindAsync ( m => ( m.ModuleName_en == cUModule.ModuleName_en && m.ModuleName_ar == cUModule.ModuleName_ar ) && m.ModuleId == cUModule.ModuleId );
+                var (item, IsExist) = await moduleService.FindAsync ( m => m.ModuleId == module.ModuleId );
 
-                if ( !isExist )
+                if ( !IsExist )
                 {
                     return NotFound ( $"this module is not found." );
                 }
 
-                if ( cUModule.ModuleImage is null )
+                if ( module.ModuleImage is null )
                 {
-                    cUModule.ModuleImage = item?.First ( ).ModuleImage;
+                    module.ModuleImage = item.First ( ).ModuleImage;
                 }
+                
 
+                Module moduleToUpdate = mapper.Map<Module> ( module );
 
-                Module moduleToUpdate = mapper.Map<Module> ( cUModule );
+                var (updatedModule, IsSuccess) = await moduleService.UpdateAsync ( moduleToUpdate );
 
-                var (updatedModule, isSuccess) = await moduleService.UpdateAsync ( moduleToUpdate );
-
-                if ( !isSuccess )
+                if ( !IsSuccess )
                 {
                     return BadRequest ( "updating failed" );
                 }
@@ -112,61 +99,21 @@ namespace HRBackEndApi.Controllers
 
 
         }
-        /// <summary>
-        /// check module function used in delete methods
-        /// </summary>
-        /// <param name="moduleName"></param>
-        /// <returns></returns>
-        private async Task<bool> checkModules ( string moduleName )
+
+        [HttpDelete ( "DeleteModule" )]
+        public async Task<ActionResult> DeleteModule ( [FromBody] ModuleDto module)
         {
-            if ( moduleName is null )
+            if ( module.ModuleName_en is null || module.ModuleName_ar is null )
             {
-                return false;
+                return BadRequest ( "Module Name is required" );
             }
-            var (item, IsSuccess) = await moduleService.FindAsync ( m => m.ModuleName_en == moduleName || m.ModuleName_ar == moduleName );
+            var (item, IsSuccess) = await moduleService.FindAsync ( m=>m.ModuleName_en == module.ModuleName_en && m.ModuleName_ar == module.ModuleName_ar);
             if ( item == null || !item.Any ( ) )
             {
-                return false;
+                return NotFound ( $"This Module is not found." );
             }
             int rowsaffected = await moduleService.DeleteAsync ( m => m.ModuleId == item.First ( ).ModuleId );
-
-            return ( rowsaffected == 1 ) ? true : false;
-
-
+            return Ok ( $"The Module is deleted Successfully." );
         }
-        /// <summary>
-        /// Delete a module from the system
-        /// </summary>
-        /// <param name="moduleName"></param>
-        /// <returns></returns>
-        [HttpDelete ( "deleteModule/{moduleName}" )]
-        public async Task<ActionResult> deleteModule ( string moduleName )
-        {
-            bool itemIsDeleted = await checkModules ( moduleName );
-
-
-            return ( itemIsDeleted ) ? Ok ( $"The Module is deleted Successfully." ) : BadRequest ( "Something done during deletion" );
-        }
-        /// <summary>
-        /// delete a group of modules together
-        /// </summary>
-        /// <param name="moduleNames"></param>
-        /// <returns></returns>
-        [HttpDelete ( "deleteBulkOfModules/{moduleNames}" )]
-        public async Task<ActionResult> deleteBulkModules ( string [ ] moduleNames )
-        {
-            int count = moduleNames.Count ( );
-            int rowsAffected = 0;
-            foreach ( var moduleName in moduleNames )
-            {
-                bool isDeleted = await checkModules ( moduleName );
-                if ( isDeleted ) { rowsAffected++; }
-            }
-
-            return Ok ( $"{rowsAffected} items are deleted successfully from {count} items are selected" );
-
-
-        }
-
     }
 }
