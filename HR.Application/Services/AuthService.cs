@@ -216,7 +216,7 @@ namespace HR.Application.Services
         /// <returns>
         /// A boolean indicating whether the operation was successful.
         /// </returns>
-        public async Task<string> LockUserAccountAsync ( string Username, TimeSpan lockoutDuration)
+        public async Task<string> LockUserAccountAsync ( string Username, TimeSpan lockoutDuration )
         {
             if ( string.IsNullOrEmpty ( Username ) )
             {

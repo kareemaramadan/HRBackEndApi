@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HR.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDBWithAuthandAuthorizationTables : Migration
+    public partial class initDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -56,8 +56,9 @@ namespace HR.Infrastructure.Migrations
                 {
                     ModuleId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ModuleName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    ModuleImage = table.Column<byte[]>(type: "varbinary(256)", maxLength: 256, nullable: false)
+                    ModuleName_en = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    ModuleName_ar = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    ModuleImage = table.Column<byte[]>(type: "varbinary(MAX)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,7 +86,6 @@ namespace HR.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -107,6 +107,7 @@ namespace HR.Infrastructure.Migrations
                     LastName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActivatedAccount = table.Column<bool>(type: "bit", nullable: false),
+                    ProfilePicture = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -159,7 +160,8 @@ namespace HR.Infrastructure.Migrations
                     PageId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ModuleId = table.Column<int>(type: "int", nullable: false),
-                    PageName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    PageName_en = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    PageName_ar = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     PageUrl = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false)
                 },
                 constraints: table =>
@@ -500,10 +502,17 @@ namespace HR.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ModulePage_PageName",
+                name: "IX_ModulePage_PageName_ar",
                 schema: "Auth",
                 table: "ModulePages",
-                column: "PageName",
+                column: "PageName_ar",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModulePage_PageName_en",
+                schema: "Auth",
+                table: "ModulePages",
+                column: "PageName_en",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -513,10 +522,17 @@ namespace HR.Infrastructure.Migrations
                 column: "ModuleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Module_ModuleName",
+                name: "IX_Module_ModuleName_ar",
                 schema: "Auth",
                 table: "Modules",
-                column: "ModuleName",
+                column: "ModuleName_ar",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Module_ModuleName_en",
+                schema: "Auth",
+                table: "Modules",
+                column: "ModuleName_en",
                 unique: true);
 
             migrationBuilder.CreateIndex(

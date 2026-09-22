@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HR.Infrastructure.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    [Migration("20260903053502_InitDBWithAuthandAuthorizationTables")]
-    partial class InitDBWithAuthandAuthorizationTables
+    [Migration("20260921113746_initDB")]
+    partial class initDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,19 +35,27 @@ namespace HR.Infrastructure.Migrations
 
                     b.Property<byte[]>("ModuleImage")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("varbinary");
+                        .HasColumnType("varbinary(MAX)");
 
-                    b.Property<string>("ModuleName")
+                    b.Property<string>("ModuleName_ar")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("ModuleName_en")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar");
 
                     b.HasKey("ModuleId");
 
-                    b.HasIndex("ModuleName")
+                    b.HasIndex("ModuleName_ar")
                         .IsUnique()
-                        .HasDatabaseName("IX_Module_ModuleName");
+                        .HasDatabaseName("IX_Module_ModuleName_ar");
+
+                    b.HasIndex("ModuleName_en")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Module_ModuleName_en");
 
                     b.ToTable("Modules", "Auth");
                 });
@@ -63,7 +71,12 @@ namespace HR.Infrastructure.Migrations
                     b.Property<int>("ModuleId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PageName")
+                    b.Property<string>("PageName_ar")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("PageName_en")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar");
@@ -77,9 +90,13 @@ namespace HR.Infrastructure.Migrations
 
                     b.HasIndex("ModuleId");
 
-                    b.HasIndex("PageName")
+                    b.HasIndex("PageName_ar")
                         .IsUnique()
-                        .HasDatabaseName("IX_ModulePage_PageName");
+                        .HasDatabaseName("IX_ModulePage_PageName_ar");
+
+                    b.HasIndex("PageName_en")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ModulePage_PageName_en");
 
                     b.ToTable("ModulePages", "Auth");
                 });
@@ -182,9 +199,6 @@ namespace HR.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -260,6 +274,10 @@ namespace HR.Infrastructure.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<byte[]>("ProfilePicture")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
