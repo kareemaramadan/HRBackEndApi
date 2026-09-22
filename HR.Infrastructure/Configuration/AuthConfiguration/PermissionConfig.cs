@@ -17,7 +17,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
             builder.HasKey ( p => p.PermissionId );
             builder.Property ( p => p.PermissionId ).UseIdentityColumn ( 1, 1 ).HasColumnType ( "int" );
             builder.Property ( p => p.PermissionName ).HasColumnType ( "nvarchar" ).HasMaxLength ( 150 ).IsRequired ( );
-            builder.Property ( p => p.PermissionCode ).HasColumnType ( "nvarchar" ).HasMaxLength ( 150 ).IsRequired ( );
+           
 
 
             // Indexes
@@ -39,7 +39,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
             builder.HasMany ( p => p.UserPagePermissions )
                 .WithOne ( upp => upp.Permissions )
                 .HasForeignKey ( upp => upp.PermissionId )
-                .OnDelete ( DeleteBehavior.Cascade );
+                .OnDelete ( DeleteBehavior.Restrict );
 
             // Define a one-to-many relationship between Permission and RolePagePermission entities.
             // Each Permission can have multiple RolePagePermissions, and each RolePagePermission is associated with one Permission.
@@ -48,7 +48,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
             builder.HasMany ( p => p.RolePagePermissions )
                 .WithOne ( upp => upp.Permissions )
                 .HasForeignKey ( upp => upp.PermissionId )
-                .OnDelete ( DeleteBehavior.Cascade );
+                .OnDelete ( DeleteBehavior.Restrict );
 
         }
     }

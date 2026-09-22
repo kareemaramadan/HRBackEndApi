@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HR.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initDB : Migration
+    public partial class InitateNewDatabaseTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -72,8 +72,7 @@ namespace HR.Infrastructure.Migrations
                 {
                     PermissionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PermissionName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    PermissionCode = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false)
+                    PermissionName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -173,7 +172,7 @@ namespace HR.Infrastructure.Migrations
                         principalSchema: "Auth",
                         principalTable: "Modules",
                         principalColumn: "ModuleId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -334,21 +333,21 @@ namespace HR.Infrastructure.Migrations
                         principalSchema: "Auth",
                         principalTable: "ModulePages",
                         principalColumn: "PageId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_RolePagePermissions_Permission_PermissionId",
                         column: x => x.PermissionId,
                         principalSchema: "Auth",
                         principalTable: "Permission",
                         principalColumn: "PermissionId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_RolePagePermissions_Roles_RoleId",
                         column: x => x.RoleId,
                         principalSchema: "Auth",
                         principalTable: "Roles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -370,21 +369,21 @@ namespace HR.Infrastructure.Migrations
                         principalSchema: "Auth",
                         principalTable: "ModulePages",
                         principalColumn: "PageId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_UserPagePermissions_Permission_PermissionId",
                         column: x => x.PermissionId,
                         principalSchema: "Auth",
                         principalTable: "Permission",
                         principalColumn: "PermissionId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_UserPagePermissions_Users_UserId",
                         column: x => x.UserId,
                         principalSchema: "Auth",
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(

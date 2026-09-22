@@ -10,105 +10,105 @@ using System.Text;
 
 namespace HR.Application.Services
 {
-    public class BaseService<T>(IBaseRepository<T> repository) : IBaseService<T>
+    public class BaseService<T> ( IBaseRepository<T> _repository ) : IBaseService<T>
         where T : class
     {
 
-        private readonly IBaseRepository<T> _repository = repository;
+        //Main CRUD Operations
+        //=====================
 
-        public async Task<int> CountAsync()
+        public async Task<(IEnumerable<T>?, bool IsSuccess)> GetAllAsync ( )
         {
-           return await _repository.CountAsync();
-        }
+            var items = await _repository.GetAllAsync ( );
+            if ( items.Count() == 0 )
+                return (null, false);
 
-        public async Task<int> CountAsync(Expression<Func<T, bool>> criteria)
+            return (items, true);
+        }
+        public async Task<(IEnumerable<T>?, bool IsSuccess)> GetByConditionAsync ( Expression<Func<T, bool>> criteria )
         {
-            return await _repository.CountAsync(criteria);
-        }
+            var items = await _repository.GetByConditionAsync ( criteria );
+            if ( items.Count() == 0 )
+                return (null, false);
 
-        public async Task<(T? entity, bool IsSuccess)> CreateByForceAsync ( T entity )
+            return (items, true);
+        }
+        public async Task<(T? entity, bool IsSuccess)> CreateAsync ( T entity )
         {
             var createdEntity = await _repository.CreateAsync ( entity );
             if ( createdEntity != null )
                 return (createdEntity, true);
             return (null, false);
         }
+        public async Task<(T? entity, bool IsSuccess)> CreateAsync ( T entity, HttpRequestType httpRequest, Expression<Func<T, bool>> checkCriteria )
+        {
+            bool IsExist = await IsExistAsync ( checkCriteria, httpRequest );
 
-        public async Task<(T? entity, bool IsSuccess)> CreateAsync(T entity, HttpRequestType httpRequest, Expression<Func<T, bool>> checkCriteria)
+            return ( !IsExist ) ? (await _repository.CreateAsync ( entity ), true) : (null, false);
+        }
+        public async Task<(T, bool IsSuccess)> UpdateAsync ( T entity )
         {
-            bool IsExist = await IsExistAsync(checkCriteria, httpRequest);
+            var updatedItem = await _repository.UpdateAsync ( entity );
+            if ( updatedItem == null )
+                return (null, false);
 
-            return (!IsExist) ? (await _repository.CreateAsync(entity), true) : (null,false);
+            return (updatedItem, true);
         }
-        public async Task<IEnumerable<T>> GetUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters)
+        public async Task<(T, bool IsSuccess)> UpdateAsync ( T entity, Expression<Func<T, bool>> criteria )
         {
-            return await _repository.GetUsingStoredProcedureAsync(spName, parameters);
+            var (result, IsSuccess) = await _repository.UpdateAsync ( entity, criteria );
+            return (result, IsSuccess);
         }
-
-        public async Task<int> CUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters,Expression<Func<T, bool>> checkCriteria, HttpRequestType httpRequest)
+        public async Task<int> DeleteAsync ( Expression<Func<T, bool>> criteria )
         {
-            bool IsExist = await IsExistAsync(checkCriteria, httpRequest);
-            return ((IsExist && httpRequest != HttpRequestType.Post) || (!IsExist && httpRequest == HttpRequestType.Post))
-                ? await _repository.CUDUsingStoredProcedureAsync(spName, parameters, httpRequest)
-                : 0;
-        }
-
-        public async Task<int> DeleteAsync(Expression<Func<T, bool>> criteria)
-        {
-           return await _repository.DeleteAsync(criteria);
-        }
-        public async Task<(IEnumerable<T>?, bool IsSuccess)> FindAsync ( Expression<Func<T, bool>> criteria )
-        {
-           var items = await _repository.FindAsync(criteria);
-            return ( items != null ) ? (items, true) : (null, false);
-        }
-        public async Task<(IEnumerable<T>?, bool IsSuccess)> GetAllAsync()
-        {
-            var items = await _repository.GetAllAsync ( );
-            if(items == null)
-            return (null, false);
-
-            return (items,true);
+            return await _repository.DeleteAsync ( criteria );
         }
 
-        public async Task<(IEnumerable<T>?, bool IsSuccess)> GetByConditionAsync(Expression<Func<T, bool>> criteria)
-        {
-            var items = await _repository.GetByConditionAsync(criteria);
-            if(items == null)
-                return (null,false);
+        //Extra Functions for count and checking
+        //=======================================
 
-            return (items, true);
-        }
-
-        public async Task<bool> IsExistAsync(Expression<Func<T, bool>> criteria, HttpRequestType httpRequest)
+        public async Task<bool> IsExistAsync ( Expression<Func<T, bool>> criteria, HttpRequestType httpRequest )
         {
-            switch (httpRequest)
+            switch ( httpRequest )
             {
                 case HttpRequestType.Post:
                 case HttpRequestType.Put:
                 case HttpRequestType.Delete:
                 case HttpRequestType.Get:
                     {
-                        return await CountAsync(criteria) > 0 ? true : false;
+                        return await CountAsync ( criteria ) > 0 ? true : false;
                     }
 
                 default:
                     return false;
             }
         }
-
-        public async Task<(T,bool IsSuccess)> UpdateAsync(T entity, Expression<Func<T, bool>> criteria)
+        public async Task<int> CountAsync ( )
         {
-            var (result, IsSuccess) = await _repository.UpdateAsync ( entity, criteria );
-            return (result,IsSuccess);
+            return await _repository.CountAsync ( );
         }
-        public async Task<(T,bool IsSuccess)> UpdateAsync ( T entity )
+        public async Task<int> CountAsync ( Expression<Func<T, bool>> criteria )
         {
-            var updatedItem = await _repository.UpdateAsync ( entity );
-            if ( updatedItem == null )
-                return (null, false);
+            return await _repository.CountAsync ( criteria );
+        }
+        public async Task<(IEnumerable<T>?, bool IsSuccess)> FindAsync ( Expression<Func<T, bool>> criteria )
+        {
+            var items = await _repository.FindAsync ( criteria );
+            return ( items != null ) ? (items, true) : (null, false);
+        }
 
-            return (updatedItem,true);
+        //Using StoredProcedures
+        //=======================
+        public async Task<IEnumerable<T>> GetUsingStoredProcedureAsync ( string spName, Dictionary<string, object> parameters )
+        {
+            return await _repository.GetUsingStoredProcedureAsync ( spName, parameters );
+        }
+        public async Task<int> CUDUsingStoredProcedureAsync ( string spName, Dictionary<string, object> parameters, Expression<Func<T, bool>> checkCriteria, HttpRequestType httpRequest )
+        {
+            bool IsExist = await IsExistAsync ( checkCriteria, httpRequest );
+            return ( ( IsExist && httpRequest != HttpRequestType.Post ) || ( !IsExist && httpRequest == HttpRequestType.Post ) )
+                ? await _repository.CUDUsingStoredProcedureAsync ( spName, parameters, httpRequest )
+                : 0;
         }
 
     }

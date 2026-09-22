@@ -7,8 +7,8 @@ using HR.Domain.Models.LookUps;
 
 namespace HR.Infrastructure.Context
 {
-    public class AppDbContext : DbContext
-    {
+    //public class AppDbContext : DbContext
+    //{
         //private readonly IConfiguration _configuration;
         //public AppDbContext ( DbContextOptions<AppDbContext> options, IConfiguration configuration ) : base ( options )
         //{
@@ -29,5 +29,5 @@ namespace HR.Infrastructure.Context
         //    modelBuilder.ApplyConfigurationsFromAssembly ( typeof ( AppDbContext ).Assembly );
 
         //}
-    }
+   // }
 }   

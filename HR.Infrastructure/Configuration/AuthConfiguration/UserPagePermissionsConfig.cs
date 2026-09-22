@@ -41,7 +41,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
             builder.HasOne ( u => u.Users )
                 .WithMany ( u => u.UserPagePermissions )
                 .HasForeignKey ( u => u.UserId )
-                .OnDelete ( DeleteBehavior.Cascade );
+                .OnDelete ( DeleteBehavior.Restrict );
 
             //  // Define a one-to-many relationship between ModulePage and UserPagePermission entities.
             // Each ModulePage can have multiple UserPagePermissions, and each UserPagePermission is associated with one ModulePage.
@@ -49,7 +49,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
             builder.HasOne(u=> u.Pages)
                 .WithMany(u=> u.UserPagePermissions)
                 .HasForeignKey( u => u.PageId )
-                .OnDelete( DeleteBehavior.Cascade );
+                .OnDelete( DeleteBehavior.Restrict );
 
 
             // Define a one-to-many relationship between Permission and UserPagePermission entities.
@@ -59,7 +59,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
             builder.HasOne ( u => u.Permissions )
                 .WithMany ( u => u.UserPagePermissions )
                 .HasForeignKey ( u => u.PermissionId )
-                .OnDelete ( DeleteBehavior.Cascade );
+                .OnDelete ( DeleteBehavior.Restrict );
 
 
 

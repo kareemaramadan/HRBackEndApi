@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HR.Infrastructure.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    [Migration("20260921113746_initDB")]
-    partial class initDB
+    [Migration("20260922083928_InitateNewDatabaseTables")]
+    partial class InitateNewDatabaseTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -108,11 +108,6 @@ namespace HR.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PermissionId"));
-
-                    b.Property<string>("PermissionCode")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar");
 
                     b.Property<string>("PermissionName")
                         .IsRequired()
@@ -608,7 +603,7 @@ namespace HR.Infrastructure.Migrations
                     b.HasOne("HR.Domain.Models.Authorization.Module", "Modules")
                         .WithMany("ModulePages")
                         .HasForeignKey("ModuleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Modules");
@@ -619,19 +614,19 @@ namespace HR.Infrastructure.Migrations
                     b.HasOne("HR.Domain.Models.Authorization.ModulePage", "ModulePages")
                         .WithMany("RolePagePermissions")
                         .HasForeignKey("PageId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HR.Domain.Models.Authorization.Permission", "Permissions")
                         .WithMany("RolePagePermissions")
                         .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HR.Domain.Models.Identity.AppRole", "Roles")
                         .WithMany("RolePagePermissions")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ModulePages");
@@ -646,19 +641,19 @@ namespace HR.Infrastructure.Migrations
                     b.HasOne("HR.Domain.Models.Authorization.ModulePage", "Pages")
                         .WithMany("UserPagePermissions")
                         .HasForeignKey("PageId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HR.Domain.Models.Authorization.Permission", "Permissions")
                         .WithMany("UserPagePermissions")
                         .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HR.Domain.Models.Identity.AppUser", "Users")
                         .WithMany("UserPagePermissions")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Pages");

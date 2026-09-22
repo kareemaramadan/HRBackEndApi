@@ -14,7 +14,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
             builder.HasMany ( u => u.RolePagePermissions )
                 .WithOne ( up => up.Roles )
                 .HasForeignKey ( up => up.RoleId )
-                .OnDelete ( DeleteBehavior.Cascade );
+                .OnDelete ( DeleteBehavior.Restrict );
         }
     }
 

@@ -44,7 +44,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
             builder.HasOne ( p => p.Modules )
                 .WithMany ( m => m.ModulePages )
                 .HasForeignKey ( p => p.ModuleId )
-                .OnDelete ( DeleteBehavior.Cascade );
+                .OnDelete ( DeleteBehavior.Restrict );
 
         }
 
