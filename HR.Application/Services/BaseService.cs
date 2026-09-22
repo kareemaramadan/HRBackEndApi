@@ -57,13 +57,11 @@ namespace HR.Application.Services
         {
            return await _repository.DeleteAsync(criteria);
         }
-
         public async Task<(IEnumerable<T>?, bool IsSuccess)> FindAsync ( Expression<Func<T, bool>> criteria )
         {
            var items = await _repository.FindAsync(criteria);
             return ( items != null ) ? (items, true) : (null, false);
         }
-
         public async Task<(IEnumerable<T>?, bool IsSuccess)> GetAllAsync()
         {
             var items = await _repository.GetAllAsync ( );

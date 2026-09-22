@@ -89,7 +89,6 @@ namespace HRBackEndApi.Controllers
         /// Updates an existing role in the system
         /// </summary>
         /// <param name="role"></param>
-        /// <param name="roleAction"></param>
         /// <returns>
         /// The updated role
         /// </returns>

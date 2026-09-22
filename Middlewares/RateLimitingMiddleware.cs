@@ -12,6 +12,7 @@
 
                 _counter = 1;
                 _lastRequestDate = DateTime.Now;
+                logger.LogInformation ( "Last request date from the same user is:{_lastRequestDate}", _lastRequestDate );
                 await next ( context );
             }
             else
@@ -20,6 +21,7 @@
                 {
                     _lastRequestDate = DateTime.Now;
                     await context.Response.WriteAsync ( "Rate Limit exceeded" );
+                    logger.LogInformation ( "Rate Limit exceeded" );
                 }
                 else
                 {

@@ -20,10 +20,9 @@ namespace HRBackEndApi.Controllers
         [HttpGet ( "GetAllUsers" )]
         public async Task<ActionResult<IList<string>>> GetAllUsers ( )
         {
-            IList<string> result = await authService.GetAllUsersAsync ( );
+            IList<string?> result = await authService.GetAllUsersAsync ( );
             return Ok ( result );
         }
-
         /// <summary>
         /// Registers a new user in the system
         /// </summary>
@@ -135,7 +134,7 @@ namespace HRBackEndApi.Controllers
         [HttpPut ( "ActivateUserAccount/{username}" )]
         public async Task<ActionResult<string>> ActivateUserAccount ( string username, bool isActivated )
         {
-            if ( string.IsNullOrEmpty ( username ) || isActivated == null )
+            if ( string.IsNullOrEmpty ( username ) || isActivated==false )
             {
                 return BadRequest ( "Username and activation status are required" );
             }
