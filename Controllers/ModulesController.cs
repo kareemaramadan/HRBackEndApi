@@ -141,10 +141,10 @@ namespace HRBackEndApi.Controllers
     bool isDeleted = await checkModules ( moduleName );
     if ( isDeleted ) { rowsAffected++; }
    }
-
+   if ( rowsAffected == 0 ) {
+    return BadRequest ( "No items deleted" );
+   }
    return Ok ( $"{rowsAffected} items are deleted successfully from {count} items are selected" );
-
-
   }
 
  }

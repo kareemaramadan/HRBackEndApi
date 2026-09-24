@@ -4,6 +4,8 @@ using HR.Application.Helpers;
 using HR.Application.Interfaces;
 using HR.Domain.Models.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Net;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,7 +22,7 @@ namespace HRBackEndApi.Controllers
   /// <returns>
   /// 
   /// </returns>
-  [HttpGet ( "getAllPermissions" )]
+  [HttpGet ( "ReadAllPermissions" )]
   public async Task<ActionResult<IEnumerable<PermissionDto>>> GetAllPermissionsAsync ( )
   {
    var (permissions, isSuccess) = await PermissionService.GetAllAsync ( );
@@ -30,8 +32,15 @@ namespace HRBackEndApi.Controllers
    IEnumerable<PermissionDto> getPermissions = mapper.Map<IEnumerable<PermissionDto>> ( permissions );
    return Ok ( getPermissions.OrderBy ( p => p.PermissionName ).ToList ( ) );
   }
-  // GET api/<PermissionController>/5
-  [HttpGet ( "getPermissionId/{permissionName}" )]
+  /// <summary>
+  /// Get Permission Id for a specific Permission Name
+  /// </summary>
+  /// <param name="permissionName"></param>
+  /// <returns>
+  /// returns PermissionDto with PermissionId and Permission Name
+  /// </returns>
+  /// 
+  [HttpGet ( "ReadPermissionId/{permissionName}" )]
   public async Task<ActionResult<PermissionDto>> GetPermissionIdAsync ( string permissionName )
   {
    if ( string.IsNullOrWhiteSpace ( permissionName ) )
@@ -41,10 +50,15 @@ namespace HRBackEndApi.Controllers
     return NotFound ( $"this permission {permissionName} is not found " );
    return Ok ( permission );
   }
-
-  // POST api/<PermissionController>
-  [HttpPost ( "addNewPermission" )]
-  public async Task<ActionResult<IEnumerable<PermissionDto>>> PostPermissionAsync ( [FromBody] CreatePermissionDto createPermission )
+  /// <summary>
+  /// Create a new Permission by Permission Name
+  /// </summary>
+  /// <param name="createPermission"></param>
+  /// <returns>
+  /// get all permissions ordered by name
+  /// </returns>
+  [HttpPost ( "AddNewPermission" )]
+  public async Task<ActionResult<IEnumerable<PermissionDto>>> AddPermissionAsync ( [FromBody] CreatePermissionDto createPermission )
   {
    if ( string.IsNullOrWhiteSpace ( createPermission.PermissionName ) ) return BadRequest ( "permission Name is required." );
 
@@ -59,17 +73,46 @@ namespace HRBackEndApi.Controllers
 
    return await GetAllPermissionsAsync ( );
   }
-
-  // PUT api/<PermissionController>/5
-  [HttpPut ( "{id}" )]
-  public void Put ( int id, [FromBody] string value )
+  /// <summary>
+  /// Update Permission by name and Id
+  /// </summary>
+  /// <param name="permissionDto"></param>
+  /// <returns>
+  /// the updated permission
+  /// </returns>
+  [HttpPut ( "UpdatePermission" )]
+  public async Task<ActionResult<PermissionDto>> UpdatePermissionAsync ( [FromBody] PermissionDto permissionDto )
   {
+   if ( string.IsNullOrWhiteSpace ( permissionDto.PermissionName ) || permissionDto.PermissionId is null )
+   {
+    return BadRequest ( "the missing fields are required" );
+   }
+   var (checkPermission, isExist) = await PermissionService.FindAsync ( p => p.PermissionName == permissionDto.PermissionName );
+   if ( isExist )
+    return BadRequest ( $"this item {permissionDto.PermissionName} already exists." );
+   var (updatedPerm, isSuccess) = await PermissionService.UpdateAsync ( mapper.Map<Permission> ( permissionDto ) );
+   if ( !isSuccess )
+    return BadRequest ( "updating failed" );
+   return Ok ( mapper.Map<PermissionDto> ( updatedPerm ) );
   }
-
-  // DELETE api/<PermissionController>/5
-  [HttpDelete ( "{id}" )]
-  public void Delete ( int id )
+  /// <summary>
+  /// Delete permission by name
+  /// </summary>
+  /// <param name="permissionName"></param>
+  /// <returns></returns>
+  [HttpDelete ( "DeletePermission" )]
+  public async Task<ActionResult> DeletePermissionAsync ( [FromBody] string permissionName )
   {
+   if ( string.IsNullOrWhiteSpace ( permissionName ) )
+   {
+    return BadRequest ( "the missing field is required" );
+   }
+   int affectedRowsCount = await PermissionService.DeleteAsync ( p => p.PermissionName == permissionName );
+   if ( affectedRowsCount == 0 )
+   {
+    return BadRequest ( "No items deleted" );
+   }
+   return Ok ( $"{permissionName} has been deleted successfully " );
   }
  }
 }
