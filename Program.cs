@@ -9,265 +9,287 @@ using HR.Infrastructure.Repository;
 using HRBackEndApi.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 
 namespace HRBackEndApi
 {
-    public class Program
+ public class Program
+ {
+  public static void Main(string[] args)
+  {
+   var builder = WebApplication.CreateBuilder(args);
+
+
+
+   #region AddDataBaseConnection
+
+   //Add Identity DataBase Connection
+   //=================================
+   // Configure a separate MigrationsHistoryTable (and migrations assembly) so Identity migrations
+   // are stored separately from the application DbContext migrations and do not conflict.
+   builder.Services.AddDbContext<IdentityContext>(options =>
+   options.EnableSensitiveDataLogging(true)
+          .UseSqlServer(
+           builder.Configuration.GetConnectionString("IdentityConnection"),
+           sqlOptions => sqlOptions
+               .MigrationsAssembly(typeof(IdentityContext).Assembly.FullName))
+          .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+
+
+   //.MigrationsHistoryTable("__Identity_MigrationsHistory", "Auth")
+
+   //Add Application DataBase Connection
+   //=================================
+   // Configure a distinct MigrationsHistoryTable for application DbContext to avoid mixing
+   // migrations with the Identity context.Optionally place App migrations in the default schema.
+   //builder.Services.AddDbContext<AppDbContext> ( options =>
+   //    options.UseSqlServer (
+   //        builder.Configuration.GetConnectionString ( "HRDbConnection" ),
+   //        sqlOptions => sqlOptions
+   //            .MigrationsAssembly ( typeof ( AppDbContext ).Assembly.FullName ) ) );
+   //.MigrationsHistoryTable ( "__App_MigrationsHistory", "dbo" )
+   //=========================================================================
+
+   #endregion
+
+   #region AddIdentityServices
+
+   //Add Identity Services
+   //=========================
+
+   builder.Services.AddIdentity<AppUser, AppRole>(
+       options =>
+       {
+        options.Password.RequireDigit = true;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.AllowedForNewUsers = true;
+        options.User.RequireUniqueEmail = true;
+
+        // Lockout Settings
+        // Lockout new users
+        options.Lockout.AllowedForNewUsers = builder.Configuration.GetValue<bool>("Identity:Lockout:AllowedForNewUsers", true);
+        // Number of failed attempts allowed
+        options.Lockout.MaxFailedAccessAttempts = builder.Configuration.GetValue<int>("Identity:Lockout:MaxFailedAccessAttempts", 5);
+        // Lockout duration
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(
+                     builder.Configuration.GetValue<int>("Identity:Lockout:DefaultLockoutMinutes", 5));
+       })
+       .AddEntityFrameworkStores<IdentityContext>()
+       .AddSignInManager()
+       .AddDefaultTokenProviders()
+       .AddApiEndpoints();
+
+
+
+
+
+   #endregion
+
+
+   builder.Services.AddControllers();
+
+
+
+   #region SwaggerConfigurationService
+
+   //configure swagger for API documentation
+   //========================================
+   builder.Services.AddSwaggerGen(options =>
+   {
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
-        public static void Main ( string [ ] args )
-        {
-            var builder = WebApplication.CreateBuilder ( args );
+     Title = "HRMS Web API",
+     Version = "v1",
+     Description = "This is a HRMS Web API for managing human resource system",
+     Contact = new OpenApiContact
+     {
+      Name = "Kareem Sayed Ramadan",
+      Email = "kramadan@petroamir.com",
+     }
+    });
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath);
+
+   });
+
+   #endregion
+
+
+   #region CORSConfigurationService
+
+
+   // Configure CORS to allow requests from any origin
+   //=========================================================
+   builder.Services.AddCors(options =>
+   {
+    options.AddPolicy("CorsPolicy", policy =>
+             {
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("*");
+       });
+   });
+
+
+   #endregion
+
+   #region RegisterServices
+
+   //Register Repositoriesand Interfaces Services
+   //=============================================
+
+   //AddTransient for IBaseRepository and BaseRepository==> This means that a new instance of the repository will be created each time it is requested.
+   //This is useful for lightweight, stateless services that do not maintain any state between requests.
+
+   builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+
+   //AddScoped =>A single object is made for the duration of an entire request (e.g., an HTTP web request).
+   //If two classes ask for the service in the same HTTP request, they share the exact same instance.
+   //A new instance is only created when a new HTTP request begins.
+
+   builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
+   builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+   builder.Services.AddScoped<IAuthService, AuthService>();
+   builder.Services.AddScoped<IRoleService, RoleService>();
 
 
 
-            #region AddDataBaseConnection
+   // Register JwtOptions from configuration
+   builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 
-            //Add Identity DataBase Connection
-            //=================================
-            // Configure a separate MigrationsHistoryTable (and migrations assembly) so Identity migrations
-            // are stored separately from the application DbContext migrations and do not conflict.
-            builder.Services.AddDbContext<IdentityContext> ( options =>
-            options.EnableSensitiveDataLogging (true)
-                   .UseSqlServer (
-                    builder.Configuration.GetConnectionString ( "IdentityConnection" ),
-                    sqlOptions => sqlOptions
-                        .MigrationsAssembly ( typeof ( IdentityContext ).Assembly.FullName ) )
-                   .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking) );
+   // If JwtOptions is required as a direct injectable type (not IOptions), register as singleton
+   builder.Services.AddSingleton(resolver => resolver.GetRequiredService<Microsoft.Extensions.Options.IOptions<JwtOptions>>().Value);
 
 
-            //.MigrationsHistoryTable("__Identity_MigrationsHistory", "Auth")
+   //builder.Services.AddSingleton ( jwtOptions );
 
-            //Add Application DataBase Connection
-            //=================================
-            // Configure a distinct MigrationsHistoryTable for application DbContext to avoid mixing
-            // migrations with the Identity context.Optionally place App migrations in the default schema.
-            //builder.Services.AddDbContext<AppDbContext> ( options =>
-            //    options.UseSqlServer (
-            //        builder.Configuration.GetConnectionString ( "HRDbConnection" ),
-            //        sqlOptions => sqlOptions
-            //            .MigrationsAssembly ( typeof ( AppDbContext ).Assembly.FullName ) ) );
-            //.MigrationsHistoryTable ( "__App_MigrationsHistory", "dbo" )
-            //=========================================================================
+   builder.Services.AddAuthentication(options =>
+   {
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+   }).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, o =>
+   {
+    o.RequireHttpsMetadata = true;
+    o.SaveToken = true;
+    o.TokenValidationParameters = new TokenValidationParameters
+    {
 
-            #endregion
+     ValidateIssuerSigningKey = true,
+     ValidateIssuer = true,
+     ValidateAudience = true,
+     ValidateLifetime = true,
+     ValidIssuer = builder.Configuration["Jwt:Issuer"],
+     ValidAudience = builder.Configuration["Jwt:Audience"],
+     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+     ClockSkew = TimeSpan.Zero
+    };
+    o.Events = new JwtBearerEvents
+    {
+     OnMessageReceived = ctx =>
+              {
+               // Console logging so developer can see details in dev environment
+            Console.WriteLine($"JwtBearer: OnMessageReceived - {ctx.Result?.ToString()}");
+            return Task.CompletedTask;
+           },
+     OnAuthenticationFailed = ctx =>
+              {
+            Console.WriteLine($"JwtBearer: Authentication failed - {ctx.Exception?.Message}");
+            return Task.CompletedTask;
+           },
+     OnTokenValidated = ctx =>
+              {
+            Console.WriteLine("JwtBearer: Token validated");
+            return Task.CompletedTask;
+           },
+     OnChallenge = ctx =>
+              {
+            Console.WriteLine($"JwtBearer: OnChallenge - {ctx.Error} : {ctx.ErrorDescription}");
+            return Task.CompletedTask;
+           }
+    };
+   });
 
-            #region AddIdentityServices
+   #endregion
 
-            //Add Identity Services
-            //=========================
+   #region RegisterMappers
 
-            builder.Services.AddIdentity<AppUser, AppRole> (
-                options =>
-                {
-                    options.Password.RequireDigit = true;
-                    options.Password.RequiredLength = 6;
-                    options.Password.RequireNonAlphanumeric = true;
-                    options.Password.RequireUppercase = true;
-                    options.Password.RequireLowercase = true;
-                    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes ( 5 );
-                    options.Lockout.MaxFailedAccessAttempts = 5;
-                    options.Lockout.AllowedForNewUsers = true;
-                    options.User.RequireUniqueEmail = true;
+   builder.Services.AddAutoMapper(m => { }, typeof(CityMappingProfile));
+   builder.Services.AddAutoMapper(m => { }, typeof(CountryMappingProfile));
+   builder.Services.AddAutoMapper(m => { }, typeof(CompanyMappingProfile));
+   builder.Services.AddAutoMapper(m => { }, typeof(GovernorateMappingProfile));
+   builder.Services.AddAutoMapper(m => { }, typeof(AuthMappingProfile));
 
-                    // Lockout Settings
-                    // Lockout new users
-                    options.Lockout.AllowedForNewUsers = builder.Configuration.GetValue<bool> ( "Identity:Lockout:AllowedForNewUsers", true );
-                    // Number of failed attempts allowed
-                    options.Lockout.MaxFailedAccessAttempts = builder.Configuration.GetValue<int> ( "Identity:Lockout:MaxFailedAccessAttempts", 5 );
-                    // Lockout duration
-                    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes (
-                        builder.Configuration.GetValue<int> ( "Identity:Lockout:DefaultLockoutMinutes", 5 ) );
-                } )
-                .AddEntityFrameworkStores<IdentityContext> ( )
-                .AddSignInManager ( )
-                .AddDefaultTokenProviders ( )
-                .AddApiEndpoints ( );
-                
-            
-
-
-
-            #endregion
-
-
-            builder.Services.AddControllers ( );
-
-            #region SwaggerConfigurationService
-
-            //configure swagger for API documentation
-            //========================================
-            builder.Services.AddSwaggerGen ( options =>
-            {
-                options.SwaggerDoc ( "v1", new OpenApiInfo
-                {
-                    Title = "HRMS Web API",
-                    Version = "v1",
-                    Description = "This is a HRMS Web API for managing human resource system",
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Kareem Sayed Ramadan",
-                        Email = "kramadan@petroamir.com",
-                    }
-                } );
-                var xmlFile = $"{Assembly.GetExecutingAssembly ( ).GetName ( ).Name}.xml";
-                var xmlPath = Path.Combine ( AppContext.BaseDirectory, xmlFile );
-                options.IncludeXmlComments ( xmlPath );
-
-            } );
-
-            #endregion
+   #endregion
 
 
-            #region CORSConfigurationService
+   var app = builder.Build();
+
+   builder.Services.AddLocalization(options =>
+   {
+    options.ResourcesPath = "Resources";
+   }
+   );
+
+   var supportedCultures = new[]
+   {
+    new CultureInfo("en-US"),
+    new CultureInfo("ar-EG")
+   };
+   var localizationOptions = new RequestLocalizationOptions 
+   {
+    DefaultRequestCulture = new  RequestCulture("en-US"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+   };
+
+   // Configure the HTTP request pipeline.
+   if (app.Environment.IsDevelopment())
+   {
+    app.UseSwagger();
+    app.UseSwaggerUI();
+
+   }
+
+   #region AddMiddleWarePipelines
 
 
-            // Configure CORS to allow requests from any origin
-            //=========================================================
-            builder.Services.AddCors ( options =>
-            {
-                options.AddPolicy ( "CorsPolicy", policy =>
-                {
-                    policy.AllowAnyHeader ( ).AllowAnyMethod ( ).WithOrigins ( "*" );
-                } );
-            } );
+   // Apply the CORS policy
+   //======================
+   app.UseCors("CorsPolicy");
+
+   app.UseRequestLocalization(localizationOptions);
+   // Enable HTTPS redirection
+   //=========================
+   app.UseHttpsRedirection();
+   app.UseRouting();
 
 
-            #endregion
+   app.UseMiddleware<RateLimitingMiddleware>();
+   app.UseMiddleware<ProfilingMiddleware>();
+   app.UseMiddleware<LoggingMiddleware>();
 
-            #region RegisterServices
-
-            //Register Repositoriesand Interfaces Services
-            //=============================================
-
-            //AddTransient for IBaseRepository and BaseRepository==> This means that a new instance of the repository will be created each time it is requested.
-            //This is useful for lightweight, stateless services that do not maintain any state between requests.
-
-            builder.Services.AddTransient ( typeof ( IBaseRepository<> ), typeof ( BaseRepository<> ) );
-
-            //AddScoped =>A single object is made for the duration of an entire request (e.g., an HTTP web request).
-            //If two classes ask for the service in the same HTTP request, they share the exact same instance.
-            //A new instance is only created when a new HTTP request begins.
-
-            builder.Services.AddScoped ( typeof ( IBaseService<> ), typeof ( BaseService<> ) );
-            builder.Services.AddScoped<IJwtTokenService, JwtTokenService> ( );
-            builder.Services.AddScoped<IAuthService, AuthService> ( );
-            builder.Services.AddScoped<IRoleService, RoleService> ( );
+   // Enable Authentication and Authorization Middleware
+   //===================================================
+   app.UseAuthentication();
+   app.UseAuthorization();
 
 
+   app.MapControllers();
 
-            // Register JwtOptions from configuration
-            builder.Services.Configure<JwtOptions> ( builder.Configuration.GetSection ( "Jwt" ) );
+   #endregion
 
-            // If JwtOptions is required as a direct injectable type (not IOptions), register as singleton
-            builder.Services.AddSingleton ( resolver => resolver.GetRequiredService<Microsoft.Extensions.Options.IOptions<JwtOptions>> ( ).Value );
-
-
-            //builder.Services.AddSingleton ( jwtOptions );
-
-            builder.Services.AddAuthentication ( options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            } ).AddJwtBearer ( JwtBearerDefaults.AuthenticationScheme, o =>
-            {
-                o.RequireHttpsMetadata = true;
-                o.SaveToken = true;
-                o.TokenValidationParameters = new TokenValidationParameters
-                {
-
-                    ValidateIssuerSigningKey = true,
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidIssuer = builder.Configuration [ "Jwt:Issuer" ],
-                    ValidAudience = builder.Configuration [ "Jwt:Audience" ],
-                    IssuerSigningKey = new SymmetricSecurityKey ( Encoding.UTF8.GetBytes ( builder.Configuration [ "Jwt:Key" ] ) ),
-                    ClockSkew = TimeSpan.Zero
-                };
-                o.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = ctx =>
-                    {
-                        // Console logging so developer can see details in dev environment
-                        Console.WriteLine ( $"JwtBearer: OnMessageReceived - {ctx.Result?.ToString ( )}" );
-                        return Task.CompletedTask;
-                    },
-                    OnAuthenticationFailed = ctx =>
-                    {
-                        Console.WriteLine ( $"JwtBearer: Authentication failed - {ctx.Exception?.Message}" );
-                        return Task.CompletedTask;
-                    },
-                    OnTokenValidated = ctx =>
-                    {
-                        Console.WriteLine ( "JwtBearer: Token validated" );
-                        return Task.CompletedTask;
-                    },
-                    OnChallenge = ctx =>
-                    {
-                        Console.WriteLine ( $"JwtBearer: OnChallenge - {ctx.Error} : {ctx.ErrorDescription}" );
-                        return Task.CompletedTask;
-                    }
-                };
-            } );
-
-            #endregion
-
-            #region RegisterMappers
-
-            builder.Services.AddAutoMapper ( m => { }, typeof ( CityMappingProfile ) );
-            builder.Services.AddAutoMapper ( m => { }, typeof ( CountryMappingProfile ) );
-            builder.Services.AddAutoMapper ( m => { }, typeof ( CompanyMappingProfile ) );
-            builder.Services.AddAutoMapper ( m => { }, typeof ( GovernorateMappingProfile ) );
-            builder.Services.AddAutoMapper ( m => { }, typeof ( AuthMappingProfile ) );
-
-            #endregion
-
-
-            var app = builder.Build ( );
-
-
-            // Configure the HTTP request pipeline.
-            if ( app.Environment.IsDevelopment ( ) )
-            {
-                app.UseSwagger ( );
-                app.UseSwaggerUI ( );
-
-            }
-
-            #region AddMiddleWarePipelines
-
-
-            // Apply the CORS policy
-            //======================
-            app.UseCors ( "CorsPolicy" );
-
-            // Enable HTTPS redirection
-            //=========================
-            app.UseHttpsRedirection ( );
-            app.UseRouting ( );
-
-
-            app.UseMiddleware<RateLimitingMiddleware> ();
-            app.UseMiddleware<ProfilingMiddleware> ();
-            app.UseMiddleware<LoggingMiddleware> ();
-
-            // Enable Authentication and Authorization Middleware
-            //===================================================
-            app.UseAuthentication ( );
-            app.UseAuthorization ( );
-
-
-            app.MapControllers ( );
-            
-            #endregion
-
-            app.Run ( );
-        }
-    }
+   app.Run();
+  }
+ }
 }

@@ -5,9 +5,9 @@
         public async Task Invoke ( HttpContext context )
         {
             logger.LogInformation ("================================== Start New Log Information =========================================");
-            logger.LogInformation ( "HTTP Request Information:Scheme:{Scheme}|Method:{Method}|Path:{Path}|Host:{Host}|QueryString:{QueryString}|Body:{Body}"
-                , context.Request.Method, context.Request.Path, context.Request.Host, context.Request.QueryString, context.Request.Body,
-                context.Request.Scheme );
+            logger.LogInformation ( "HTTP Request Information:Scheme:{Scheme}|Method:{Method}|Path:{Path}|Host:{Host}|QueryString:{QueryString}|Body:{Body}",
+               context.Request.Scheme , context.Request.Method, context.Request.Path, context.Request.Host, context.Request.QueryString, context.Request.Body
+                 );
 
             await next ( context );
 

@@ -94,7 +94,7 @@ namespace HR.Application.Services
         public async Task<(IEnumerable<T>?, bool IsSuccess)> FindAsync ( Expression<Func<T, bool>> criteria )
         {
             var items = await _repository.FindAsync ( criteria );
-            return ( items != null ) ? (items, true) : (null, false);
+            return ( items.Count() > 0 ) ? (items, true) : (null, false);
         }
 
         //Using StoredProcedures

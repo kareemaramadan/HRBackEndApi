@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis;
 using System.Linq.Expressions;
 
 
-namespace HRBackEndApi.Controllers
+namespace HRBackEndApi.Controllers.LookUpControllers
 {
     [Route ( "api/[controller]" )]
     [ApiController]

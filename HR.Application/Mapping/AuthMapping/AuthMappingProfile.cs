@@ -15,21 +15,36 @@ namespace HR.Application.Mapping.AuthMapping
   {
    //AppUser Mapping
    //================
+   
    CreateMap<RegisterDto, AppUser> ( ).ReverseMap ( );
    CreateMap<AppUser, UserRequest> ( ).ReverseMap ( );
    CreateMap<UserProfile, AppUser> ( ).ReverseMap ( );
+   
    //AppRole Mapping
    //================
+   
    CreateMap<RoleDto, AppRole> ( ).ReverseMap ( );
    CreateMap<CreateRoleDto, AppRole> ( );
    CreateMap<UpdateRoleDto, AppRole> ( ).ReverseMap ( );
+   
    //Module Mapping
    //===============
+   
    CreateMap<ModuleDto, Module> ( ).ReverseMap ( );
+   CreateMap<createModuleDto, Module> ( ).ReverseMap ( );
+
    //Permission Mapping
    //===================
    CreateMap<PermissionDto, Permission> ( ).ReverseMap ( );
    CreateMap<CreatePermissionDto, Permission> ( ).ReverseMap ( );
+
+   //ModulePage Mapping
+   //==================
+
+   CreateMap<ModulePagesDto,ModulePage> ( ).ReverseMap ( );
+   CreateMap<CreateModulePagesDto, ModulePage> ( ).ReverseMap ( );
+
+
   }
  }
 }

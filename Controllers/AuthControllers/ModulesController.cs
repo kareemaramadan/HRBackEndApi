@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace HRBackEndApi.Controllers
+namespace HRBackEndApi.Controllers.AuthControllers
 {
 
  [Route ( "api/[controller]" )]
@@ -53,7 +53,7 @@ namespace HRBackEndApi.Controllers
   /// <param name="newModule"></param>
   /// <returns></returns>
   [HttpPost ( "addNewModule" )]
-  public async Task<ActionResult<ModuleDto>> addNewModuleAsync ( [FromBody] ModuleDto newModule )
+  public async Task<ActionResult<ModuleDto>> addNewModuleAsync ( [FromBody] createModuleDto newModule )
   {
    if ( newModule.ModuleName_en == null || newModule.ModuleName_ar == null )
     return BadRequest ( "Module names are required." );
@@ -64,7 +64,8 @@ namespace HRBackEndApi.Controllers
    if ( !IsSuccess )
     return BadRequest ( "Failed to create module." );
 
-   return CreatedAtAction ( nameof ( getModuleByNameAsync ), new { moduleName = newModule.ModuleName_en }, mapper.Map<ModuleDto> ( createdModule ) );
+   return Created ( "", mapper.Map<ModuleDto> ( createdModule ) );
+   //return CreatedAtAction ( nameof ( getModuleByNameAsync ), new { moduleName = newModule.ModuleName_en}, mapper.Map<ModuleDto> ( createdModule ) );
   }
   /// <summary>
   /// Update module image and name

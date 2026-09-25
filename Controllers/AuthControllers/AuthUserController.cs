@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using NuGet.Protocol;
 
-namespace HRBackEndApi.Controllers
+namespace HRBackEndApi.Controllers.AuthControllers
 {
     [Route ( "api/[controller]" )]
     [ApiController]

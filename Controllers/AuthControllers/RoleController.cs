@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HRBackEndApi.Controllers
+namespace HRBackEndApi.Controllers.AuthControllers
 {
 
     [ApiController]
