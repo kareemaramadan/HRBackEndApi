@@ -59,6 +59,7 @@ namespace HRBackEndApi
 
    #endregion
 
+
    #region AddIdentityServices
 
    //Add Identity Services
@@ -97,10 +98,29 @@ namespace HRBackEndApi
 
    #endregion
 
+   #region Localization
+   //====================
 
    builder.Services.AddControllers();
 
+   builder.Services.AddLocalization ( options =>
+   {
+    options.ResourcesPath = "Resources";
+   }
+  );
 
+   var supportedCultures = new [ ]
+   {
+    new CultureInfo("en-US"),
+    new CultureInfo("ar-EG")
+   };
+   var localizationOptions = new RequestLocalizationOptions
+   {
+    DefaultRequestCulture = new RequestCulture ( "en-US" ),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+   };
+   #endregion
 
    #region SwaggerConfigurationService
 
@@ -162,6 +182,8 @@ namespace HRBackEndApi
    builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
    builder.Services.AddScoped<IAuthService, AuthService>();
    builder.Services.AddScoped<IRoleService, RoleService>();
+   // Register Localization service for Translation Layer between Languages
+   builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 
 
 
@@ -235,23 +257,7 @@ namespace HRBackEndApi
 
    var app = builder.Build();
 
-   builder.Services.AddLocalization(options =>
-   {
-    options.ResourcesPath = "Resources";
-   }
-   );
-
-   var supportedCultures = new[]
-   {
-    new CultureInfo("en-US"),
-    new CultureInfo("ar-EG")
-   };
-   var localizationOptions = new RequestLocalizationOptions 
-   {
-    DefaultRequestCulture = new  RequestCulture("en-US"),
-    SupportedCultures = supportedCultures,
-    SupportedUICultures = supportedCultures
-   };
+  
 
    // Configure the HTTP request pipeline.
    if (app.Environment.IsDevelopment())

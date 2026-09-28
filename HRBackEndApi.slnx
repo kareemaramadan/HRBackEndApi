@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="../HR.Localization/HR.Localization.csproj" Id="536a10ed-0436-4f3f-97a0-edf8be0a2585" />
   <Project Path="HR.Application/HR.Application.csproj" />
   <Project Path="HR.Domain/HR.Domain.csproj" />
   <Project Path="HR.Infrastructure/HR.Infrastructure.csproj" />
