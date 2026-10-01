@@ -167,5 +167,40 @@ namespace HRBackEndApi.Controllers.AuthControllers
    ApiResponse<int> affectedRowsCount = await PermissionService.DeleteAsync (p => p.PermissionName==permissionName);
    return (!affectedRowsCount.Success) ? BadRequest (affectedRowsCount) : Ok (affectedRowsCount);
   }
+  /// <summary>
+  /// delete a group of permissions together and permission names should be separated by comma
+  /// </summary>
+  /// <param name="permissionNames"></param>
+  /// <returns></returns>
+  [HttpDelete ("DeleteBulkOfPermissions/{permissionNames}")]
+  public async Task<ActionResult<ApiResponse<int>>> DeleteBulkPermissionsAsync ( string permissionNames )
+  {
+   string [ ] deletedpermissions = permissionNames.Split (',');
+   int count = deletedpermissions.Length;
+   int deletedrowsAffected = 0;
+   foreach (var permissionName in deletedpermissions)
+   {
+    ApiResponse<Permission> deleteditem = await PermissionService.FindItemAsync (p => p.PermissionName==permissionName);
+    if (!deleteditem.Success) return BadRequest (deleteditem);
+    ApiResponse<int> rowsaffected = await PermissionService.DeleteAsync (deleteditem.Data!);
+    deletedrowsAffected+=rowsaffected.Data;
+   }
+   return (deletedrowsAffected!=count) ? BadRequest (new ApiResponse<int>
+   {
+    Success=false,
+    Message=localization.Get ("notalldeleted"),
+    Data=deletedrowsAffected,
+    Language=localization.GetLanguage ()
+   }) :
+   Ok
+   (new ApiResponse<int>
+   {
+    Success=true,
+    Message=$"{deletedrowsAffected} {localization.Get ("itemsdeleted")} ",
+    Data=deletedrowsAffected,
+    Language=localization.GetLanguage ()
+   });
+  }
+
  }
 }

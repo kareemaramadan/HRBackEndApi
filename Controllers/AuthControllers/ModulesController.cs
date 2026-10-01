@@ -150,7 +150,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
    return (!rowsaffected.Success) ? BadRequest (rowsaffected) : Ok (rowsaffected);
   }
   /// <summary>
-  /// delete a group of modules together
+  /// delete a group of modules together and module names should be separated by comma
   /// </summary>
   /// <param name="moduleNames"></param>
   /// <returns></returns>
