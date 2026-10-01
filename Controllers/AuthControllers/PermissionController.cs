@@ -13,9 +13,9 @@ using System.Net;
 namespace HRBackEndApi.Controllers.AuthControllers
 {
 
- [Route ( "api/[controller]" )]
+ [Route ("api/[controller]")]
  [ApiController]
- public class PermissionController ( IBaseService<Permission> PermissionService, IMapper mapper, ILocalizationService localization ) : ControllerBase
+ public class PermissionController ( IBaseService<Permission> PermissionService,IMapper mapper,ILocalizationService localization ) : ControllerBase
  {
   /// <summary>
   /// Get All Permissions in the system.
@@ -23,27 +23,21 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <returns>
   /// 
   /// </returns>
-  [HttpGet ( "ReadAllPermissions" )]
+  [HttpGet ("GetAllPermissions")]
   public async Task<ActionResult<ApiResponse<IEnumerable<PermissionDto>>>> GetAllPermissionsAsync ( )
   {
-   var (permissions, isSuccess) = await PermissionService.GetAllAsync ( );
-   if ( !isSuccess )
-    return NotFound ( new ApiResponse<IEnumerable<PermissionDto>>
-    {
-     Success = false,
-     Message = localization.Get ( "itemsNotFound" ),
-     Data = null,
-     Language = localization.GetLanguage ( )
-    } );
-   IEnumerable<PermissionDto> getPermissions = mapper.Map<IEnumerable<PermissionDto>> ( permissions );
-   ApiResponse<IEnumerable<PermissionDto>> apiResponse = new ApiResponse<IEnumerable<PermissionDto>>
+   ApiResponse<IEnumerable<Permission>> permissions = await PermissionService.GetAllAsync ();
+   if (!permissions.Success)
+    return NotFound (permissions);
+
+   IEnumerable<PermissionDto> getPermissions = mapper.Map<IEnumerable<PermissionDto>> (permissions.Data);
+   return Ok (new ApiResponse<IEnumerable<PermissionDto>>
    {
-    Success = isSuccess,
-    Message = localization.Get ( "itemsRetrieved" ),
-    Data = getPermissions.OrderBy ( p => p.PermissionName ).ToList ( ),
-    Language = localization.GetLanguage ( )
-   };
-   return Ok ( apiResponse );
+    Success=true,
+    Message=permissions.Message,
+    Data= [.. getPermissions.OrderBy (p => p.PermissionName)],
+    Language=permissions.Language
+   });
   }
 
   /// <summary>
@@ -54,34 +48,25 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// returns PermissionDto with PermissionId and Permission Name
   /// </returns>
   /// 
-  [HttpGet ( "ReadPermissionId/{permissionName}" )]
+  [HttpGet ("GetPermissionByName/{permissionName}")]
   public async Task<ActionResult<ApiResponse<IEnumerable<PermissionDto>>>> GetPermissionIdAsync ( string permissionName )
   {
-   if ( string.IsNullOrWhiteSpace ( permissionName ) )
-    return BadRequest ( new ApiResponse<IEnumerable<PermissionDto>>
+   if (string.IsNullOrWhiteSpace (permissionName))
+    return BadRequest (new ApiResponse<IEnumerable<PermissionDto>>
     {
-     Success = false,
-     Message = localization.Get ( "missingfields" ),
-     Data = null,
-     Language = localization.GetLanguage ( )
-    } );
-   var (permission, isSuccess) = await PermissionService.GetByConditionAsync ( p => p.PermissionName == permissionName );
-   if ( !isSuccess )
-    return NotFound ( new ApiResponse<IEnumerable<PermissionDto>>
-    {
-     Success = isSuccess,
-     Message = localization.Get ( "itemNotFound" ),
-     Data = null,
-     Language = localization.GetLanguage ( )
-    } );
-
-   return Ok ( new ApiResponse<IEnumerable<PermissionDto>>
+     Success=false,
+     Message=localization.Get ("missingfields"),
+     Data=null,
+     Language=localization.GetLanguage ()
+    });
+   ApiResponse<Permission> permission = await PermissionService.FindItemAsync (p => p.PermissionName==permissionName);
+   return (!permission.Success) ? NotFound (permission) : Ok (new ApiResponse<PermissionDto>
    {
-    Success = isSuccess,
-    Message = localization.Get ( "itemRetrieved" ),
-    Data = mapper.Map < IEnumerable < PermissionDto >> ( permission),
-    Language = localization.GetLanguage ( )
-   } );
+    Success=permission.Success,
+    Message=permission.Message,
+    Data=mapper.Map<PermissionDto> (permission.Data),
+    Language=permission.Language
+   });
   }
 
   /// <summary>
@@ -91,42 +76,40 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <returns>
   /// get all permissions ordered by name
   /// </returns>
-  [HttpPost ( "AddNewPermission" )]
+  [HttpPost ("AddNewPermission")]
   public async Task<ActionResult<ApiResponse<IEnumerable<PermissionDto>>>> AddPermissionAsync ( [FromBody] CreatePermissionDto createPermission )
   {
-   if ( !ModelState.IsValid )
+   if (!ModelState.IsValid)
    {
-    return BadRequest ( new ApiResponse<object>
+    return BadRequest (new ApiResponse<object>
     {
-     Success = false,
-     Message = localization.Get ( "validationerror" ),
-     Data = ModelState,
-     Language = localization.GetLanguage ( )
-    } );
+     Success=false,
+     Message=localization.Get ("validationerror"),
+     Data=ModelState,
+     Language=localization.GetLanguage ()
+    });
    }
 
-   createPermission.PermissionName = char.ToUpper ( createPermission.PermissionName [ 0 ] ) + createPermission.PermissionName [ 1.. ];
-   bool isExist = await PermissionService.IsExistAsync ( p => p.PermissionName == createPermission.PermissionName, HttpRequestType.Post );
-   if ( isExist )
-    return BadRequest ( new ApiResponse<object>
+   createPermission.PermissionName=char.ToUpper (createPermission.PermissionName [0])+createPermission.PermissionName [1..];
+   ApiResponse<bool> isExist = await PermissionService.IsExistAsync (p => p.PermissionName==createPermission.PermissionName,HttpRequestType.Post);
+   if (isExist.Success)
+    return BadRequest (new ApiResponse<object>
     {
-     Success = false,
-     Message = localization.Get ( "exists" ),
-     Data = null,
-     Language = localization.GetLanguage ( )
-    } );
+     Success=false,
+     Message=isExist.Message,
+     Data=null,
+     Language=isExist.Language
+    });
 
-   var (permission, isSuccess) = await PermissionService.CreateAsync ( mapper.Map<Permission> ( createPermission ) );
-   if ( !isSuccess )
-    return BadRequest ( new ApiResponse<ModuleDto>
-    {
-     Success = isSuccess,
-     Message = localization.Get ( "unexpectederror" ),
-     Data = null,
-     Language = localization.GetLanguage ( )
-    } );
-
-   return Created ( "", await GetAllPermissionsAsync ( ) );
+   ApiResponse<IEnumerable<Permission>> permission = await PermissionService.CreateAsyncAndGetAll (mapper.Map<Permission> (createPermission),HttpRequestType.Post,
+    p => p.PermissionName==createPermission.PermissionName);
+   return (!permission.Success) ? BadRequest (permission) : Created ("",new ApiResponse<object>
+   {
+    Success=permission.Success,
+    Message=permission.Message,
+    Data=(mapper.Map<IEnumerable<PermissionDto>> (permission.Data)).OrderBy (p => p.PermissionName),
+    Language=permission.Language
+   });
   }
 
   /// <summary>
@@ -136,47 +119,29 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <returns>
   /// the updated permission
   /// </returns>
-  [HttpPut ( "UpdatePermission" )]
+  [HttpPut ("UpdatePermission")]
   public async Task<ActionResult<ApiResponse<PermissionDto>>> UpdatePermissionAsync ( [FromBody] PermissionDto permissionDto )
   {
-   if ( !ModelState.IsValid )
+   if (!ModelState.IsValid)
    {
-    return BadRequest ( new ApiResponse<object>
+    return BadRequest (new ApiResponse<object>
     {
-     Success = false,
-     Message = localization.Get ( "validationerror" ),
-     Data = ModelState,
-     Language = localization.GetLanguage ( )
-    } );
+     Success=false,
+     Message=localization.Get ("validationerror"),
+     Data=ModelState,
+     Language=localization.GetLanguage ()
+    });
    }
-   var (checkPermission, isExist) = await PermissionService.FindAsync ( p => p.PermissionName == permissionDto.PermissionName );
-   if ( isExist )
-    return BadRequest ( new ApiResponse<object>
-    {
-     Success = false,
-     Message = localization.Get ( "exists" ),
-     Data = ModelState,
-     Language = localization.GetLanguage ( )
-    } );
-   var (updatedPerm, isSuccess) = await PermissionService.UpdateAsync ( mapper.Map<Permission> ( permissionDto ) );
-
-   if ( !isSuccess )
-    return BadRequest ( new ApiResponse<object>
-    {
-     Success = false,
-     Message = localization.Get ( "updatefailed" ),
-     Data = ModelState,
-     Language = localization.GetLanguage ( )
-    } );
-   return Ok (
-    new ApiResponse<object>
-    {
-     Success = false,
-     Message = localization.Get ( "updated" ),
-     Data = mapper.Map<PermissionDto> ( updatedPerm ),
-     Language = localization.GetLanguage ( )
-    }
-    );
+   var item = await PermissionService.FindItemAsync (p => p.PermissionName==permissionDto.PermissionName);
+   if (!item.Success) return NotFound (item);
+   ApiResponse<Permission> updatedPermission = await PermissionService.UpdateAsync (mapper.Map<Permission> (permissionDto));
+   return (!updatedPermission.Success) ? BadRequest (updatedPermission) : Ok (new ApiResponse<object>
+   {
+    Success=updatedPermission.Success,
+    Message=updatedPermission.Message,
+    Data=mapper.Map<PermissionDto> (updatedPermission.Data),
+    Language=updatedPermission.Language
+   });
   }
 
   /// <summary>
@@ -184,38 +149,23 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// </summary>
   /// <param name="permissionName"></param>
   /// <returns></returns>
-  [HttpDelete ( "DeletePermission" )]
-  public async Task<ActionResult> DeletePermissionAsync ( [FromBody] string permissionName )
+  [HttpDelete ("DeletePermission/{permissionName}")]
+  public async Task<ActionResult<ApiResponse<string>>> DeletePermissionAsync ( string permissionName )
   {
-   if ( string.IsNullOrWhiteSpace ( permissionName ) )
+   ApiResponse<string> response = new ()
    {
-    return BadRequest ( new ApiResponse<object>
-    {
-     Success = false,
-     Message = localization.Get ( "missingfields" ),
-     Data = null,
-     Language = localization.GetLanguage ( )
-    } );
-   }
-   int affectedRowsCount = await PermissionService.DeleteAsync ( p => p.PermissionName == permissionName );
-   if ( affectedRowsCount == 0 )
+    Success=false,
+    Data=null,
+    Language=localization.GetLanguage ()
+   };
+
+   if (string.IsNullOrEmpty (permissionName))
    {
-    return BadRequest ( new ApiResponse<object>
-    {
-     Success = false,
-     Message = localization.Get ( "deletionfailed" ),
-     Data = null,
-     Language = localization.GetLanguage ( )
-    } );
+    response.Message=localization.Get ("missingfields");
+    return BadRequest (response);
    }
-   return Ok ( new ApiResponse<object>
-   {
-    Success = false,
-    Message = $"{affectedRowsCount} {localization.Get ( "updated" )}",
-    Data = null,
-    Language = localization.GetLanguage ( )
-   }
-    );
+   ApiResponse<int> affectedRowsCount = await PermissionService.DeleteAsync (p => p.PermissionName==permissionName);
+   return (!affectedRowsCount.Success) ? BadRequest (affectedRowsCount) : Ok (affectedRowsCount);
   }
  }
 }

@@ -8,18 +8,20 @@ using System.Text;
 
 namespace HR.Application.Interfaces
 {
-    public interface IBaseRepository<T> where T : class
-    {
-        Task<IEnumerable<T>> GetAllAsync();
-        Task<IEnumerable<T>> GetByConditionAsync(Expression<Func<T, bool>> criteria);
-        Task<T> CreateAsync(T entity);
-        Task<(T,bool IsSuccess)> UpdateAsync(T entity, Expression<Func<T, bool>> criteria);
-        Task<T> UpdateAsync ( T entity);
-        Task<int> DeleteAsync(Expression<Func<T, bool>> criteria);
-        Task<int> CUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters, HttpRequestType httpRequest);
-        Task<IEnumerable<T>> GetUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters);
-        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> criteria);
-        Task<int> CountAsync();
-        Task<int> CountAsync(Expression<Func<T, bool>> criteria);
-    }
+ public interface IBaseRepository<T> where T : class
+ {
+  Task<IEnumerable<T>> GetAllAsync ( );
+  Task<IEnumerable<T>> GetAllAsync ( Expression<Func<T,bool>> criteria );
+  Task<T> CreateAsync ( T entity );
+  Task<T> UpdateAsync ( T entity,Expression<Func<T,bool>> criteria );
+  Task<T> UpdateAsync ( T entity );
+  Task<int> DeleteAsync ( Expression<Func<T,bool>> criteria );
+  Task<int> DeleteAsync ( T entity );
+  Task<int> CUDUsingStoredProcedureAsync ( string spName,Dictionary<string,object> parameters,HttpRequestType httpRequest );
+  Task<IEnumerable<T>> GetUsingStoredProcedureAsync ( string spName,Dictionary<string,object> parameters );
+  Task<IEnumerable<T>> FindAsync ( Expression<Func<T,bool>> criteria );
+  Task<T> FindItemAsync ( Expression<Func<T,bool>> criteria );
+  Task<int> CountAsync ( );
+  Task<int> CountAsync ( Expression<Func<T,bool>> criteria );
+ }
 }

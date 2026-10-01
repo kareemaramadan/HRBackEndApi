@@ -15,7 +15,7 @@ namespace HR.Application.Dtos.AuthDtos
         public byte[ ]? ModuleImage { get; set; }
     }
 
- public class createModuleDto
+ public class CreateModuleDto
  {
   [Required]
   public string ModuleName_en { get; set; } = string.Empty;

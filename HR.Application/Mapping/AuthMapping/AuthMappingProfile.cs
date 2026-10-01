@@ -31,7 +31,7 @@ namespace HR.Application.Mapping.AuthMapping
    //===============
    
    CreateMap<ModuleDto, Module> ( ).ReverseMap ( );
-   CreateMap<createModuleDto, Module> ( ).ReverseMap ( );
+   CreateMap<CreateModuleDto, Module> ( ).ReverseMap ( );
 
    //Permission Mapping
    //===================
