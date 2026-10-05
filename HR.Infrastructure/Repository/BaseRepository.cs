@@ -1,13 +1,14 @@
-﻿using HR.Application.Interfaces;
+﻿using HR.Application.Helpers;
+using HR.Application.Interfaces;
 using HR.Domain.Models;
 using HR.Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using HR.Application.Helpers;
 
 
 namespace HR.Infrastructure.Repository
@@ -39,47 +40,40 @@ namespace HR.Infrastructure.Repository
   {
    return await dbSet.CountAsync (criteria);
   }
-  public async Task<int> CUDUsingStoredProcedureAsync ( string spName,Dictionary<string,object> parameters,HttpRequestType httpRequest )
+  public async Task<int> CUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters)
   {
-   SqlParameter [ ] sqlParameters = parameters.Select (
-       p => new SqlParameter (p.Key.StartsWith ('@') ? p.Key : $"@{p.Key}",p.Value??DBNull.Value)).ToArray ();
-   string parameterNames = string.Join (", ",sqlParameters.Select (p => p.ParameterName));
+   SqlParameter[] sqlParameters = parameters.Select(
+       p => new SqlParameter(p.Key.StartsWith('@') ? p.Key : $"@{p.Key}", p.Value ?? DBNull.Value)).ToArray();
+   string parameterNames = string.Join(", ", sqlParameters.Select(p => p.ParameterName));
 
    int parametersCount = sqlParameters.Length;
    string sqlQuery = string.Empty;
-   if (parametersCount>0)
+   if (parametersCount > 0)
    {
-    sqlQuery=$"EXEC {spName} {parameterNames}";
+    sqlQuery = $"EXEC {spName} {parameterNames}";
    }
    else
    {
-    sqlQuery=$"EXEC {spName}";
+    sqlQuery = $"EXEC {spName}";
    }
 
-   FormattableString interpolatedQuery = FormattableStringFactory.Create (sqlQuery,sqlParameters);
+   FormattableString interpolatedQuery = FormattableStringFactory.Create(sqlQuery, sqlParameters);
 
-   switch (httpRequest)
-   {
-    case HttpRequestType.Post:
-    case HttpRequestType.Put:
-    case HttpRequestType.Delete:
-     return await dbContext.Database.ExecuteSqlAsync (interpolatedQuery);
-
-    default:
-     throw new NotImplementedException ("Invalid HTTP request type for CRUD operations.");
-   }
+   return await dbContext.Database.ExecuteSqlAsync(interpolatedQuery);
   }
+ 
 
   public async Task<IEnumerable<T>> GetUsingStoredProcedureAsync ( string spName,Dictionary<string,object> parameters )
   {
+
    SqlParameter [ ] sqlParameters = parameters.Select (
        p => new SqlParameter (p.Key.StartsWith ('@') ? p.Key : $"@{p.Key}",p.Value??DBNull.Value)).ToArray ();
-   string parameterNames = string.Join (", ",sqlParameters.Select (p => p.ParameterName));
 
    int parametersCount = sqlParameters.Length;
    string sqlQuery = string.Empty;
    if (parametersCount>0)
    {
+    string parameterNames = string.Join (", ",sqlParameters.Select (p => p.ParameterName));
     sqlQuery=$"EXEC {spName} {parameterNames}";
    }
    else
@@ -88,6 +82,7 @@ namespace HR.Infrastructure.Repository
    }
    FormattableString interpolatedQuery = FormattableStringFactory.Create (sqlQuery,sqlParameters);
    return await dbSet.FromSqlInterpolated (interpolatedQuery).ToListAsync ();
+   return await dbSet.FromSqlRaw (sqlQuery,sqlParameters).ToListAsync ();
   }
 
   public async Task<int> DeleteAsync ( T entity )
@@ -122,10 +117,28 @@ namespace HR.Infrastructure.Repository
    return await dbSet.ToListAsync ();
   }
 
-  public async Task<IEnumerable<T>> GetAllAsync ( Expression<Func<T,bool>> criteria )
+  public async Task<IEnumerable<T>> GetAllAsync ( Expression<Func<T,bool>> filter )
   {
-   IQueryable<T> query = dbSet.Where (criteria);
+   IQueryable<T> query = dbSet.Where (filter);
    return await query.ToListAsync ();
+  }
+
+  public async Task<IEnumerable<T>> GetAllAsync (Expression<Func<T, bool>>? filter = null,
+        Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null)
+  {
+   IQueryable<T> query = dbSet;
+
+   if (include != null)
+   {
+    query = include(query);
+   }
+
+   if (filter != null)
+   {
+    query = query.Where(filter);
+   }
+
+   return await query.ToListAsync();
   }
 
   public async Task<T> UpdateAsync ( T entity,Expression<Func<T,bool>> criteria )

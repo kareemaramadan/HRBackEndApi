@@ -43,6 +43,8 @@ namespace HRBackEndApi
           .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
 
+
+
    //.MigrationsHistoryTable("__Identity_MigrationsHistory", "Auth")
 
    //Add Application DataBase Connection
@@ -101,22 +103,25 @@ namespace HRBackEndApi
    #region Localization
    //====================
 
-   builder.Services.AddControllers();
+   builder.Services.AddControllers().AddJsonOptions(options =>
+   {
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+   });
 
-   builder.Services.AddLocalization ( options =>
+   builder.Services.AddLocalization(options =>
    {
     options.ResourcesPath = "Resources";
    }
   );
 
-   var supportedCultures = new [ ]
+   var supportedCultures = new[]
    {
     new CultureInfo("en-US"),
     new CultureInfo("ar-EG")
    };
    var localizationOptions = new RequestLocalizationOptions
    {
-    DefaultRequestCulture = new RequestCulture ( "en-US" ),
+    DefaultRequestCulture = new RequestCulture("en-US"),
     SupportedCultures = supportedCultures,
     SupportedUICultures = supportedCultures
    };
@@ -157,8 +162,8 @@ namespace HRBackEndApi
    {
     options.AddPolicy("CorsPolicy", policy =>
              {
-        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("*");
-       });
+              policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("*");
+             });
    });
 
 
@@ -221,24 +226,24 @@ namespace HRBackEndApi
      OnMessageReceived = ctx =>
               {
                // Console logging so developer can see details in dev environment
-            Console.WriteLine($"JwtBearer: OnMessageReceived - {ctx.Result?.ToString()}");
-            return Task.CompletedTask;
-           },
+               Console.WriteLine($"JwtBearer: OnMessageReceived - {ctx.Result?.ToString()}");
+               return Task.CompletedTask;
+              },
      OnAuthenticationFailed = ctx =>
               {
-            Console.WriteLine($"JwtBearer: Authentication failed - {ctx.Exception?.Message}");
-            return Task.CompletedTask;
-           },
+               Console.WriteLine($"JwtBearer: Authentication failed - {ctx.Exception?.Message}");
+               return Task.CompletedTask;
+              },
      OnTokenValidated = ctx =>
               {
-            Console.WriteLine("JwtBearer: Token validated");
-            return Task.CompletedTask;
-           },
+               Console.WriteLine("JwtBearer: Token validated");
+               return Task.CompletedTask;
+              },
      OnChallenge = ctx =>
               {
-            Console.WriteLine($"JwtBearer: OnChallenge - {ctx.Error} : {ctx.ErrorDescription}");
-            return Task.CompletedTask;
-           }
+               Console.WriteLine($"JwtBearer: OnChallenge - {ctx.Error} : {ctx.ErrorDescription}");
+               return Task.CompletedTask;
+              }
     };
    });
 
@@ -257,7 +262,7 @@ namespace HRBackEndApi
 
    var app = builder.Build();
 
-  
+
 
    // Configure the HTTP request pipeline.
    if (app.Environment.IsDevelopment())

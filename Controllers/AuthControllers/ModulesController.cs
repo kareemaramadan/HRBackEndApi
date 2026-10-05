@@ -83,8 +83,8 @@ namespace HRBackEndApi.Controllers.AuthControllers
     });
    }
    Module moduleToCreate = mapper.Map<Module> (newModule);
-   ApiResponse<IEnumerable<Module>> createdModule = await moduleService.CreateAsyncAndGetAll (moduleToCreate,HttpRequestType.Post,
-       m => (m.ModuleName_en==newModule.ModuleName_en||m.ModuleName_ar==newModule.ModuleName_ar));
+   ApiResponse<IEnumerable<Module>> createdModule = await moduleService.CreateAsyncAndGetAll(moduleToCreate,
+       m => (m.ModuleName_en == newModule.ModuleName_en || m.ModuleName_ar == newModule.ModuleName_ar), getAllCriteria: null);
 
    return (!createdModule.Success) ? BadRequest (createdModule) : Created ("",new ApiResponse<IEnumerable<ModuleDto>>
    {
