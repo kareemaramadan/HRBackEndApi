@@ -18,16 +18,17 @@ namespace HR.Application.Interfaces
 
   Task<ApiResponse<IEnumerable<T>>> GetAllAsync ( );
   Task<ApiResponse<IEnumerable<T>>> GetAllAsync ( Expression<Func<T,bool>> criteria );
-  Task<ApiResponse<IEnumerable<T>>> GetAllAsync(Expression<Func<T, bool>>? filter = null,
-        Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
+  Task<ApiResponse<IEnumerable<T>>> GetAllAsync ( Expression<Func<T,bool>>? filter,Func<IQueryable<T>,IIncludableQueryable<T,object>>? include );
   Task<ApiResponse<T>> CreateAsync ( T entity );
   Task<ApiResponse<IEnumerable<T>>> CreateAsyncAndGetAll ( T entity );
   Task<ApiResponse<T>> CreateAsync ( T entity,Expression<Func<T,bool>> checkCriteria );
-  Task<ApiResponse<IEnumerable<T>>> CreateAsyncAndGetAll ( T entity,Expression<Func<T,bool>> checkCriteria, Expression<Func<T, bool>> getAllCriteria);
+  Task<ApiResponse<IEnumerable<T>>> CreateAsyncAndGetAll ( T entity,Expression<Func<T,bool>> checkCriteria, Expression<Func<T, bool>>? getAllCriteria);
   Task<ApiResponse<T>> UpdateAsync ( T entity );
   Task<ApiResponse<T>> UpdateAsync ( T entity,Expression<Func<T,bool>> criteria );
+  Task<ApiResponse<IEnumerable<T>>> UpdateAsyncAndGetAll ( T entity , Expression<Func<T , bool>> checkCriteria , Expression<Func<T , bool>>? getAllCriteria );
   Task<ApiResponse<int>> DeleteAsync ( T entity );
   Task<ApiResponse<int>> DeleteAsync ( Expression<Func<T,bool>> criteria );
+  Task<ApiResponse<IEnumerable<T>>> DeleteAsyncAndGetAll ( Expression<Func<T,bool>> Criteria,Expression<Func<T,bool>>? GetAllCriteria );
 
 
   //Extra Functions for count and checking

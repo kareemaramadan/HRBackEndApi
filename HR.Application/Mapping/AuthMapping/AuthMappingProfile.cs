@@ -42,7 +42,7 @@ namespace HR.Application.Mapping.AuthMapping
    //==================
 
    CreateMap<ModulePagesDto,ModulePage> ( ).ReverseMap ( );
-   CreateMap<CreateModulePagesDto, ModulePage> ( ).ReverseMap ( );
+   CreateMap<ModulePagesDtowithModule, ModulePage> ( ).ReverseMap ( );
 
 
   }

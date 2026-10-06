@@ -17,21 +17,10 @@ namespace HR.Application.Dtos.AuthDtos
  }
  public class ModulePagesDto ()
  {
-  public int? PageId { get; set; }
-  public string PageName_en { get; set; } = string.Empty;
-  public string PageName_ar { get; set; } = string.Empty;
-  public string PageUrl { get; set; } = string.Empty;
-
- }
-
- public class CreateModulePagesDto {
-
   public int ModuleId { get; set; }
+  public int PageId { get; set; }
   public string PageName_en { get; set; } = string.Empty;
   public string PageName_ar { get; set; } = string.Empty;
   public string PageUrl { get; set; } = string.Empty;
-
  }
-
-
 }
