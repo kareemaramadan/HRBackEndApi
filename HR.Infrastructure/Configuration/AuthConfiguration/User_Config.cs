@@ -9,7 +9,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
   public void Configure ( EntityTypeBuilder<AppUser> builder )
   {
    builder.HasMany (u => u.User_Page_Permissions)
-       .WithOne (up => up.Users)
+       .WithOne (up => up.User)
        .HasForeignKey (up => up.UserId)
        .OnDelete (DeleteBehavior.Restrict);
   }

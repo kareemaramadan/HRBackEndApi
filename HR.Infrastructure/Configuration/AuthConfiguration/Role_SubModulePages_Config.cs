@@ -10,7 +10,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
   {
    //table Configuration
    //====================
-   builder.ToTable ("Role_ModulePages","Auth");
+   builder.ToTable ("Role_SubModulePages","Auth");
    builder.HasKey (p => new { p.RoleId,p.PageId });
    builder.Property (p => p.RoleId).HasMaxLength (450).IsRequired ();
    builder.Property (p => p.PageId).HasColumnType ("int").IsRequired ();

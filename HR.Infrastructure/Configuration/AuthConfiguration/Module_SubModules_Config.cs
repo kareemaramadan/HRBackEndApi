@@ -10,8 +10,8 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
   {
    builder.ToTable ("Module_SubModules","Auth");
    builder.HasKey (p => new { p.ModuleId,p.SubModuleId });
-   builder.Property (p => p.ModuleId).UseIdentityColumn (1,1).HasColumnType ("int");
-   builder.Property (p => p.SubModuleId).UseIdentityColumn (1,1).HasColumnType ("int");
+   builder.Property (p => p.ModuleId).HasColumnType ("int").IsRequired ();
+   builder.Property (p => p.SubModuleId).HasColumnType ("int").IsRequired ();
 
 
    // Indexes

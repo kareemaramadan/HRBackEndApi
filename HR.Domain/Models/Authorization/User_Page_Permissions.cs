@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HR.Domain.Models.Authorization
 {
- public class User_Page_Permission
+ public class User_Page_Permissions
  {
   [Required]
   public string UserId { get; set; } = Guid.NewGuid ().ToString ();

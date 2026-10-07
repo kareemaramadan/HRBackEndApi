@@ -20,7 +20,7 @@ namespace HR.Domain.Models.Identity
 
 
 
-  public virtual ICollection<User_Page_Permission>? User_Page_Permissions { get; set; }
+  public virtual ICollection<User_Page_Permissions>? User_Page_Permissions { get; set; }
 
 
 

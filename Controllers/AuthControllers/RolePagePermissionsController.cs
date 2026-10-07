@@ -11,7 +11,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
 {
  [Route ("api/[controller]")]
  [ApiController]
- public class RolePagePermissionsController ( IBaseService<Role_Page_Permission> RolePagePermissionService,IMapper mapper,ILocalizationService localization ) : ControllerBase
+ public class RolePagePermissionsController ( IBaseService<Role_Page_Permissions> RolePagePermissionService,IMapper mapper,ILocalizationService localization ) : ControllerBase
  {
   // GET: api/<RolePagePermissionsController>
   [HttpGet ("GetAllPagesPermissionsForRole")]

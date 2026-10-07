@@ -14,6 +14,20 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
    // Primary Key
    //===============
    builder.HasKey (p => new { p.RoleId,p.ModuleId,p.SubModuleId });
+   builder.Property (p => p.RoleId)
+    .HasColumnName ("RoleId")
+    .HasMaxLength (450)
+    .HasColumnType ("nvarchar(450)")
+    .IsRequired ();
+   builder.Property (p => p.ModuleId)
+    .HasColumnName ("ModuleId")
+    .HasColumnType ("int")
+    .IsRequired ();
+
+   builder.Property (p => p.SubModuleId)
+    .HasColumnName ("SubModuleId")
+    .HasColumnType ("int")
+    .IsRequired ();
    // Indexes
    //===============
 

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HR.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitateNewDatabaseTables : Migration
+    public partial class InitDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -66,7 +66,7 @@ namespace HR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Permission",
+                name: "Permissions",
                 schema: "Auth",
                 columns: table => new
                 {
@@ -76,7 +76,7 @@ namespace HR.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Permission", x => x.PermissionId);
+                    table.PrimaryKey("PK_Permissions", x => x.PermissionId);
                 });
 
             migrationBuilder.CreateTable(
@@ -94,6 +94,21 @@ namespace HR.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SubModules",
+                schema: "Auth",
+                columns: table => new
+                {
+                    SubModuleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SubModuleName_en = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    SubModuleName_ar = table.Column<string>(type: "nvarchar(350)", maxLength: 350, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubModules", x => x.SubModuleId);
                 });
 
             migrationBuilder.CreateTable(
@@ -152,30 +167,6 @@ namespace HR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ModulePages",
-                schema: "Auth",
-                columns: table => new
-                {
-                    PageId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ModuleId = table.Column<int>(type: "int", nullable: false),
-                    PageName_en = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    PageName_ar = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    PageUrl = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ModulePages", x => x.PageId);
-                    table.ForeignKey(
-                        name: "FK_ModulePages_Modules_ModuleId",
-                        column: x => x.ModuleId,
-                        principalSchema: "Auth",
-                        principalTable: "Modules",
-                        principalColumn: "ModuleId",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "RoleClaims",
                 schema: "Auth",
                 columns: table => new
@@ -196,6 +187,92 @@ namespace HR.Infrastructure.Migrations
                         principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Module_SubModules",
+                schema: "Auth",
+                columns: table => new
+                {
+                    ModuleId = table.Column<int>(type: "int", nullable: false),
+                    SubModuleId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Module_SubModules", x => new { x.ModuleId, x.SubModuleId });
+                    table.ForeignKey(
+                        name: "FK_Module_SubModules_ModuleId",
+                        column: x => x.ModuleId,
+                        principalSchema: "Auth",
+                        principalTable: "Modules",
+                        principalColumn: "ModuleId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Module_SubModules_SubModuleId",
+                        column: x => x.SubModuleId,
+                        principalSchema: "Auth",
+                        principalTable: "SubModules",
+                        principalColumn: "SubModuleId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Role_SubModules",
+                schema: "Auth",
+                columns: table => new
+                {
+                    RoleId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    ModuleId = table.Column<int>(type: "int", nullable: false),
+                    SubModuleId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Role_SubModules", x => new { x.RoleId, x.ModuleId, x.SubModuleId });
+                    table.ForeignKey(
+                        name: "FK_Role_SubModules_Modules_ModuleId",
+                        column: x => x.ModuleId,
+                        principalSchema: "Auth",
+                        principalTable: "Modules",
+                        principalColumn: "ModuleId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Role_SubModules_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalSchema: "Auth",
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Role_SubModules_SubModules_SubModuleId",
+                        column: x => x.SubModuleId,
+                        principalSchema: "Auth",
+                        principalTable: "SubModules",
+                        principalColumn: "SubModuleId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SubModulePages",
+                schema: "Auth",
+                columns: table => new
+                {
+                    PageId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SubModuleId = table.Column<int>(type: "int", nullable: false),
+                    PageName_en = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    PageName_ar = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    PageUrl = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubModulePages", x => x.PageId);
+                    table.ForeignKey(
+                        name: "FK_SubModulePages_SubModules_SubModuleId",
+                        column: x => x.SubModuleId,
+                        principalSchema: "Auth",
+                        principalTable: "SubModules",
+                        principalColumn: "SubModuleId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -316,42 +393,69 @@ namespace HR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RolePagePermissions",
+                name: "Role_Page_Permissions",
                 schema: "Auth",
                 columns: table => new
                 {
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RoleId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     PageId = table.Column<int>(type: "int", nullable: false),
                     PermissionId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RolePagePermissions", x => new { x.RoleId, x.PageId, x.PermissionId });
+                    table.PrimaryKey("PK_Role_Page_Permissions", x => new { x.RoleId, x.PageId, x.PermissionId });
                     table.ForeignKey(
-                        name: "FK_RolePagePermissions_ModulePages_PageId",
-                        column: x => x.PageId,
-                        principalSchema: "Auth",
-                        principalTable: "ModulePages",
-                        principalColumn: "PageId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_RolePagePermissions_Permission_PermissionId",
+                        name: "FK_Role_Page_Permissions_Permissions_PermissionId",
                         column: x => x.PermissionId,
                         principalSchema: "Auth",
-                        principalTable: "Permission",
+                        principalTable: "Permissions",
                         principalColumn: "PermissionId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_RolePagePermissions_Roles_RoleId",
+                        name: "FK_Role_Page_Permissions_Roles_RoleId",
                         column: x => x.RoleId,
                         principalSchema: "Auth",
                         principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Role_Page_Permissions_SubModulePages_PageId",
+                        column: x => x.PageId,
+                        principalSchema: "Auth",
+                        principalTable: "SubModulePages",
+                        principalColumn: "PageId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserPagePermissions",
+                name: "Role_SubModulePages",
+                schema: "Auth",
+                columns: table => new
+                {
+                    RoleId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    PageId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Role_SubModulePages", x => new { x.RoleId, x.PageId });
+                    table.ForeignKey(
+                        name: "FK_Role_SubModulePages_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalSchema: "Auth",
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Role_SubModulePages_SubModulePages_PageId",
+                        column: x => x.PageId,
+                        principalSchema: "Auth",
+                        principalTable: "SubModulePages",
+                        principalColumn: "PageId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "User_Page_Permissions",
                 schema: "Auth",
                 columns: table => new
                 {
@@ -362,23 +466,23 @@ namespace HR.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserPagePermissions", x => new { x.UserId, x.PageId, x.PermissionId });
+                    table.PrimaryKey("PK_User_Page_Permissions", x => new { x.UserId, x.PageId, x.PermissionId });
                     table.ForeignKey(
-                        name: "FK_UserPagePermissions_ModulePages_PageId",
-                        column: x => x.PageId,
-                        principalSchema: "Auth",
-                        principalTable: "ModulePages",
-                        principalColumn: "PageId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_UserPagePermissions_Permission_PermissionId",
+                        name: "FK_User_Page_Permissions_Permissions_PermissionId",
                         column: x => x.PermissionId,
                         principalSchema: "Auth",
-                        principalTable: "Permission",
+                        principalTable: "Permissions",
                         principalColumn: "PermissionId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_UserPagePermissions_Users_UserId",
+                        name: "FK_User_Page_Permissions_SubModulePages_PageId",
+                        column: x => x.PageId,
+                        principalSchema: "Auth",
+                        principalTable: "SubModulePages",
+                        principalColumn: "PageId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_User_Page_Permissions_Users_UserId",
                         column: x => x.UserId,
                         principalSchema: "Auth",
                         principalTable: "Users",
@@ -501,24 +605,17 @@ namespace HR.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ModulePage_PageName_ar",
+                name: "IX_Module_SubModules_ModuleId_SubModuleId",
                 schema: "Auth",
-                table: "ModulePages",
-                column: "PageName_ar",
+                table: "Module_SubModules",
+                columns: new[] { "ModuleId", "SubModuleId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ModulePage_PageName_en",
+                name: "IX_Module_SubModules_SubModuleId",
                 schema: "Auth",
-                table: "ModulePages",
-                column: "PageName_en",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ModulePages_ModuleId",
-                schema: "Auth",
-                table: "ModulePages",
-                column: "ModuleId");
+                table: "Module_SubModules",
+                column: "SubModuleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Module_ModuleName_ar",
@@ -537,8 +634,59 @@ namespace HR.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Permission_PermissionName",
                 schema: "Auth",
-                table: "Permission",
+                table: "Permissions",
                 column: "PermissionName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Role_Page_Permissions_PageId",
+                schema: "Auth",
+                table: "Role_Page_Permissions",
+                column: "PageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Role_Page_Permissions_PermissionId",
+                schema: "Auth",
+                table: "Role_Page_Permissions",
+                column: "PermissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RolePagePermission_RoleId",
+                schema: "Auth",
+                table: "Role_Page_Permissions",
+                columns: new[] { "RoleId", "PageId", "PermissionId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Role_ModulePages_RoleId_PageId",
+                schema: "Auth",
+                table: "Role_SubModulePages",
+                columns: new[] { "RoleId", "PageId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Role_SubModulePages_PageId",
+                schema: "Auth",
+                table: "Role_SubModulePages",
+                column: "PageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Role_SubModules_ModuleId",
+                schema: "Auth",
+                table: "Role_SubModules",
+                column: "ModuleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Role_SubModules_SubModuleId",
+                schema: "Auth",
+                table: "Role_SubModules",
+                column: "SubModuleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoleModules_RoleId_ModuleId_SubModuleId",
+                schema: "Auth",
+                table: "Role_SubModules",
+                columns: new[] { "RoleId", "ModuleId", "SubModuleId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -548,32 +696,65 @@ namespace HR.Infrastructure.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RolePagePermission_PageId",
-                schema: "Auth",
-                table: "RolePagePermissions",
-                column: "PageId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RolePagePermission_RoleId",
-                schema: "Auth",
-                table: "RolePagePermissions",
-                column: "RoleId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RolePagePermissions_PermissionId",
-                schema: "Auth",
-                table: "RolePagePermissions",
-                column: "PermissionId");
-
-            migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
                 schema: "Auth",
                 table: "Roles",
                 column: "NormalizedName",
                 unique: true,
                 filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModulePage_PageName_ar",
+                schema: "Auth",
+                table: "SubModulePages",
+                column: "PageName_ar",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ModulePage_PageName_en",
+                schema: "Auth",
+                table: "SubModulePages",
+                column: "PageName_en",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubModulePages_SubModuleId",
+                schema: "Auth",
+                table: "SubModulePages",
+                column: "SubModuleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubModules_SubModuleName_ar",
+                schema: "Auth",
+                table: "SubModules",
+                column: "SubModuleName_ar",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubModules_SubModuleName_en",
+                schema: "Auth",
+                table: "SubModules",
+                column: "SubModuleName_en",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_User_Page_Permissions_PageId",
+                schema: "Auth",
+                table: "User_Page_Permissions",
+                column: "PageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_User_Page_Permissions_PermissionId",
+                schema: "Auth",
+                table: "User_Page_Permissions",
+                column: "PermissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserPagePermissions_Unique",
+                schema: "Auth",
+                table: "User_Page_Permissions",
+                columns: new[] { "UserId", "PageId", "PermissionId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserClaims_UserId",
@@ -586,26 +767,6 @@ namespace HR.Infrastructure.Migrations
                 schema: "Auth",
                 table: "UserLogins",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserPagePermission_PageId",
-                schema: "Auth",
-                table: "UserPagePermissions",
-                column: "PageId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserPagePermission_UserId",
-                schema: "Auth",
-                table: "UserPagePermissions",
-                column: "UserId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserPagePermissions_PermissionId",
-                schema: "Auth",
-                table: "UserPagePermissions",
-                column: "PermissionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId",
@@ -640,11 +801,27 @@ namespace HR.Infrastructure.Migrations
                 schema: "LookUps");
 
             migrationBuilder.DropTable(
+                name: "Module_SubModules",
+                schema: "Auth");
+
+            migrationBuilder.DropTable(
+                name: "Role_Page_Permissions",
+                schema: "Auth");
+
+            migrationBuilder.DropTable(
+                name: "Role_SubModulePages",
+                schema: "Auth");
+
+            migrationBuilder.DropTable(
+                name: "Role_SubModules",
+                schema: "Auth");
+
+            migrationBuilder.DropTable(
                 name: "RoleClaims",
                 schema: "Auth");
 
             migrationBuilder.DropTable(
-                name: "RolePagePermissions",
+                name: "User_Page_Permissions",
                 schema: "Auth");
 
             migrationBuilder.DropTable(
@@ -653,10 +830,6 @@ namespace HR.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserLogins",
-                schema: "Auth");
-
-            migrationBuilder.DropTable(
-                name: "UserPagePermissions",
                 schema: "Auth");
 
             migrationBuilder.DropTable(
@@ -672,11 +845,15 @@ namespace HR.Infrastructure.Migrations
                 schema: "LookUps");
 
             migrationBuilder.DropTable(
-                name: "ModulePages",
+                name: "Modules",
                 schema: "Auth");
 
             migrationBuilder.DropTable(
-                name: "Permission",
+                name: "Permissions",
+                schema: "Auth");
+
+            migrationBuilder.DropTable(
+                name: "SubModulePages",
                 schema: "Auth");
 
             migrationBuilder.DropTable(
@@ -692,7 +869,7 @@ namespace HR.Infrastructure.Migrations
                 schema: "LookUps");
 
             migrationBuilder.DropTable(
-                name: "Modules",
+                name: "SubModules",
                 schema: "Auth");
 
             migrationBuilder.DropTable(

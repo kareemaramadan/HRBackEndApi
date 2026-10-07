@@ -17,7 +17,7 @@ namespace HR.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.11")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -57,45 +57,23 @@ namespace HR.Infrastructure.Migrations
                     b.ToTable("Modules", "Auth");
                 });
 
-            modelBuilder.Entity("HR.Domain.Models.Authorization.ModulePage", b =>
+            modelBuilder.Entity("HR.Domain.Models.Authorization.Module_SubModules", b =>
                 {
-                    b.Property<int>("PageId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PageId"));
-
                     b.Property<int>("ModuleId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PageName_ar")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar");
+                    b.Property<int>("SubModuleId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("PageName_en")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar");
+                    b.HasKey("ModuleId", "SubModuleId");
 
-                    b.Property<string>("PageUrl")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar");
+                    b.HasIndex("SubModuleId");
 
-                    b.HasKey("PageId");
-
-                    b.HasIndex("ModuleId");
-
-                    b.HasIndex("PageName_ar")
+                    b.HasIndex("ModuleId", "SubModuleId")
                         .IsUnique()
-                        .HasDatabaseName("IX_ModulePage_PageName_ar");
+                        .HasDatabaseName("IX_Module_SubModules_ModuleId_SubModuleId");
 
-                    b.HasIndex("PageName_en")
-                        .IsUnique()
-                        .HasDatabaseName("IX_ModulePage_PageName_en");
-
-                    b.ToTable("ModulePages", "Auth");
+                    b.ToTable("Module_SubModules", "Auth");
                 });
 
             modelBuilder.Entity("HR.Domain.Models.Authorization.Permission", b =>
@@ -117,12 +95,13 @@ namespace HR.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Permission_PermissionName");
 
-                    b.ToTable("Permission", "Auth");
+                    b.ToTable("Permissions", "Auth");
                 });
 
-            modelBuilder.Entity("HR.Domain.Models.Authorization.RolePagePermission", b =>
+            modelBuilder.Entity("HR.Domain.Models.Authorization.Role_Page_Permissions", b =>
                 {
                     b.Property<string>("RoleId")
+                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("PageId")
@@ -133,20 +112,141 @@ namespace HR.Infrastructure.Migrations
 
                     b.HasKey("RoleId", "PageId", "PermissionId");
 
-                    b.HasIndex("PageId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_RolePagePermission_PageId");
+                    b.HasIndex("PageId");
 
                     b.HasIndex("PermissionId");
 
-                    b.HasIndex("RoleId")
+                    b.HasIndex("RoleId", "PageId", "PermissionId")
                         .IsUnique()
                         .HasDatabaseName("IX_RolePagePermission_RoleId");
 
-                    b.ToTable("RolePagePermissions", "Auth");
+                    b.ToTable("Role_Page_Permissions", "Auth");
                 });
 
-            modelBuilder.Entity("HR.Domain.Models.Authorization.UserPagePermission", b =>
+            modelBuilder.Entity("HR.Domain.Models.Authorization.Role_SubModulePages", b =>
+                {
+                    b.Property<string>("RoleId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("PageId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RoleId", "PageId");
+
+                    b.HasIndex("PageId");
+
+                    b.HasIndex("RoleId", "PageId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Role_ModulePages_RoleId_PageId");
+
+                    b.ToTable("Role_SubModulePages", "Auth");
+                });
+
+            modelBuilder.Entity("HR.Domain.Models.Authorization.Role_SubModules", b =>
+                {
+                    b.Property<string>("RoleId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("RoleId");
+
+                    b.Property<int>("ModuleId")
+                        .HasColumnType("int")
+                        .HasColumnName("ModuleId");
+
+                    b.Property<int>("SubModuleId")
+                        .HasColumnType("int")
+                        .HasColumnName("SubModuleId");
+
+                    b.HasKey("RoleId", "ModuleId", "SubModuleId");
+
+                    b.HasIndex("ModuleId");
+
+                    b.HasIndex("SubModuleId");
+
+                    b.HasIndex("RoleId", "ModuleId", "SubModuleId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_RoleModules_RoleId_ModuleId_SubModuleId");
+
+                    b.ToTable("Role_SubModules", "Auth");
+                });
+
+            modelBuilder.Entity("HR.Domain.Models.Authorization.SubModulePages", b =>
+                {
+                    b.Property<int>("PageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PageId"));
+
+                    b.Property<string>("PageName_ar")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("PageName_en")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<string>("PageUrl")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<int>("SubModuleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PageId");
+
+                    b.HasIndex("PageName_ar")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ModulePage_PageName_ar");
+
+                    b.HasIndex("PageName_en")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ModulePage_PageName_en");
+
+                    b.HasIndex("SubModuleId");
+
+                    b.ToTable("SubModulePages", "Auth");
+                });
+
+            modelBuilder.Entity("HR.Domain.Models.Authorization.SubModules", b =>
+                {
+                    b.Property<int>("SubModuleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("SubModuleId");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubModuleId"));
+
+                    b.Property<string>("SubModuleName_ar")
+                        .IsRequired()
+                        .HasMaxLength(350)
+                        .HasColumnType("nvarchar(350)")
+                        .HasColumnName("SubModuleName_ar");
+
+                    b.Property<string>("SubModuleName_en")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)")
+                        .HasColumnName("SubModuleName_en");
+
+                    b.HasKey("SubModuleId");
+
+                    b.HasIndex("SubModuleName_ar")
+                        .IsUnique()
+                        .HasDatabaseName("IX_SubModules_SubModuleName_ar");
+
+                    b.HasIndex("SubModuleName_en")
+                        .IsUnique()
+                        .HasDatabaseName("IX_SubModules_SubModuleName_en");
+
+                    b.ToTable("SubModules", "Auth");
+                });
+
+            modelBuilder.Entity("HR.Domain.Models.Authorization.User_Page_Permissions", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -162,17 +262,15 @@ namespace HR.Infrastructure.Migrations
 
                     b.HasKey("UserId", "PageId", "PermissionId");
 
-                    b.HasIndex("PageId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_UserPagePermission_PageId");
+                    b.HasIndex("PageId");
 
                     b.HasIndex("PermissionId");
 
-                    b.HasIndex("UserId")
+                    b.HasIndex("UserId", "PageId", "PermissionId")
                         .IsUnique()
-                        .HasDatabaseName("IX_UserPagePermission_UserId");
+                        .HasDatabaseName("IX_UserPagePermissions_Unique");
 
-                    b.ToTable("UserPagePermissions", "Auth");
+                    b.ToTable("User_Page_Permissions", "Auth");
                 });
 
             modelBuilder.Entity("HR.Domain.Models.Identity.AppRole", b =>
@@ -595,69 +693,136 @@ namespace HR.Infrastructure.Migrations
                     b.ToTable("UserTokens", "Auth");
                 });
 
-            modelBuilder.Entity("HR.Domain.Models.Authorization.ModulePage", b =>
+            modelBuilder.Entity("HR.Domain.Models.Authorization.Module_SubModules", b =>
                 {
-                    b.HasOne("HR.Domain.Models.Authorization.Module", "Modules")
-                        .WithMany("ModulePages")
+                    b.HasOne("HR.Domain.Models.Authorization.Module", "Module")
+                        .WithMany("Module_SubModules")
                         .HasForeignKey("ModuleId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_Module_SubModules_ModuleId");
 
-                    b.Navigation("Modules");
+                    b.HasOne("HR.Domain.Models.Authorization.SubModules", "SubModule")
+                        .WithMany("Module_SubModules")
+                        .HasForeignKey("SubModuleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_Module_SubModules_SubModuleId");
+
+                    b.Navigation("Module");
+
+                    b.Navigation("SubModule");
                 });
 
-            modelBuilder.Entity("HR.Domain.Models.Authorization.RolePagePermission", b =>
+            modelBuilder.Entity("HR.Domain.Models.Authorization.Role_Page_Permissions", b =>
                 {
-                    b.HasOne("HR.Domain.Models.Authorization.ModulePage", "ModulePages")
-                        .WithMany("RolePagePermissions")
+                    b.HasOne("HR.Domain.Models.Authorization.SubModulePages", "SubModulePage")
+                        .WithMany("Role_Page_Permissions")
                         .HasForeignKey("PageId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("HR.Domain.Models.Authorization.Permission", "Permissions")
-                        .WithMany("RolePagePermissions")
+                    b.HasOne("HR.Domain.Models.Authorization.Permission", "Permission")
+                        .WithMany("Role_Page_Permissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("HR.Domain.Models.Identity.AppRole", "Roles")
-                        .WithMany("RolePagePermissions")
+                    b.HasOne("HR.Domain.Models.Identity.AppRole", "Role")
+                        .WithMany("Role_Page_Permissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ModulePages");
+                    b.Navigation("Permission");
 
-                    b.Navigation("Permissions");
+                    b.Navigation("Role");
 
-                    b.Navigation("Roles");
+                    b.Navigation("SubModulePage");
                 });
 
-            modelBuilder.Entity("HR.Domain.Models.Authorization.UserPagePermission", b =>
+            modelBuilder.Entity("HR.Domain.Models.Authorization.Role_SubModulePages", b =>
                 {
-                    b.HasOne("HR.Domain.Models.Authorization.ModulePage", "Pages")
-                        .WithMany("UserPagePermissions")
+                    b.HasOne("HR.Domain.Models.Authorization.SubModulePages", "SubModulePage")
+                        .WithMany("Role_SubModulePages")
                         .HasForeignKey("PageId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("HR.Domain.Models.Authorization.Permission", "Permissions")
-                        .WithMany("UserPagePermissions")
+                    b.HasOne("HR.Domain.Models.Identity.AppRole", "Role")
+                        .WithMany("Role_SubModulePages")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("SubModulePage");
+                });
+
+            modelBuilder.Entity("HR.Domain.Models.Authorization.Role_SubModules", b =>
+                {
+                    b.HasOne("HR.Domain.Models.Authorization.Module", "Module")
+                        .WithMany("Role_SubModules")
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HR.Domain.Models.Identity.AppRole", "Role")
+                        .WithMany("Role_SubModules")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HR.Domain.Models.Authorization.SubModules", "SubModule")
+                        .WithMany()
+                        .HasForeignKey("SubModuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Module");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("SubModule");
+                });
+
+            modelBuilder.Entity("HR.Domain.Models.Authorization.SubModulePages", b =>
+                {
+                    b.HasOne("HR.Domain.Models.Authorization.SubModules", "SubModule")
+                        .WithMany("SubModulePages")
+                        .HasForeignKey("SubModuleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SubModule");
+                });
+
+            modelBuilder.Entity("HR.Domain.Models.Authorization.User_Page_Permissions", b =>
+                {
+                    b.HasOne("HR.Domain.Models.Authorization.SubModulePages", "SubModulePage")
+                        .WithMany("User_Page_Permissions")
+                        .HasForeignKey("PageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HR.Domain.Models.Authorization.Permission", "Permission")
+                        .WithMany("User_Page_Permissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("HR.Domain.Models.Identity.AppUser", "Users")
-                        .WithMany("UserPagePermissions")
+                    b.HasOne("HR.Domain.Models.Identity.AppUser", "User")
+                        .WithMany("User_Page_Permissions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Pages");
+                    b.Navigation("Permission");
 
-                    b.Navigation("Permissions");
+                    b.Navigation("SubModulePage");
 
-                    b.Navigation("Users");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HR.Domain.Models.LookUps.City", b =>
@@ -746,31 +911,46 @@ namespace HR.Infrastructure.Migrations
 
             modelBuilder.Entity("HR.Domain.Models.Authorization.Module", b =>
                 {
-                    b.Navigation("ModulePages");
-                });
+                    b.Navigation("Module_SubModules");
 
-            modelBuilder.Entity("HR.Domain.Models.Authorization.ModulePage", b =>
-                {
-                    b.Navigation("RolePagePermissions");
-
-                    b.Navigation("UserPagePermissions");
+                    b.Navigation("Role_SubModules");
                 });
 
             modelBuilder.Entity("HR.Domain.Models.Authorization.Permission", b =>
                 {
-                    b.Navigation("RolePagePermissions");
+                    b.Navigation("Role_Page_Permissions");
 
-                    b.Navigation("UserPagePermissions");
+                    b.Navigation("User_Page_Permissions");
+                });
+
+            modelBuilder.Entity("HR.Domain.Models.Authorization.SubModulePages", b =>
+                {
+                    b.Navigation("Role_Page_Permissions");
+
+                    b.Navigation("Role_SubModulePages");
+
+                    b.Navigation("User_Page_Permissions");
+                });
+
+            modelBuilder.Entity("HR.Domain.Models.Authorization.SubModules", b =>
+                {
+                    b.Navigation("Module_SubModules");
+
+                    b.Navigation("SubModulePages");
                 });
 
             modelBuilder.Entity("HR.Domain.Models.Identity.AppRole", b =>
                 {
-                    b.Navigation("RolePagePermissions");
+                    b.Navigation("Role_Page_Permissions");
+
+                    b.Navigation("Role_SubModulePages");
+
+                    b.Navigation("Role_SubModules");
                 });
 
             modelBuilder.Entity("HR.Domain.Models.Identity.AppUser", b =>
                 {
-                    b.Navigation("UserPagePermissions");
+                    b.Navigation("User_Page_Permissions");
                 });
 
             modelBuilder.Entity("HR.Domain.Models.LookUps.City", b =>

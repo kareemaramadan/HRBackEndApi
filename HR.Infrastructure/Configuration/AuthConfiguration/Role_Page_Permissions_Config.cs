@@ -10,6 +10,15 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
   {
    builder.ToTable ("Role_Page_Permissions","Auth");
    builder.HasKey (p => new { p.RoleId,p.PageId,p.PermissionId });
+   builder.Property (p => p.RoleId)
+   .HasMaxLength (450)
+   .HasColumnType ("nvarchar(450)")
+   .IsRequired ();
+   builder.Property (p => p.PageId)
+    .HasColumnType ("int").IsRequired ();
+   builder.Property (p => p.PermissionId)
+    .HasColumnType ("int")
+    .IsRequired ();
 
 
    // Indexes

@@ -13,7 +13,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
        .HasForeignKey (up => up.RoleId)
        .OnDelete (DeleteBehavior.Restrict);
 
-   builder.HasMany (u => u.Role_Modules)
+   builder.HasMany (u => u.Role_SubModules)
        .WithOne (up => up.Role)
        .HasForeignKey (up => up.RoleId)
        .OnDelete (DeleteBehavior.Restrict);

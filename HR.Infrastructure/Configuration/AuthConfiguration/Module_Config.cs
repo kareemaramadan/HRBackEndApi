@@ -47,7 +47,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
        .HasForeignKey (mp => mp.ModuleId)
        .OnDelete (DeleteBehavior.Restrict);
 
-   builder.HasMany (p => p.Role_Modules)
+   builder.HasMany (p => p.Role_SubModules)
        .WithOne (rm => rm.Module)
        .HasForeignKey (rm => rm.ModuleId)
        .OnDelete (DeleteBehavior.Restrict);

@@ -9,7 +9,7 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
   public void Configure ( EntityTypeBuilder<Permission> builder )
   {
 
-   builder.ToTable ("Permission","Auth");
+   builder.ToTable ("Permissions","Auth");
    builder.HasKey (p => p.PermissionId);
    builder.Property (p => p.PermissionId).UseIdentityColumn (1,1).HasColumnType ("int");
    builder.Property (p => p.PermissionName).HasColumnType ("nvarchar").HasMaxLength (150).IsRequired ();
