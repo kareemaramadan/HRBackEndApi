@@ -1,12 +1,9 @@
 ﻿using AutoMapper;
 using HR.Application.Dtos.AuthDtos;
-using HR.Application.Helpers;
 using HR.Application.Interfaces;
 using HR.Application.Response;
 using HR.Domain.Models.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Net;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -147,9 +144,9 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <param name="permissionName"></param>
   /// <returns></returns>
   [HttpDelete ("DeletePermission/{permissionName}")]
-  public async Task<ActionResult<ApiResponse<string>>> DeletePermissionAsync ( string permissionName )
+  public async Task<ActionResult<ApiResponse<IEnumerable<PermissionDto>>>> DeletePermissionAsync ( string permissionName )
   {
-   ApiResponse<string> response = new ()
+   ApiResponse<IEnumerable<PermissionDto>> response = new ()
    {
     Success=false,
     Data=null,
@@ -161,8 +158,12 @@ namespace HRBackEndApi.Controllers.AuthControllers
     response.Message=localization.Get ("missingfields");
     return BadRequest (response);
    }
-   ApiResponse<int> affectedRowsCount = await PermissionService.DeleteAsync (p => p.PermissionName==permissionName);
-   return (!affectedRowsCount.Success) ? BadRequest (affectedRowsCount) : Ok (affectedRowsCount);
+   ApiResponse<IEnumerable<Permission>> affectedRowsCount = await PermissionService.DeleteAsyncAndGetAll (p => p.PermissionName==permissionName,null);
+   response.Data=mapper.Map<IEnumerable<PermissionDto>> (affectedRowsCount);
+   response.Success=affectedRowsCount.Success;
+   response.Message=affectedRowsCount.Message;
+
+   return (!affectedRowsCount.Success) ? BadRequest (affectedRowsCount) : Ok (response);
   }
   /// <summary>
   /// delete a group of permissions together and permission names should be separated by comma
@@ -172,8 +173,14 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// the number of deleted permissions
   /// </returns>
   [HttpDelete ("DeleteBulkOfPermissions/{permissionNames}")]
-  public async Task<ActionResult<ApiResponse<int>>> DeleteBulkPermissionsAsync ( string permissionNames )
+  public async Task<ActionResult<ApiResponse<IEnumerable<PermissionDto>>>> DeleteBulkPermissionsAsync ( string permissionNames )
   {
+   ApiResponse<IEnumerable<PermissionDto>> response = new ()
+   {
+    Success=false,
+    Data=null,
+    Language=localization.GetLanguage ()
+   };
    string [ ] deletedpermissions = permissionNames.Split (',');
    int count = deletedpermissions.Length;
    int deletedrowsAffected = 0;
@@ -182,23 +189,21 @@ namespace HRBackEndApi.Controllers.AuthControllers
     ApiResponse<Permission> deleteditem = await PermissionService.FindItemAsync (p => p.PermissionName==permissionName);
     if (!deleteditem.Success) return BadRequest (deleteditem);
     ApiResponse<int> rowsaffected = await PermissionService.DeleteAsync (deleteditem.Data!);
+
     deletedrowsAffected+=rowsaffected.Data;
    }
-   return (deletedrowsAffected!=count) ? BadRequest (new ApiResponse<int>
+   if (deletedrowsAffected!=count)
    {
-    Success=false,
-    Message=localization.Get ("notalldeleted"),
-    Data=deletedrowsAffected,
-    Language=localization.GetLanguage ()
-   }) :
-   Ok
-   (new ApiResponse<int>
-   {
-    Success=true,
-    Message=$"{deletedrowsAffected} {localization.Get ("itemsdeleted")} ",
-    Data=deletedrowsAffected,
-    Language=localization.GetLanguage ()
-   });
+    response.Message=localization.Get ("notalldeleted");
+    response.Data=null;
+    return BadRequest (response);
+   }
+
+   response.Success=true;
+   response.Message=$"{deletedrowsAffected} {localization.Get ("itemsdeleted")} ";
+   response.Data=mapper.Map<IEnumerable<PermissionDto>> (PermissionService.GetAllAsync ());
+   return Ok (response);
+
   }
 
  }

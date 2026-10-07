@@ -65,7 +65,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <param name="newSubModule"></param>
   /// <returns></returns>
   [HttpPost ("AddNewSubModule")]
-  public async Task<ActionResult<ApiResponse<IEnumerable<SubModuleDto>>>> AddNewSubModuleAsync ( [FromBody] SubModuleDto newSubModule )
+  public async Task<ActionResult<ApiResponse<IEnumerable<SubModuleDto>>>> AddNewSubModuleAsync ( [FromBody] CreateSubModuleDto newSubModule )
   {
    if (!ModelState.IsValid)
    {

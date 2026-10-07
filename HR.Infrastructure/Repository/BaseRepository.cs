@@ -82,7 +82,7 @@ namespace HR.Infrastructure.Repository
    }
    FormattableString interpolatedQuery = FormattableStringFactory.Create (sqlQuery,sqlParameters);
    return await dbSet.FromSqlInterpolated (interpolatedQuery).ToListAsync ();
-   return await dbSet.FromSqlRaw (sqlQuery,sqlParameters).ToListAsync ();
+   //return await dbSet.FromSqlRaw (sqlQuery,sqlParameters).ToListAsync ();
   }
 
   public async Task<int> DeleteAsync ( T entity )

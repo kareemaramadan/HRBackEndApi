@@ -10,6 +10,12 @@ namespace HR.Application.Dtos.AuthDtos
   [Required]
   public string SubModuleName_ar { get; set; } = string.Empty;
  }
-
+ public class CreateSubModuleDto
+ {
+  [Required]
+  public string SubModuleName_en { get; set; } = string.Empty;
+  [Required]
+  public string SubModuleName_ar { get; set; } = string.Empty;
+ }
 
 }

@@ -10,41 +10,44 @@ using System.Text;
 
 namespace HR.Application.Interfaces
 {
- public interface IBaseService<T>
-     where T : class
- {
-  //Main CRUD Operations
-  //=====================
+    public interface IBaseService<T>
+        where T : class
+    {
+        //Main CRUD Operations
+        //=====================
 
-  Task<ApiResponse<IEnumerable<T>>> GetAllAsync ( );
-  Task<ApiResponse<IEnumerable<T>>> GetAllAsync ( Expression<Func<T,bool>> criteria );
-  Task<ApiResponse<IEnumerable<T>>> GetAllAsync ( Expression<Func<T,bool>>? filter,Func<IQueryable<T>,IIncludableQueryable<T,object>>? include );
-  Task<ApiResponse<T>> CreateAsync ( T entity );
-  Task<ApiResponse<IEnumerable<T>>> CreateAsyncAndGetAll ( T entity );
-  Task<ApiResponse<T>> CreateAsync ( T entity,Expression<Func<T,bool>> checkCriteria );
-  Task<ApiResponse<IEnumerable<T>>> CreateAsyncAndGetAll ( T entity,Expression<Func<T,bool>> checkCriteria, Expression<Func<T, bool>>? getAllCriteria);
-  Task<ApiResponse<T>> UpdateAsync ( T entity );
-  Task<ApiResponse<T>> UpdateAsync ( T entity,Expression<Func<T,bool>> criteria );
-  Task<ApiResponse<IEnumerable<T>>> UpdateAsyncAndGetAll ( T entity , Expression<Func<T , bool>> checkCriteria , Expression<Func<T , bool>>? getAllCriteria );
-  Task<ApiResponse<int>> DeleteAsync ( T entity );
-  Task<ApiResponse<int>> DeleteAsync ( Expression<Func<T,bool>> criteria );
-  Task<ApiResponse<IEnumerable<T>>> DeleteAsyncAndGetAll ( Expression<Func<T,bool>> Criteria,Expression<Func<T,bool>>? GetAllCriteria );
+        Task<ApiResponse<IEnumerable<T>>> GetAllAsync();
+        Task<ApiResponse<IEnumerable<T>>> GetAllAsync(Expression<Func<T, bool>> criteria);
+        Task<ApiResponse<IEnumerable<T>>> GetAllAsync(Expression<Func<T, bool>>? filter, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include);
+        Task<ApiResponse<T>> CreateAsync(T entity);
+        Task<ApiResponse<IEnumerable<T>>> CreateAsyncAndGetAll(T entity);
+        Task<ApiResponse<T>> CreateAsync(T entity, Expression<Func<T, bool>> checkCriteria);
+        Task<ApiResponse<IEnumerable<T>>> CreateAsyncAndGetAll(T entity, Expression<Func<T, bool>> checkCriteria, Expression<Func<T, bool>>? getAllCriteria);
+        Task<ApiResponse<IEnumerable<T>>> CreateAsyncAndGetAll(T entity, Expression<Func<T, bool>> checkCriteria,
+           Expression<Func<T, bool>>? getAllCriteria, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include);
+        Task<ApiResponse<T>> UpdateAsync(T entity);
+        Task<ApiResponse<T>> UpdateAsync(T entity, Expression<Func<T, bool>> criteria);
+        Task<ApiResponse<IEnumerable<T>>> UpdateAsyncAndGetAll(T entity, Expression<Func<T, bool>> checkCriteria, Expression<Func<T, bool>>? getAllCriteria);
+        Task<ApiResponse<int>> DeleteAsync(T entity);
+        Task<ApiResponse<int>> DeleteAsync(Expression<Func<T, bool>> criteria);
+        Task<ApiResponse<IEnumerable<T>>> DeleteAsyncAndGetAll(Expression<Func<T, bool>> Criteria, Expression<Func<T, bool>>? GetAllCriteria);
+        Task<ApiResponse<IEnumerable<T>>> DeleteAsyncAndGetAll(Expression<Func<T, bool>>? filter,
+                Expression<Func<T, bool>>? GetAllCriteria, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include);
 
+        //Extra Functions for count and checking
+        //=======================================
 
-  //Extra Functions for count and checking
-  //=======================================
+        Task<ApiResponse<bool>> IsExistAsync(Expression<Func<T, bool>> criteria);
+        Task<ApiResponse<int>> CountAsync();
+        Task<ApiResponse<int>> CountAsync(Expression<Func<T, bool>> criteria);
+        Task<ApiResponse<T>> FindItemAsync(Expression<Func<T, bool>> criteria);
+        Task<ApiResponse<IEnumerable<T>>> FindAsync(Expression<Func<T, bool>> criteria);
 
-  Task<ApiResponse<bool>> IsExistAsync ( Expression<Func<T,bool>> criteria);
-  Task<ApiResponse<int>> CountAsync ( );
-  Task<ApiResponse<int>> CountAsync ( Expression<Func<T,bool>> criteria );
-  Task<ApiResponse<T>> FindItemAsync ( Expression<Func<T,bool>> criteria );
-  Task<ApiResponse<IEnumerable<T>>> FindAsync ( Expression<Func<T,bool>> criteria );
+        //Using StoredProcedures
+        //=======================
 
-  //Using StoredProcedures
-  //=======================
+        Task<ApiResponse<IEnumerable<T>>> GetUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters);
+        Task<ApiResponse<int>> CUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters, Expression<Func<T, bool>> checkCriteria);
 
-  Task<ApiResponse<IEnumerable<T>>> GetUsingStoredProcedureAsync ( string spName,Dictionary<string,object> parameters );
-  Task<ApiResponse<int>> CUDUsingStoredProcedureAsync ( string spName,Dictionary<string,object> parameters,Expression<Func<T,bool>> checkCriteria);
-
- }
+    }
 }

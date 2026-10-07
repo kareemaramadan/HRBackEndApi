@@ -6,47 +6,51 @@ using HR.Domain.Models.Identity;
 
 namespace HR.Application.Mapping.AuthMapping
 {
- public class AuthMappingProfile : Profile
- {
-  public AuthMappingProfile ( )
-  {
-   //AppUser Mapping
-   //================
+    public class AuthMappingProfile : Profile
+    {
+        public AuthMappingProfile()
+        {
+            //AppUser Mapping
+            //================
 
-   CreateMap<RegisterDto,AppUser> ().ReverseMap ();
-   CreateMap<AppUser,UserRequest> ().ReverseMap ();
-   CreateMap<UserProfile,AppUser> ().ReverseMap ();
+            CreateMap<RegisterDto, AppUser>().ReverseMap();
+            CreateMap<AppUser, UserRequest>().ReverseMap();
+            CreateMap<UserProfile, AppUser>().ReverseMap();
 
-   //AppRole Mapping
-   //================
+            //AppRole Mapping
+            //================
 
-   CreateMap<RoleDto,AppRole> ().ReverseMap ();
-   CreateMap<CreateRoleDto,AppRole> ();
-   CreateMap<UpdateRoleDto,AppRole> ().ReverseMap ();
+            CreateMap<RoleDto, AppRole>().ReverseMap();
+            CreateMap<CreateRoleDto, AppRole>();
+            CreateMap<UpdateRoleDto, AppRole>().ReverseMap();
 
-   //Module Mapping
-   //===============
+            //Module Mapping
+            //===============
 
-   CreateMap<ModuleDto,Module> ().ReverseMap ();
-   CreateMap<CreateModuleDto,Module> ().ReverseMap ();
+            CreateMap<ModuleDto, Module>().ReverseMap();
+            CreateMap<CreateModuleDto, Module>().ReverseMap();
 
-   //Permission Mapping
-   //===================
-   CreateMap<PermissionDto,Permission> ().ReverseMap ();
-   CreateMap<CreatePermissionDto,Permission> ().ReverseMap ();
+            //Permission Mapping
+            //===================
+            CreateMap<PermissionDto, Permission>().ReverseMap();
+            CreateMap<CreatePermissionDto, Permission>().ReverseMap();
 
-   //ModulePage Mapping
-   //==================
+            //ModulePage Mapping
+            //==================
 
-   CreateMap<SubModulePagesDto,SubModulePages> ().ReverseMap ();
-   CreateMap<SubModulePagesDtowithModule,SubModulePages> ().ReverseMap ();
+            CreateMap<SubModulePagesDto, SubModulePages>().ReverseMap();
+            CreateMap<SubModulePagesDtowithModule, SubModulePages>().ReverseMap();
 
-   //SubModule Mapping
-   //==================
+            //SubModule Mapping
+            //==================
 
-   CreateMap<SubModuleDto,SubModules> ().ReverseMap ();
+            CreateMap<SubModuleDto, SubModules>().ReverseMap();
+            CreateMap<CreateSubModuleDto, SubModules>().ReverseMap();
 
-
-  }
- }
+            //Module_SubModule Mapping
+            //========================
+            CreateMap<Module_SubModulesDto, Module_SubModules>().ReverseMap();
+            CreateMap<Module_SubModuleDto, Module_SubModules>().ReverseMap();
+        }
+    }
 }
