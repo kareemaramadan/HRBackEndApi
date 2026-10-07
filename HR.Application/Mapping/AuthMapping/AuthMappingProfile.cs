@@ -41,8 +41,8 @@ namespace HR.Application.Mapping.AuthMapping
    //ModulePage Mapping
    //==================
 
-   CreateMap<ModulePagesDto,ModulePage> ( ).ReverseMap ( );
-   CreateMap<ModulePagesDtowithModule, ModulePage> ( ).ReverseMap ( );
+   CreateMap<ModulePagesDto,SubModulePages> ( ).ReverseMap ( );
+   CreateMap<ModulePagesDtowithModule, SubModulePages> ( ).ReverseMap ( );
 
 
   }

@@ -53,10 +53,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="HR.Localization\HR.Localization.csproj" />
     <ProjectReference Include="HR.Application\HR.Application.csproj" />
     <ProjectReference Include="HR.Domain\HR.Domain.csproj" />
     <ProjectReference Include="HR.Infrastructure\HR.Infrastructure.csproj" />
+    <ProjectReference Include="HR.Localization\HR.Localization.csproj" />
   </ItemGroup>
 
 </Project>

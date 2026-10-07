@@ -44,8 +44,8 @@ namespace HR.Infrastructure.Context
             modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserTokens", "Auth");
             modelBuilder.Entity<Permission> ( ).ToTable ( "Permissions", "Auth" );
             modelBuilder.Entity<Module>().ToTable ( "Modules", "Auth" );
-            modelBuilder.Entity<ModulePage> ( ).ToTable ( "ModulePages", "Auth" );
-            modelBuilder.Entity<RolePagePermission> ( ).ToTable ( "RolePagePermissions", "Auth" );
+            modelBuilder.Entity<SubModulePages> ( ).ToTable ( "ModulePages", "Auth" );
+            modelBuilder.Entity<Role_Page_Permissions> ( ).ToTable ( "RolePagePermissions", "Auth" );
             modelBuilder.Entity<UserPagePermission> ( ).ToTable ( "UserPagePermissions", "Auth" );
 
 

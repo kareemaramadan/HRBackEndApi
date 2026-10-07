@@ -6,7 +6,7 @@ using System.Text;
 
 namespace HR.Application.Dtos.AuthDtos
 {
- public class ModulePagesDtowithModule (ModulePage mp , string language)
+ public class ModulePagesDtowithModule (SubModulePages mp , string language)
  {
   public int ModuleId { get; set; } = mp.ModuleId;
   public string ModuleName { get; set; } = language == "en" ? mp.Modules!.ModuleName_en : mp.Modules!.ModuleName_ar;

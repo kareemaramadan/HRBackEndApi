@@ -10,7 +10,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
 {
  [Route ("api/[controller]")]
  [ApiController]
- public class ModulePagesController ( IBaseService<ModulePage> ModulePagesService,IMapper mapper,ILocalizationService localization ) : ControllerBase
+ public class ModulePagesController ( IBaseService<SubModulePages> ModulePagesService,IMapper mapper,ILocalizationService localization ) : ControllerBase
  {
   /// <summary>
   /// Retrieves all module pages, including their associated module information, ordered by module name and page name.
@@ -56,7 +56,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
     Language=currentLanguage,
     Data=null
    };
-   ApiResponse<IEnumerable<ModulePage>> modulepages = await ModulePagesService.GetAllAsync ((mp => mp.Modules!=null&&(mp.Modules.ModuleId==moduleId)));
+   ApiResponse<IEnumerable<SubModulePages>> modulepages = await ModulePagesService.GetAllAsync ((mp => mp.Modules!=null&&(mp.Modules.ModuleId==moduleId)));
    if (!modulepages.Success)
    {
     response.Message=$"{localization.Get ("NoModulePagesfound")}'{moduleId}'";
@@ -87,8 +87,8 @@ namespace HRBackEndApi.Controllers.AuthControllers
     response.Message=localization.Get ("missingfields");
     return BadRequest (response);
    }
-   ModulePage modulePage = mapper.Map<ModulePage> (createModulePage);
-   ApiResponse<IEnumerable<ModulePage>> addedpage = await ModulePagesService.CreateAsyncAndGetAll (modulePage,mp => (mp.PageName_ar==createModulePage.PageName_ar||mp.PageName_en==createModulePage.PageName_en||mp.PageUrl==createModulePage.PageUrl),mp => mp.Modules!.ModuleId==createModulePage.ModuleId);
+   SubModulePages modulePage = mapper.Map<SubModulePages> (createModulePage);
+   ApiResponse<IEnumerable<SubModulePages>> addedpage = await ModulePagesService.CreateAsyncAndGetAll (modulePage,mp => (mp.PageName_ar==createModulePage.PageName_ar||mp.PageName_en==createModulePage.PageName_en||mp.PageUrl==createModulePage.PageUrl),mp => mp.Modules!.ModuleId==createModulePage.ModuleId);
    if (!addedpage.Success)
     return BadRequest (addedpage);
    return Created ("",mapper.Map<IEnumerable<ModulePagesDto>> (addedpage.Data));
@@ -114,9 +114,9 @@ namespace HRBackEndApi.Controllers.AuthControllers
     response.Message=localization.Get ("missingfields");
     return BadRequest (response);
    }
-   ModulePage modulePage = mapper.Map<ModulePage> (updateModulePage);
+   SubModulePages modulePage = mapper.Map<SubModulePages> (updateModulePage);
 
-   ApiResponse<IEnumerable<ModulePage>> updatedPage = await ModulePagesService.UpdateAsyncAndGetAll (modulePage,mp => (mp.PageName_ar==updateModulePage.PageName_ar||mp.PageName_en==updateModulePage.PageName_en||mp.PageUrl==updateModulePage.PageUrl),mp => mp.Modules!.ModuleId==modulePage.ModuleId);
+   ApiResponse<IEnumerable<SubModulePages>> updatedPage = await ModulePagesService.UpdateAsyncAndGetAll (modulePage,mp => (mp.PageName_ar==updateModulePage.PageName_ar||mp.PageName_en==updateModulePage.PageName_en||mp.PageUrl==updateModulePage.PageUrl),mp => mp.Modules!.ModuleId==modulePage.ModuleId);
    return (updatedPage.Success) ? Ok (mapper.Map<IEnumerable<ModulePagesDto>> (updatedPage.Data)) : BadRequest (updatedPage);
   }
   /// <summary>
@@ -139,7 +139,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
     response.Message=localization.Get ("missingfields");
     return BadRequest (response);
    }
-   ApiResponse<IEnumerable<ModulePage>> deletedPage = await ModulePagesService.DeleteAsyncAndGetAll (mp => ((mp.PageName_en==pageName||mp.PageName_ar==pageName)&&mp.ModuleId==moduleId),mp => mp.Modules!.ModuleId==moduleId);
+   ApiResponse<IEnumerable<SubModulePages>> deletedPage = await ModulePagesService.DeleteAsyncAndGetAll (mp => ((mp.PageName_en==pageName||mp.PageName_ar==pageName)&&mp.ModuleId==moduleId),mp => mp.Modules!.ModuleId==moduleId);
    if (!deletedPage.Success) return BadRequest (deletedPage);
 
    response.Data=mapper.Map<IEnumerable<ModulePagesDto>> (deletedPage.Data);
