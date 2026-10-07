@@ -21,7 +21,7 @@ namespace HR.Application.Dtos.AuthDtos
  {
 
   [Required]
-  public string RoleId { get; set; } = Guid.NewGuid ().ToString ();
+  public string? RoleId { get; set; }
   [Required]
   public int ModuleId { get; set; }
  }

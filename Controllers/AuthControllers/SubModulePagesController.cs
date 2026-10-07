@@ -10,7 +10,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
 {
  [Route ("api/[controller]")]
  [ApiController]
- public class ModulePagesController ( IBaseService<SubModulePages> ModulePagesService,IMapper mapper,ILocalizationService localization ) : ControllerBase
+ public class SubModulePagesController ( IBaseService<SubModulePages> ModulePagesService,IMapper mapper,ILocalizationService localization ) : ControllerBase
  {
   /// <summary>
   /// Retrieves all module pages, including their associated module information, ordered by module name and page name.
