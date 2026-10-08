@@ -21,7 +21,7 @@ namespace HR.Application.Mapping.AuthMapping
             //================
 
             CreateMap<RoleDto, AppRole>().ReverseMap();
-            CreateMap<CreateRoleDto, AppRole>();
+            CreateMap<CreateRoleDto, AppRole>().ReverseMap();
             CreateMap<UpdateRoleDto, AppRole>().ReverseMap();
 
             //Module Mapping
