@@ -13,7 +13,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
  public class SubModulePagesController ( IBaseService<SubModulePages> ModulePagesService,IMapper mapper,ILocalizationService localization ) : ControllerBase
  {
   /// <summary>
-  /// Retrieves all module pages, including their associated module information, ordered by module name and page name.
+  /// Retrieves all Submodule pages, including their associated Submodule information, ordered by Submodule name and page name.
   /// </summary>
   /// <remarks>
   /// Returns all module pages with localized submodule names. If no pages exist returns an empty list.
@@ -24,8 +24,8 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// { "success": true, "data": [ { "SubModuleId": 5, "SubModuleName": "Payroll", "PageId": 1, "PageName_en": "Overview" } ], "message": "Allmodulepagesretrieved" }
   /// </example>
   /// <returns>ApiResponse with SubModulePagesDtowithModule collection.</returns>
-  [HttpGet ("GetALLModulesPages")]
-  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDtowithModule>>>> ReadAllPagesAsync ( )
+  [HttpGet ("GetALLSubModulePages")]
+  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDtowithModule>>>> GetAllSubModulePagesAsync ( )
   {
    string currentLanguage = localization.GetLanguage ();
    ApiResponse<IEnumerable<SubModulePagesDtowithModule>> response = new ()
@@ -51,10 +51,10 @@ namespace HRBackEndApi.Controllers.AuthControllers
    return Ok (response);
   }
   /// <summary>
-  /// Retrieves module pages by module ID, including their associated module information, ordered by page name.
+  /// Retrieves Submodule pages by Submodule ID, including their associated Submodule information, ordered by page name.
   /// </summary>
   /// <remarks>
-  /// Returns pages for the provided module id. If no pages are found returns NotFound (404).
+  /// Returns pages for the provided Submodule id. If no pages are found returns NotFound (404).
   /// </remarks>
   /// <example>
   /// GET /api/SubModulePages/GetModulePagesByModuleId/5
@@ -64,8 +64,8 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// { "success": false, "message": "NoModulePagesfound'5'" }
   /// </example>
   /// <returns>ApiResponse with SubModulePagesDto collection.</returns>
-  [HttpGet ("GetModulePagesByModuleId/{moduleId}")]
-  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> ReadModulePagesByModuleIdAsync ( int moduleId )
+  [HttpGet ("GetSubModulePagesBySubModuleId/{submoduleId}")]
+  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> ReadSubModulePagesBySubModuleIdAsync ( int submoduleId )
   {
    string currentLanguage = localization.GetLanguage ();
    ApiResponse<IEnumerable<SubModulePagesDto>> response = new ()
@@ -74,32 +74,32 @@ namespace HRBackEndApi.Controllers.AuthControllers
     Language=currentLanguage,
     Data=null
    };
-   ApiResponse<IEnumerable<SubModulePages>> modulepages = await ModulePagesService.GetAllAsync ((mp => mp.SubModule!=null&&(mp.SubModule.SubModuleId==moduleId)));
-   if (!modulepages.Success)
+   ApiResponse<IEnumerable<SubModulePages>> submodulepages = await ModulePagesService.GetAllAsync ((mp => mp.SubModule!=null&&(mp.SubModule.SubModuleId==submoduleId)));
+   if (!submodulepages.Success)
    {
-    response.Message=$"{localization.Get ("NoModulePagesfound")}'{moduleId}'";
+    response.Message=$"{localization.Get ("NoPagesfound")}'{submoduleId}'";
     return NotFound (response);
    }
-   response.Message=localization.Get ("modulepagesretrieved");
-   response.Data=mapper.Map<IEnumerable<SubModulePagesDto>> (modulepages.Data);
+   response.Message=localization.Get ("submodulepagesretrieved");
+   response.Data=mapper.Map<IEnumerable<SubModulePagesDto>> (submodulepages.Data);
    response.Success=true;
    return Ok (response);
   }
   /// <summary>
-  /// Adds a new page to a module, ensuring that the page name and URL are unique within the module, and returns the all pages information for the specified module ID.
+  /// Adds a new page to a Submodule, ensuring that the page name and URL are unique within the Submodule, and returns the all pages information for the specified Submodule ID.
   /// </summary>
   /// <remarks>
-  /// Creates a new page and returns Created (201) with all pages for the module. Validation errors return BadRequest (400).
+  /// Creates a new page and returns Created (201) with all pages for the Submodule. Validation errors return BadRequest (400).
   /// </remarks>
   /// <example>
-  /// POST /api/SubModulePages/AddPageToModule
+  /// POST /api/SubModulePages/AddPageToSubModule
   /// { "SubModuleId": 5, "PageName_en": "Overview", "PageUrl": "/payroll/overview" }
   /// // Success (201)
   /// [ { "PageId": 10, "PageName_en": "Overview", "PageUrl": "/payroll/overview" } ]
   /// </example>
-  /// <returns>ApiResponse with created and all pages for the module id.</returns>
-  [HttpPost ("AddPageToModule")]
-  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> AddPageToModuleAsync ( [FromBody] SubModulePagesDto createModulePage )
+  /// <returns>ApiResponse with created and all pages for the Submodule id.</returns>
+  [HttpPost ("AddPageToSubModule")]
+  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> AddPageToSubModuleAsync ( [FromBody] SubModulePagesDto createSubModulePage )
   {
    ApiResponse<IEnumerable<SubModulePagesDto>> response = new ()
    {
@@ -112,25 +112,25 @@ namespace HRBackEndApi.Controllers.AuthControllers
     response.Message=localization.Get ("missingfields");
     return BadRequest (response);
    }
-   SubModulePages modulePage = mapper.Map<SubModulePages> (createModulePage);
-   ApiResponse<IEnumerable<SubModulePages>> addedpage = await ModulePagesService.CreateAsyncAndGetAll (modulePage,mp => (mp.PageName_ar==createModulePage.PageName_ar||mp.PageName_en==createModulePage.PageName_en||mp.PageUrl==createModulePage.PageUrl),mp => mp.SubModule!.SubModuleId==createModulePage.SubModuleId);
+   SubModulePages modulePage = mapper.Map<SubModulePages> (createSubModulePage);
+   ApiResponse<IEnumerable<SubModulePages>> addedpage = await ModulePagesService.CreateAsyncAndGetAll (modulePage,mp => (mp.PageName_ar==createSubModulePage.PageName_ar||mp.PageName_en==createSubModulePage.PageName_en||mp.PageUrl==createSubModulePage.PageUrl),mp => mp.SubModule!.SubModuleId==createSubModulePage.SubModuleId);
    if (!addedpage.Success)
     return BadRequest (addedpage);
    return Created ("",mapper.Map<IEnumerable<SubModulePagesDto>> (addedpage.Data));
   }
   /// <summary> 
-  /// Updates an existing module page and returns the updated list of module pages.
+  /// Updates an existing Submodule page and returns the updated list of Submodule pages.
   /// </summary>
   /// <remarks>
   /// Updates the page metadata and returns the updated list. Validation errors will return BadRequest.
   /// </remarks>
   /// <example>
-  /// PUT /api/SubModulePages/UpdateModulePage
+  /// PUT /api/SubModulePages/UpdateSubModulePage
   /// { "SubModuleId": 5, "PageId": 10, "PageName_en": "Overview Updated", "PageUrl": "/payroll/overview" }
   /// </example>
   /// <returns>ApiResponse with updated SubModulePagesDto collection.</returns>
-  [HttpPut ("UpdateModulePage")]
-  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> UpdateModulePageAsync ( [FromBody] SubModulePagesDto updateModulePage )
+  [HttpPut ("UpdateSubModulePage")]
+  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> UpdateModulePageAsync ( [FromBody] SubModulePagesDto updateSubModulePage )
   {
    ApiResponse<IEnumerable<SubModulePagesDto>> response = new ()
    {
@@ -144,18 +144,18 @@ namespace HRBackEndApi.Controllers.AuthControllers
     response.Message=localization.Get ("missingfields");
     return BadRequest (response);
    }
-   SubModulePages modulePage = mapper.Map<SubModulePages> (updateModulePage);
+   SubModulePages modulePage = mapper.Map<SubModulePages> (updateSubModulePage);
 
-   ApiResponse<IEnumerable<SubModulePages>> updatedPage = await ModulePagesService.UpdateAsyncAndGetAll (modulePage,mp => (mp.PageName_ar==updateModulePage.PageName_ar||mp.PageName_en==updateModulePage.PageName_en||mp.PageUrl==updateModulePage.PageUrl),mp => mp.SubModule!.SubModuleId==modulePage.SubModuleId);
+   ApiResponse<IEnumerable<SubModulePages>> updatedPage = await ModulePagesService.UpdateAsyncAndGetAll (modulePage,mp => (mp.PageName_ar==updateSubModulePage.PageName_ar||mp.PageName_en==updateSubModulePage.PageName_en||mp.PageUrl==updateSubModulePage.PageUrl),mp => mp.SubModule!.SubModuleId==modulePage.SubModuleId);
    return (updatedPage.Success) ? Ok (mapper.Map<IEnumerable<SubModulePagesDto>> (updatedPage.Data)) : BadRequest (updatedPage);
   }
   /// <summary>
-  /// Deletes a module page by its name and module ID, returning the result of the deletion operation, along with the updated list of module pages for the specified module ID.
+  /// Deletes a Submodule page by its name and Submodule ID, returning the result of the deletion operation, along with the updated list of Submodule pages for the specified Submodule ID.
   /// </summary>
   /// <param name="pageName"></param>
-  /// <param name="moduleId"></param>
-  [HttpDelete ("DeleteModulePage/{pageName}/{moduleId}")]
-  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> DeleteModulePageAsync ( string pageName,int moduleId )
+  /// <param name="submoduleId"></param>
+  [HttpDelete ("DeleteSubModulePage/{pageName}/{submoduleId}")]
+  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> DeleteModulePageAsync ( string pageName,int submoduleId )
   {
    ApiResponse<IEnumerable<SubModulePagesDto>> response = new ()
    {
@@ -169,7 +169,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
     response.Message=localization.Get ("missingfields");
     return BadRequest (response);
    }
-   ApiResponse<IEnumerable<SubModulePages>> deletedPage = await ModulePagesService.DeleteAsyncAndGetAll (mp => ((mp.PageName_en==pageName||mp.PageName_ar==pageName)&&mp.SubModuleId==moduleId),mp => mp.SubModule!.SubModuleId==moduleId);
+   ApiResponse<IEnumerable<SubModulePages>> deletedPage = await ModulePagesService.DeleteAsyncAndGetAll (mp => ((mp.PageName_en==pageName||mp.PageName_ar==pageName)&&mp.SubModuleId==submoduleId),mp => mp.SubModule!.SubModuleId==submoduleId);
    if (!deletedPage.Success) return BadRequest (deletedPage);
 
    response.Data=mapper.Map<IEnumerable<SubModulePagesDto>> (deletedPage.Data);

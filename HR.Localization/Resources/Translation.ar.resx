@@ -315,16 +315,16 @@
   <data name="ModulesNotFound" xml:space="preserve">
     <value>No modules are found</value>
   </data>
-  <data name="ModulePagesFound" xml:space="preserve">
+  <data name="SubModulePagesFound" xml:space="preserve">
     <value>Module Pages are retrieved Successfully.</value>
   </data>
   <data name="Allmodulepagesretrieved" xml:space="preserve">
     <value>All Modules Pages are retrieved succeffully</value>
   </data>
-  <data name="modulepagesretrieved" xml:space="preserve">
+  <data name="Submodulepagesretrieved" xml:space="preserve">
     <value>Module Pages are retrieved succeffully</value>
   </data>
-  <data name="NoModulePagesfound" xml:space="preserve">
+  <data name="NoPagesfound" xml:space="preserve">
     <value>No module pages found for module ID:</value>
   </data>
   <data name="modulepageDeleted" xml:space="preserve">
