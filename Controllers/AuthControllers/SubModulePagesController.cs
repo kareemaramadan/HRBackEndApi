@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using HR.Application.Dtos.AuthDtos;
+using HR.Application.Dtos.AppDtos;
 using HR.Application.Interfaces;
 using HR.Application.Response;
 using HR.Domain.Models.Authorization;
@@ -15,9 +15,15 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <summary>
   /// Retrieves all module pages, including their associated module information, ordered by module name and page name.
   /// </summary>
-  /// <returns>
-  /// A list of all module pages.
-  /// </returns>
+  /// <remarks>
+  /// Returns all module pages with localized submodule names. If no pages exist returns an empty list.
+  /// </remarks>
+  /// <example>
+  /// GET /api/SubModulePages/GetALLModulesPages
+  /// // Success (200)
+  /// { "success": true, "data": [ { "SubModuleId": 5, "SubModuleName": "Payroll", "PageId": 1, "PageName_en": "Overview" } ], "message": "Allmodulepagesretrieved" }
+  /// </example>
+  /// <returns>ApiResponse with SubModulePagesDtowithModule collection.</returns>
   [HttpGet ("GetALLModulesPages")]
   public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDtowithModule>>>> ReadAllPagesAsync ( )
   {
@@ -34,18 +40,30 @@ namespace HRBackEndApi.Controllers.AuthControllers
     response.Message=localization.Get ("ModulesNotFound");
     return NotFound (response);
    }
-   var orderedModulesPages = allModulesPages.Data?.Select (mp => new SubModulePagesDtowithModule (mp,currentLanguage)).ToList ().OrderBy (m => m.SubModuleName).ThenBy (m => m.PageName_en);
+   var orderedModulesPages = allModulesPages.Data?
+       .Select (mp => new SubModulePagesDtowithModule (mp,currentLanguage))
+       .OrderBy (m => m.SubModuleName)
+       .ThenBy (m => m.PageName_en)
+       .ToList ();
    response.Message=localization.Get ("Allmodulepagesretrieved");
-   response.Data=mapper.Map<IEnumerable<SubModulePagesDtowithModule>> (orderedModulesPages);
+   response.Data=orderedModulesPages;
    response.Success=true;
    return Ok (response);
   }
   /// <summary>
   /// Retrieves module pages by module ID, including their associated module information, ordered by page name.
   /// </summary>
-  /// <returns>
-  /// A list of module pages for the specified module ID.
-  /// </returns>
+  /// <remarks>
+  /// Returns pages for the provided module id. If no pages are found returns NotFound (404).
+  /// </remarks>
+  /// <example>
+  /// GET /api/SubModulePages/GetModulePagesByModuleId/5
+  /// // Success (200)
+  /// { "success": true, "data": [ { "PageId": 1, "PageName_en": "Overview" } ], "message": "modulepagesretrieved" }
+  /// // NotFound (404)
+  /// { "success": false, "message": "NoModulePagesfound'5'" }
+  /// </example>
+  /// <returns>ApiResponse with SubModulePagesDto collection.</returns>
   [HttpGet ("GetModulePagesByModuleId/{moduleId}")]
   public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> ReadModulePagesByModuleIdAsync ( int moduleId )
   {
@@ -70,9 +88,16 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <summary>
   /// Adds a new page to a module, ensuring that the page name and URL are unique within the module, and returns the all pages information for the specified module ID.
   /// </summary>
-  /// <returns>
-  /// A list of the createda and all module pages for the specified module ID.
-  /// </returns>
+  /// <remarks>
+  /// Creates a new page and returns Created (201) with all pages for the module. Validation errors return BadRequest (400).
+  /// </remarks>
+  /// <example>
+  /// POST /api/SubModulePages/AddPageToModule
+  /// { "SubModuleId": 5, "PageName_en": "Overview", "PageUrl": "/payroll/overview" }
+  /// // Success (201)
+  /// [ { "PageId": 10, "PageName_en": "Overview", "PageUrl": "/payroll/overview" } ]
+  /// </example>
+  /// <returns>ApiResponse with created and all pages for the module id.</returns>
   [HttpPost ("AddPageToModule")]
   public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> AddPageToModuleAsync ( [FromBody] SubModulePagesDto createModulePage )
   {
@@ -96,9 +121,14 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <summary> 
   /// Updates an existing module page and returns the updated list of module pages.
   /// </summary>
-  /// <returns>
-  /// A list of the updated module pages.
-  /// </returns>
+  /// <remarks>
+  /// Updates the page metadata and returns the updated list. Validation errors will return BadRequest.
+  /// </remarks>
+  /// <example>
+  /// PUT /api/SubModulePages/UpdateModulePage
+  /// { "SubModuleId": 5, "PageId": 10, "PageName_en": "Overview Updated", "PageUrl": "/payroll/overview" }
+  /// </example>
+  /// <returns>ApiResponse with updated SubModulePagesDto collection.</returns>
   [HttpPut ("UpdateModulePage")]
   public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> UpdateModulePageAsync ( [FromBody] SubModulePagesDto updateModulePage )
   {

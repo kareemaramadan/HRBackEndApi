@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using HR.Application.Dtos.AuthDtos;
+using HR.Application.Dtos.AppDtos;
 using HR.Application.Interfaces;
 using HR.Application.Response;
 using HR.Domain.Models.Authorization;

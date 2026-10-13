@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
-using HR.Application.Dtos.AuthDtos;
-using HR.Application.Helpers;
+using HR.Application.Dtos.AppDtos;
 using HR.Application.Interfaces;
 using HR.Application.Response;
 using HR.Domain.Models.Authorization;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -21,7 +19,14 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <summary>
   /// Get all Modules data in the system
   /// </summary>
-  /// <returns></returns>
+  /// <remarks>
+  /// Returns localized module names based on the current language provided by the localization service.
+  /// Use query parameters or headers to control localization if supported by the app.
+  /// </remarks>
+  /// <example>
+  /// GET /api/Modules/GetAllModules
+  /// </example>
+  /// <returns>A list of ModuleDto objects ordered by the localized module name.</returns>
   [HttpGet ("GetAllModules")]
   public async Task<ActionResult<ApiResponse<IEnumerable<ModuleDto>>>> GetAllModulesAsync ( )
   {
@@ -30,19 +35,26 @@ namespace HRBackEndApi.Controllers.AuthControllers
     return NotFound (items);
 
    IEnumerable<ModuleDto> modules = mapper.Map<IEnumerable<ModuleDto>> (items.Data);
+   var ordered = modules.OrderBy (m => (items.Language is "en" ? m.ModuleName_en : m.ModuleName_ar)).ToList ();
    return Ok (new ApiResponse<IEnumerable<ModuleDto>>
    {
     Success=true,
     Message=items.Message,
     Language=items.Language,
-    Data= [.. modules.OrderBy (m => (items.Language is "en" ? m.ModuleName_en : m.ModuleName_ar))]
+    Data=ordered
    });
   }
   /// <summary>
-  /// get module data by name
+  /// Get module data by its English or Arabic name.
   /// </summary>
-  /// <param name="moduleName"></param>
-  /// <returns></returns>
+  /// <remarks>
+  /// The endpoint looks up the module by either the English or Arabic name and returns the module DTO.
+  /// </remarks>
+  /// <example>
+  /// GET /api/Modules/GetModuleByName/Payroll
+  /// </example>
+  /// <param name="moduleName">Module name in English or Arabic.</param>
+  /// <returns>ModuleDto representing the requested module.</returns>
   [HttpGet ("GetModuleByName/{moduleName}")]
   public async Task<ActionResult<ApiResponse<ModuleDto>>> GetModuleByNameAsync ( string moduleName )
   {
@@ -60,15 +72,22 @@ namespace HRBackEndApi.Controllers.AuthControllers
    {
     Success=item.Success,
     Message=item.Message,
-    Data= mapper.Map<ModuleDto> (item.Data),
+    Data=mapper.Map<ModuleDto> (item.Data),
     Language=item.Language
    });
   }
   /// <summary>
   /// Add new Module to the system
   /// </summary>
-  /// <param name="newModule"></param>
-  /// <returns></returns>
+  /// <remarks>
+  /// Validates the incoming model then creates a new Module entity. Returns the updated list of modules on success.
+  /// </remarks>
+  /// <example>
+  /// POST /api/Modules/AddNewModule
+  /// { "ModuleName_en": "Payroll", "ModuleName_ar": "الرواتب" }
+  /// </example>
+  /// <param name="newModule">DTO containing the module details to create.</param>
+  /// <returns>ApiResponse with the current list of modules.</returns>
   [HttpPost ("AddNewModule")]
   public async Task<ActionResult<ApiResponse<IEnumerable<ModuleDto>>>> AddNewModuleAsync ( [FromBody] CreateModuleDto newModule )
   {
@@ -83,8 +102,8 @@ namespace HRBackEndApi.Controllers.AuthControllers
     });
    }
    Module moduleToCreate = mapper.Map<Module> (newModule);
-   ApiResponse<IEnumerable<Module>> createdModule = await moduleService.CreateAsyncAndGetAll(moduleToCreate,
-       m => (m.ModuleName_en == newModule.ModuleName_en || m.ModuleName_ar == newModule.ModuleName_ar), getAllCriteria: null);
+   ApiResponse<IEnumerable<Module>> createdModule = await moduleService.CreateAsyncAndGetAll (moduleToCreate,
+       m => (m.ModuleName_en==newModule.ModuleName_en||m.ModuleName_ar==newModule.ModuleName_ar),getAllCriteria: null);
 
    return (!createdModule.Success) ? BadRequest (createdModule) : Created ("",new ApiResponse<IEnumerable<ModuleDto>>
    {
@@ -97,8 +116,15 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <summary>
   /// Update module image and name
   /// </summary>
-  /// <param name="cUModule"></param>
-  /// <returns></returns>
+  /// <remarks>
+  /// Updates the module entity. If the image is not supplied, the existing image on the entity is preserved.
+  /// </remarks>
+  /// <example>
+  /// PUT /api/Modules/UpdateModule
+  /// { "ModuleId": 5, "ModuleName_en": "Payroll V2", "ModuleImage": null }
+  /// </example>
+  /// <param name="cUModule">ModuleDto containing updated properties.</param>
+  /// <returns>ApiResponse with the updated ModuleDto.</returns>
   [HttpPut ("UpdateModule")]
   public async Task<ActionResult<ApiResponse<ModuleDto>>> UpdateModuleAsync ( [FromBody] ModuleDto cUModule )
   {
@@ -117,8 +143,8 @@ namespace HRBackEndApi.Controllers.AuthControllers
 
    if (!item.Success) return NotFound (item);
 
-   cUModule.ModuleImage??=item.Data!.ModuleImage;
    Module moduleToUpdate = mapper.Map<Module> (cUModule);
+   moduleToUpdate.ModuleImage??=item.Data!.ModuleImage;
    var updatedModule = await moduleService.UpdateAsync (moduleToUpdate);
    return (!updatedModule.Success) ? BadRequest (updatedModule) : Ok (new ApiResponse<ModuleDto>
    {
@@ -131,8 +157,15 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <summary>
   /// Delete a module from the system
   /// </summary>
-  /// <param name="moduleName"></param>
-  /// <returns></returns>
+  /// <remarks>
+  /// Deletes a single module identified by its name.
+  /// Returns the number of rows affected.
+  /// </remarks>
+  /// <example>
+  /// DELETE /api/Modules/DeleteModule/Payroll
+  /// </example>
+  /// <param name="moduleName">The name of the module to delete (English or Arabic).</param>
+  /// <returns>ApiResponse with the number of rows removed.</returns>
   [HttpDelete ("DeleteModule/{moduleName}")]
   public async Task<ActionResult<ApiResponse<int>>> DeleteModuleAsync ( string moduleName )
   {
@@ -157,7 +190,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
   [HttpDelete ("DeleteBulkOfModules/{moduleNames}")]
   public async Task<ActionResult<ApiResponse<int>>> DeleteBulkModulesAsync ( string moduleNames )
   {
-   string [ ] deletedmodules= moduleNames.Split (',');
+   string [ ] deletedmodules = moduleNames.Split (',');
    int count = deletedmodules.Length;
    int deletedrowsAffected = 0;
    foreach (var moduleName in deletedmodules)

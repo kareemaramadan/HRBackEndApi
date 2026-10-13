@@ -13,15 +13,19 @@
     <Compile Remove="HR.Application\**" />
     <Compile Remove="HR.Domain\**" />
     <Compile Remove="HR.Infrastructure\**" />
+    <Compile Remove="HR.Localization\**" />
     <Content Remove="HR.Application\**" />
     <Content Remove="HR.Domain\**" />
     <Content Remove="HR.Infrastructure\**" />
+    <Content Remove="HR.Localization\**" />
     <EmbeddedResource Remove="HR.Application\**" />
     <EmbeddedResource Remove="HR.Domain\**" />
     <EmbeddedResource Remove="HR.Infrastructure\**" />
+    <EmbeddedResource Remove="HR.Localization\**" />
     <None Remove="HR.Application\**" />
     <None Remove="HR.Domain\**" />
     <None Remove="HR.Infrastructure\**" />
+    <None Remove="HR.Localization\**" />
   </ItemGroup>
 
   <ItemGroup>

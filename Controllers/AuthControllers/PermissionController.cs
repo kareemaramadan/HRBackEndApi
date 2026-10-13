@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using HR.Application.Dtos.AuthDtos;
+using HR.Application.Dtos.AppDtos;
 using HR.Application.Interfaces;
 using HR.Application.Response;
 using HR.Domain.Models.Authorization;
@@ -18,9 +18,12 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <summary>
   /// Get All Permissions in the system.
   /// </summary>
-  /// <returns>
-  /// 
-  /// </returns>
+  /// <remarks>
+  /// Returns all permissions; results are ordered by permission name.
+  /// </remarks>
+  /// <example>
+  /// GET /api/Permission/GetAllPermissions
+  /// </example>
   [HttpGet ("GetAllPermissions")]
   public async Task<ActionResult<ApiResponse<IEnumerable<PermissionDto>>>> GetAllPermissionsAsync ( )
   {
@@ -29,11 +32,12 @@ namespace HRBackEndApi.Controllers.AuthControllers
     return NotFound (permissions);
 
    IEnumerable<PermissionDto> getPermissions = mapper.Map<IEnumerable<PermissionDto>> (permissions.Data);
+   var ordered = getPermissions.OrderBy (p => p.PermissionName).ToList ();
    return Ok (new ApiResponse<IEnumerable<PermissionDto>>
    {
     Success=true,
     Message=permissions.Message,
-    Data= [.. getPermissions.OrderBy (p => p.PermissionName)],
+    Data=ordered,
     Language=permissions.Language
    });
   }
@@ -86,7 +90,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
     });
    }
 
-   createPermission.PermissionName=char.ToUpper (createPermission.PermissionName [0])+createPermission.PermissionName [1..];
+   createPermission.PermissionName=char.ToUpper (createPermission.PermissionName! [0])+createPermission.PermissionName [1..];
    ApiResponse<bool> isExist = await PermissionService.IsExistAsync (p => p.PermissionName==createPermission.PermissionName);
    if (isExist.Success)
     return BadRequest (new ApiResponse<object>
@@ -201,7 +205,8 @@ namespace HRBackEndApi.Controllers.AuthControllers
 
    response.Success=true;
    response.Message=$"{deletedrowsAffected} {localization.Get ("itemsdeleted")} ";
-   response.Data=mapper.Map<IEnumerable<PermissionDto>> (PermissionService.GetAllAsync ());
+   ApiResponse<IEnumerable<Permission>> allPermissions = await PermissionService.GetAllAsync ();
+   response.Data=mapper.Map<IEnumerable<PermissionDto>> (allPermissions.Data);
    return Ok (response);
 
   }

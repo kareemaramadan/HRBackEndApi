@@ -1,11 +1,8 @@
-﻿using HR.Application.Helpers;
-using HR.Application.Interfaces;
-using HR.Domain.Models;
+﻿using HR.Application.Interfaces;
 using HR.Infrastructure.Context;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
@@ -40,28 +37,28 @@ namespace HR.Infrastructure.Repository
   {
    return await dbSet.CountAsync (criteria);
   }
-  public async Task<int> CUDUsingStoredProcedureAsync(string spName, Dictionary<string, object> parameters)
+  public async Task<int> CUDUsingStoredProcedureAsync ( string spName,Dictionary<string,object> parameters )
   {
-   SqlParameter[] sqlParameters = parameters.Select(
-       p => new SqlParameter(p.Key.StartsWith('@') ? p.Key : $"@{p.Key}", p.Value ?? DBNull.Value)).ToArray();
-   string parameterNames = string.Join(", ", sqlParameters.Select(p => p.ParameterName));
+   SqlParameter [ ] sqlParameters = parameters.Select (
+       p => new SqlParameter (p.Key.StartsWith ('@') ? p.Key : $"@{p.Key}",p.Value??DBNull.Value)).ToArray ();
+   string parameterNames = string.Join (", ",sqlParameters.Select (p => p.ParameterName));
 
    int parametersCount = sqlParameters.Length;
    string sqlQuery = string.Empty;
-   if (parametersCount > 0)
+   if (parametersCount>0)
    {
-    sqlQuery = $"EXEC {spName} {parameterNames}";
+    sqlQuery=$"EXEC {spName} {parameterNames}";
    }
    else
    {
-    sqlQuery = $"EXEC {spName}";
+    sqlQuery=$"EXEC {spName}";
    }
 
-   FormattableString interpolatedQuery = FormattableStringFactory.Create(sqlQuery, sqlParameters);
+   FormattableString interpolatedQuery = FormattableStringFactory.Create (sqlQuery,sqlParameters);
 
-   return await dbContext.Database.ExecuteSqlAsync(interpolatedQuery);
+   return await dbContext.Database.ExecuteSqlAsync (interpolatedQuery);
   }
- 
+
 
   public async Task<IEnumerable<T>> GetUsingStoredProcedureAsync ( string spName,Dictionary<string,object> parameters )
   {
@@ -108,8 +105,8 @@ namespace HR.Infrastructure.Repository
 
   public async Task<T> FindItemAsync ( Expression<Func<T,bool>> criteria )
   {
-   T item = dbSet.Where (criteria).ToList ().First ();
-   return item;
+   var item = await dbSet.FirstOrDefaultAsync (criteria);
+   return item??throw new NotImplementedException ("the item is not found");
   }
 
   public async Task<IEnumerable<T>> GetAllAsync ( )
@@ -123,22 +120,22 @@ namespace HR.Infrastructure.Repository
    return await query.ToListAsync ();
   }
 
-  public async Task<IEnumerable<T>> GetAllAsync (Expression<Func<T, bool>>? filter = null,
-        Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null)
+  public async Task<IEnumerable<T>> GetAllAsync ( Expression<Func<T,bool>>? filter = null,
+        Func<IQueryable<T>,IIncludableQueryable<T,object>>? include = null )
   {
    IQueryable<T> query = dbSet;
 
-   if (include != null)
+   if (include!=null)
    {
-    query = include(query);
+    query=include (query);
    }
 
-   if (filter != null)
+   if (filter!=null)
    {
-    query = query.Where(filter);
+    query=query.Where (filter);
    }
 
-   return await query.ToListAsync();
+   return await query.ToListAsync ();
   }
 
   public async Task<T> UpdateAsync ( T entity,Expression<Func<T,bool>> criteria )
