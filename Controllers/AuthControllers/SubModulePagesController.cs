@@ -43,7 +43,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
    var orderedModulesPages = allModulesPages.Data?
        .Select (mp => new SubModulePagesDtowithModule (mp,currentLanguage))
        .OrderBy (m => m.SubModuleName)
-       .ThenBy (m => m.PageName_en)
+       .ThenBy (m => m.ListModulePagesDto!.Select (m => m.PageName_en))
        .ToList ();
    response.Message=localization.Get ("Allmodulepagesretrieved");
    response.Data=orderedModulesPages;

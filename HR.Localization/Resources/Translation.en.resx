@@ -135,6 +135,9 @@
   <data name="itemNotFound" xml:space="preserve">
     <value>item was not found.</value>
   </data>
+  <data name="PermissionNotFound" xml:space="preserve">
+    <value>permission was not found.</value>
+  </data>
   <data name="itemRetrieved" xml:space="preserve">
     <value>item retrieved successfully</value>
   </data>

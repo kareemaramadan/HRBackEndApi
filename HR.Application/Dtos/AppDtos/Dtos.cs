@@ -192,10 +192,10 @@ namespace HR.Application.Dtos.AppDtos
   //public string PageName_ar { get; set; } = mp.PageName_ar;
   ///// <summary>Page route/URL.</summary>
   //public string PageUrl { get; set; } = mp.PageUrl;
-  public List<SubModulePagesDto>? SubModulePagesDto { get; set; } = [ ];
+  public List<SubModulePagesDto>? ListModulePagesDto { get; set; } = [ ];
  }
  /// <summary>DTO for submodule page CRUD operations.</summary>
- public record SubModulePagesDto ( int PageId,string PageName_en,string PageName_ar,string PageUrl );
+ public record SubModulePagesDto ( int SubModuleId,int PageId,string PageName_en,string PageName_ar,string PageUrl );
 
  //ModuleSubModules
  //=================
@@ -230,13 +230,16 @@ namespace HR.Application.Dtos.AppDtos
   /// <summary>Role display name.</summary>
   public string? RoleName { get; set; } = rms.Role!.Name;
   /// <summary>Module identifier.</summary>
-  public int ModuleID = rms.ModuleId;
-  /// <summary>Localized module name.</summary>
-  public string ModuleName { get; set; } = language=="en" ? rms.Module!.ModuleName_en : rms.Module!.ModuleName_ar;
-  /// <summary>Submodule identifier.</summary>
-  public int subModuleID = rms.SubModuleId;
-  /// <summary>Localized submodule name.</summary>
-  public string? SubModuleName { get; set; } = language=="en" ? rms.SubModule!.SubModuleName_en : rms.SubModule!.SubModuleName_ar;
+  //public int ModuleID = rms.ModuleId;
+  ///// <summary>Localized module name.</summary>
+  //public string ModuleName { get; set; } = language=="en" ? rms.Module!.ModuleName_en : rms.Module!.ModuleName_ar;
+  ///// <summary>Submodule identifier.</summary>
+  //public int subModuleID = rms.SubModuleId;
+  ///// <summary>Localized submodule name.</summary>
+  //public string? SubModuleName { get; set; } = language=="en" ? rms.SubModule!.SubModuleName_en : rms.SubModule!.SubModuleName_ar;
+
+  public GetModule_SubModulesDto? GetModule_SubModulesDto { get; set; }
+
 
  }
  /// <summary>Request to assign or remove a submodule to/from a role.</summary>
@@ -260,7 +263,7 @@ namespace HR.Application.Dtos.AppDtos
   public string? SubModuleName { get; set; } = language=="en" ? rsp.SubModulePage!.SubModule!.SubModuleName_en : rsp.SubModulePage!.SubModule!.SubModuleName_ar;
 
   ///// <summary>Page details</summary>
-  public List<SubModulePagesDto>? SubModulePagesdto { get; set; } = [ ];
+  public List<SubModulePagesDto>? ListSubModulePagesdto { get; set; } = [ ];
  }
  public record Assign_Remove_PageToRole ( string RoleId,int PageId );
 

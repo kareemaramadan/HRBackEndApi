@@ -135,6 +135,9 @@
   <data name="itemNotFound" xml:space="preserve">
     <value>العنصر غير موجود</value>
   </data>
+  <data name="PermissionNotFound" xml:space="preserve">
+    <value>الصلاحية غير موجود</value>
+  </data>
   <data name="itemRetrieved" xml:space="preserve">
     <value>تم استرجاع العنصر المطلوب بنجاح</value>
   </data>

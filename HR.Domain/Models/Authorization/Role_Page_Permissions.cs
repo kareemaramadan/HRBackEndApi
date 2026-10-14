@@ -7,6 +7,7 @@ namespace HR.Domain.Models.Authorization
   public string RoleId { get; set; } = Guid.NewGuid ().ToString ();
   public int PageId { get; set; }
   public int PermissionId { get; set; }
+  public bool IsAllowed { get; set; }
 
 
   public virtual AppRole? Role { get; set; }
