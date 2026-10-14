@@ -26,7 +26,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <param name="roleId">The identifier of the role to query.</param>
   /// <returns>An ApiResponse containing the collection of GetRoleSubModules for the role.</returns>
   [HttpGet (template: "GetAllSubModulesForRole/{RoleId}")]
-  public async Task<ActionResult<ApiResponse<IEnumerable<GetRoleSubModules>>>> GetSubModulesForModuleAsync ( string roleId )
+  public async Task<ActionResult<ApiResponse<IEnumerable<GetRoleSubModules>>>> GetAllSubModulesForRoleAsync ( string roleId )
   {
 
    ApiResponse<IEnumerable<GetRoleSubModules>> response = new ()
@@ -51,12 +51,10 @@ namespace HRBackEndApi.Controllers.AuthControllers
    response.Message=roleSubmodules.Message;
    response.Success=roleSubmodules.Success;
 
-   response.Data=roleSubmodules.Data!.Select (msm => new GetRoleSubModules (msm,response.Language)).ToList ();
+   response.Data= [.. roleSubmodules.Data!.Select (msm => new GetRoleSubModules (msm,response.Language))];
    return Ok (response);
 
   }
-
-
   /// <summary>
   /// Assigns a submodule to a role. Returns the updated list of role-submodule assignments.
   /// </summary>
@@ -91,13 +89,12 @@ namespace HRBackEndApi.Controllers.AuthControllers
       );
 
    if (!createdItem.Success) { return BadRequest (createdItem); }
-   List<GetRoleSubModules> getfullcreateddata = createdItem.Data!.Select (rsm => new GetRoleSubModules (rsm,createdItem.Language)).ToList ();
+   List<GetRoleSubModules> getfullcreateddata = [.. createdItem.Data!.Select (rsm => new GetRoleSubModules (rsm,createdItem.Language))];
    response.Success=true;
    response.Message=createdItem.Message;
    response.Data=getfullcreateddata;
    return Ok (response);
   }
-
   /// <summary>
   /// Removes a submodule from a role and returns the updated assignments.
   /// </summary>
@@ -133,7 +130,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
       );
 
    if (!deletedItem.Success) { return BadRequest (deletedItem); }
-   List<GetRoleSubModules> getfullcreateddata = deletedItem.Data!.Select (rsm => new GetRoleSubModules (rsm,deletedItem.Language)).ToList ();
+   List<GetRoleSubModules> getfullcreateddata = [.. deletedItem.Data!.Select (rsm => new GetRoleSubModules (rsm,deletedItem.Language))];
    response.Success=true;
    response.Message=deletedItem.Message;
    response.Data=getfullcreateddata;

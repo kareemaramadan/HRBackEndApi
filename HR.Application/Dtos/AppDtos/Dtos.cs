@@ -177,22 +177,25 @@ namespace HR.Application.Dtos.AppDtos
  /// <summary>DTO representing a submodule page along with its parent submodule's localized name.</summary>
  public class SubModulePagesDtowithModule ( SubModulePages mp,string language )
  {
-  /// <summary>The parent submodule identifier.</summary>
+  /// <summary>The parent submodule identifier.</summary> 
   public int SubModuleId { get; set; } = mp.SubModuleId;
   /// <summary>Localized submodule name.</summary>
   [Required]
   public string? SubModuleName { get; set; } = language=="en" ? mp.SubModule!.SubModuleName_en : mp.SubModule!.SubModuleName_ar;
+
+
   /// <summary>Page identifier.</summary>
-  public int? PageId { get; set; } = mp.PageId;
-  /// <summary>Page name in English.</summary>
-  public string PageName_en { get; set; } = mp.PageName_en;
-  /// <summary>Page name in Arabic.</summary>
-  public string PageName_ar { get; set; } = mp.PageName_ar;
-  /// <summary>Page route/URL.</summary>
-  public string PageUrl { get; set; } = mp.PageUrl;
+  //public int? PageId { get; set; } = mp.PageId;
+  ///// <summary>Page name in English.</summary>
+  //public string PageName_en { get; set; } = mp.PageName_en;
+  ///// <summary>Page name in Arabic.</summary>
+  //public string PageName_ar { get; set; } = mp.PageName_ar;
+  ///// <summary>Page route/URL.</summary>
+  //public string PageUrl { get; set; } = mp.PageUrl;
+  public List<SubModulePagesDto>? SubModulePagesDto { get; set; } = [ ];
  }
  /// <summary>DTO for submodule page CRUD operations.</summary>
- public record SubModulePagesDto ( int SubModuleId,int PageId,string PageName_en,string PageName_ar,string PageUrl );
+ public record SubModulePagesDto ( int PageId,string PageName_en,string PageName_ar,string PageUrl );
 
  //ModuleSubModules
  //=================
@@ -237,7 +240,7 @@ namespace HR.Application.Dtos.AppDtos
 
  }
  /// <summary>Request to assign or remove a submodule to/from a role.</summary>
- public record Assign_Remove_SubModuleToRole ( int RoleId,int ModuleId,int SubModuleId );
+ public record Assign_Remove_SubModuleToRole ( string RoleId,int ModuleId,int SubModuleId );
  /// <example>
  /// { "RoleId": 3, "ModuleId": 1, "SubModuleId": 5 }
  /// </example>
@@ -252,13 +255,14 @@ namespace HR.Application.Dtos.AppDtos
   /// <summary>Role display name.</summary>
   public string? RoleName { get; set; } = rsp.Role!.Name;
   /// <summary>subModule identifier.</summary>
-  public int SubModuleID = rsp.SubModulePage!.SubModuleId;
+  public int SubModuleId { get; set; }
   /// <summary>Localized submodule name.</summary>
   public string? SubModuleName { get; set; } = language=="en" ? rsp.SubModulePage!.SubModule!.SubModuleName_en : rsp.SubModulePage!.SubModule!.SubModuleName_ar;
-  /// <summary>Page identifier.</summary>
-  public int pageID = rsp.PageId;
-  /// <summary>Localized page name.</summary>
-  public string PageName { get; set; } = language=="en" ? rsp.SubModulePage.PageName_en : rsp.SubModulePage.PageName_ar;
+
+  ///// <summary>Page details</summary>
+  public List<SubModulePagesDto>? SubModulePagesdto { get; set; } = [ ];
  }
+ public record Assign_Remove_PageToRole ( string RoleId,int PageId );
+
 
 }
