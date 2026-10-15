@@ -59,8 +59,8 @@ namespace HR.Application.Mapping.AuthMapping
    //Role_SubModulePages Mapping
    //============================
 
-   CreateMap<Role_SubModulePages,GetRoleSubModulePages> ().ReverseMap ();
-   CreateMap<Role_SubModulePages,Assign_Remove_PageToRole> ().ReverseMap ();
+   //CreateMap<Role_SubModulePages,GetRoleSubModulePages> ().ReverseMap ();
+   //CreateMap<Role_SubModulePages,Assign_Remove_PageToRole> ().ReverseMap ();
 
   }
  }

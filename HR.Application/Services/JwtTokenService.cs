@@ -31,7 +31,9 @@ namespace HR.Application.Services
          new (ClaimTypes.Email, user.Email ?? string.Empty)
         };
             }
-
+            var securityStamp = await userManager.GetSecurityStampAsync(user);
+            if (!string.IsNullOrEmpty(securityStamp))
+                userClaims.Add(new Claim("SecurityStamp", securityStamp));
             var userRoles = await userManager.GetRolesAsync(user);
             var roleClaims = new List<Claim>();
             foreach (var role in userRoles)

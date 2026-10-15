@@ -10,7 +10,7 @@ namespace HR.Domain.Models.Identity
 
 
   public virtual ICollection<Role_Page_Permissions>? Role_Page_Permissions { get; set; }
-  public virtual ICollection<Role_SubModulePages>? Role_SubModulePages { get; set; }
+  //public virtual ICollection<Role_SubModulePages>? Role_SubModulePages { get; set; }
   public virtual ICollection<Role_SubModules>? Role_SubModules { get; set; }
  }
 }

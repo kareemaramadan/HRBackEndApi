@@ -174,7 +174,7 @@ namespace HRBackEndApi
             // Provide allowed origins via configuration "Cors:AllowedOrigins" as semicolon-separated values.
             // Example appsettings: "Cors": { "AllowedOrigins": "https://app.example.com;https://admin.example.com" }
             var allowedOriginsConfig = builder.Configuration.GetValue<string>("Cors:AllowedOrigins") ?? string.Empty;
-            var allowedOrigins = allowedOriginsConfig.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+            var allowedOrigins = allowedOriginsConfig.Split([';'], StringSplitOptions.RemoveEmptyEntries)
                                                      .Select(s => s.Trim())
                                                      .ToArray();
 
@@ -182,8 +182,11 @@ namespace HRBackEndApi
             {
                 options.AddPolicy("CorsPolicy", policy =>
                 {
-                          policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("*");
-                      });
+                    if (allowedOrigins.Length > 0)
+                        policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod();
+                    else
+                        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
             });
 
 
@@ -208,8 +211,9 @@ namespace HRBackEndApi
             builder.Services.AddScoped<IRoleService, RoleService>();
             // Register Localization service for Translation Layer between Languages
             builder.Services.AddScoped<ILocalizationService, LocalizationService>();
+            builder.Services.AddScoped<IAuthRelations, AuthRelations>();
 
-
+            builder.Services.AddResponseCompression();
 
 
 
@@ -222,7 +226,8 @@ namespace HRBackEndApi
             // If JwtOptions is required as a direct injectable type (not IOptions), register as singleton
             builder.Services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<JwtOptions>>().Value);
             // e.g. after AddScoped<IJwtTokenService,...>
-            builder.Services.AddSingleton<ITokenRevocationService,InMemoryTokenRevocationService>();
+            // register DB-backed revocation service (scoped)
+            //builder.Services.AddScoped<ITokenRevocationService, DbTokenRevocationService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
             builder.Services.AddAuthentication(options =>
             {
@@ -231,7 +236,7 @@ namespace HRBackEndApi
             }).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, o =>
             {
                 o.RequireHttpsMetadata = true;
-                o.SaveToken = true;
+                o.SaveToken = false;
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -331,10 +336,6 @@ namespace HRBackEndApi
 
             #region RegisterMappers
 
-            builder.Services.AddAutoMapper(m => { }, typeof(CityMappingProfile));
-            builder.Services.AddAutoMapper(m => { }, typeof(CountryMappingProfile));
-            builder.Services.AddAutoMapper(m => { }, typeof(CompanyMappingProfile));
-            builder.Services.AddAutoMapper(m => { }, typeof(GovernorateMappingProfile));
             builder.Services.AddAutoMapper(m => { }, typeof(AuthMappingProfile));
 
             #endregion
@@ -365,6 +366,8 @@ namespace HRBackEndApi
             // Enable HTTPS redirection
             //=========================
             app.UseHttpsRedirection();
+            app.UseResponseCompression();
+            app.UseMiddleware<SecurityHeadersMiddleware>();
             app.UseRouting();
 
 

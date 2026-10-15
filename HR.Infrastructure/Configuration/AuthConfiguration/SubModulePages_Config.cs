@@ -51,10 +51,10 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
        .HasForeignKey (p => p.SubModuleId)
        .OnDelete (DeleteBehavior.Restrict);
 
-   builder.HasMany (p => p.Role_SubModulePages)
-       .WithOne (rmp => rmp.SubModulePage)
-       .HasForeignKey (rmp => rmp.PageId)
-       .OnDelete (DeleteBehavior.Restrict);
+   //builder.HasMany (p => p.Role_SubModulePages)
+   //    .WithOne (rmp => rmp.SubModulePage)
+   //    .HasForeignKey (rmp => rmp.PageId)
+   //    .OnDelete (DeleteBehavior.Restrict);
 
   }
 

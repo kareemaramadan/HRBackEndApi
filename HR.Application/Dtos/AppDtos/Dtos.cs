@@ -251,20 +251,20 @@ namespace HR.Application.Dtos.AppDtos
  //RoleSubModulePages
  //===================
 
- public class GetRoleSubModulePages ( Role_SubModulePages rsp,string language )
- {
-  /// <summary>Role identifier as string.</summary>
-  public string? RoleId { get; set; }
-  /// <summary>Role display name.</summary>
-  public string? RoleName { get; set; } = rsp.Role!.Name;
-  /// <summary>subModule identifier.</summary>
-  public int SubModuleId { get; set; }
-  /// <summary>Localized submodule name.</summary>
-  public string? SubModuleName { get; set; } = language=="en" ? rsp.SubModulePage!.SubModule!.SubModuleName_en : rsp.SubModulePage!.SubModule!.SubModuleName_ar;
+ //public class GetRoleSubModulePages ( Role_SubModulePages rsp,string language )
+ //{
+ // /// <summary>Role identifier as string.</summary>
+ // public string? RoleId { get; set; }
+ // /// <summary>Role display name.</summary>
+ // public string? RoleName { get; set; } = rsp.Role!.Name;
+ // /// <summary>subModule identifier.</summary>
+ // public int SubModuleId { get; set; }
+ // /// <summary>Localized submodule name.</summary>
+ // public string? SubModuleName { get; set; } = language=="en" ? rsp.SubModulePage!.SubModule!.SubModuleName_en : rsp.SubModulePage!.SubModule!.SubModuleName_ar;
 
-  ///// <summary>Page details</summary>
-  public List<SubModulePagesDto>? ListSubModulePagesdto { get; set; } = [ ];
- }
+ // ///// <summary>Page details</summary>
+ // public List<SubModulePagesDto>? ListSubModulePagesdto { get; set; } = [ ];
+ //}
  public record Assign_Remove_PageToRole ( string RoleId,int PageId );
 
 

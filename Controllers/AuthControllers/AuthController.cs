@@ -1,6 +1,7 @@
 ﻿using HR.Application.Dtos.AppDtos;
 using HR.Application.Interfaces;
 using HR.Application.Response;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRBackEndApi.Controllers.AuthControllers
@@ -48,22 +49,23 @@ namespace HRBackEndApi.Controllers.AuthControllers
    ApiResponse<List<string>> result = await authService.GetAllUsersAsync ();
    return (!result.Success) ? BadRequest (result) : Ok (result);
   }
-  /// <summary>
-  /// Registers a new user in the system
-  /// </summary>
-  /// <remarks>
-  /// Creates a new user account. Returns Created (201) with AuthDto on success. If validation fails returns BadRequest with model errors.
-  /// </remarks>
-  /// <example>
-  /// POST /api/Auth/RegisterUser
-  /// { "Username": "jdoe", "FirstName": "John", "LastName": "Doe", "Email": "john@example.com", "Password": "P@ssw0rd" }
-  /// // Success (201)
-  /// { "success": true, "data": { "token": "...", "isAuthenticated": true }, "message": "" }
-  /// // Validation error (400)
-  /// { "success": false, "message": "validationerror", "data": { ... } }
-  /// </example>
-  /// <param name="register">Registration request body.</param>
-  /// <returns>ApiResponse containing AuthDto when registration succeeds.</returns>
+        /// <summary>
+        /// Registers a new user in the system
+        /// </summary>
+        /// <remarks>
+        /// Creates a new user account. Returns Created (201) with AuthDto on success. If validation fails returns BadRequest with model errors.
+        /// </remarks>
+        /// <example>
+        /// POST /api/Auth/RegisterUser
+        /// { "Username": "jdoe", "FirstName": "John", "LastName": "Doe", "Email": "john@example.com", "Password": "P@ssw0rd" }
+        /// // Success (201)
+        /// { "success": true, "data": { "token": "...", "isAuthenticated": true }, "message": "" }
+        /// // Validation error (400)
+        /// { "success": false, "message": "validationerror", "data": { ... } }
+        /// </example>
+        /// <param name="register">Registration request body.</param>
+        /// <returns>ApiResponse containing AuthDto when registration succeeds.</returns>
+        [AllowAnonymous]
   [HttpPost ("RegisterUser")]
   public async Task<ActionResult<ApiResponse<AuthDto>>> RegisterAsync ( [FromBody] RegisterDto register )
   {
@@ -80,22 +82,23 @@ namespace HRBackEndApi.Controllers.AuthControllers
    ApiResponse<AuthDto> result = await authService.RegisterAsync (register);
    return (!result.Success) ? BadRequest (result) : Created ("",result);
   }
-  /// <summary>
-  /// Logs in a user and returns an authentication token
-  /// </summary>
-  /// <remarks>
-  /// Returns an authentication token and user info when credentials are valid. Returns Unauthorized (401) on invalid credentials.
-  /// </remarks>
-  /// <example>
-  /// POST /api/Auth/Login
-  /// { "Username": "jdoe", "Password": "P@ssw0rd" }
-  /// // Success (200)
-  /// { "success": true, "data": { "token": "...", "isAuthenticated": true }, "message": "" }
-  /// // Unauthorized (401)
-  /// { "success": false, "message": "invalid credentials" }
-  /// </example>
-  /// <param name="login">Login request payload.</param>
-  /// <returns>ApiResponse with AuthDto when successful, 401 when credentials fail.</returns>
+        /// <summary>
+        /// Logs in a user and returns an authentication token
+        /// </summary>
+        /// <remarks>
+        /// Returns an authentication token and user info when credentials are valid. Returns Unauthorized (401) on invalid credentials.
+        /// </remarks>
+        /// <example>
+        /// POST /api/Auth/Login
+        /// { "Username": "jdoe", "Password": "P@ssw0rd" }
+        /// // Success (200)
+        /// { "success": true, "data": { "token": "...", "isAuthenticated": true }, "message": "" }
+        /// // Unauthorized (401)
+        /// { "success": false, "message": "invalid credentials" }
+        /// </example>
+        /// <param name="login">Login request payload.</param>
+        /// <returns>ApiResponse with AuthDto when successful, 401 when credentials fail.</returns>
+        [AllowAnonymous]
   [HttpPost ("Login")]
   public async Task<ActionResult<ApiResponse<AuthDto>>> Login ( [FromBody] LoginDto login )
   {
@@ -286,11 +289,35 @@ namespace HRBackEndApi.Controllers.AuthControllers
    ApiResponse<string> result = await authService.DeleteUserAccountAsync (username);
    return (!result.Success) ? BadRequest (result) : Ok (result);
   }
-  [HttpPost ("RevokeCurrentToken")]
-  public async Task<IActionResult> RevokeCurrentToken ( )
-  {
-   return Ok ();
-  }
+        [HttpPost("RevokeCurrentToken")]
+        public async Task<ActionResult<ApiResponse<string>>> RevokeCurrentToken()
+        {
+            var response = new ApiResponse<string> { Success = false, Language = localization.GetLanguage() };
+            var jti = User?.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti)?.Value;
+            if (string.IsNullOrEmpty(jti))
+            {
+                response.Message = localization.Get("missingfields");
+                return BadRequest(response);
+            }
 
- }
+            var revocationService = HttpContext.RequestServices.GetService<HR.Application.Interfaces.ITokenRevocationService>();
+            if (revocationService == null)
+            {
+                response.Message = "Revocation service unavailable";
+                return StatusCode(500, response);
+            }
+
+            var expClaim = User?.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Exp)?.Value;
+            DateTime? expiresAtUtc = null;
+            if (long.TryParse(expClaim, out var epoch))
+                expiresAtUtc = DateTimeOffset.FromUnixTimeSeconds(epoch).UtcDateTime;
+
+            await revocationService.RevokeAsync(jti, expiresAtUtc);
+            response.Success = true;
+            response.Message = localization.Get("itemcreated");
+            response.Data = jti;
+            return Ok(response);
+        }
+
+    }
 }

@@ -18,10 +18,10 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
        .HasForeignKey (up => up.RoleId)
        .OnDelete (DeleteBehavior.Restrict);
 
-   builder.HasMany (u => u.Role_SubModulePages)
-       .WithOne (up => up.Role)
-       .HasForeignKey (up => up.RoleId)
-       .OnDelete (DeleteBehavior.Restrict);
+   //builder.HasMany (u => u.Role_SubModulePages)
+   //    .WithOne (up => up.Role)
+   //    .HasForeignKey (up => up.RoleId)
+   //    .OnDelete (DeleteBehavior.Restrict);
 
 
 

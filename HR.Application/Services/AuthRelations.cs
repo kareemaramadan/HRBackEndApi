@@ -112,9 +112,9 @@ namespace HR.Application.Services
    AppUser? user = await userManager.FindByNameAsync (username);
    AppRole? role = await rolemanager.FindByIdAsync (roleId);
 
-   var getrolepagespermission = rolepagepermissionservice.GetAllAsync (rpp => rpp.RoleId==roleId);
+   var getrolepagespermission = await rolepagepermissionservice.GetAllAsync (rpp => rpp.RoleId==roleId);
 
-   var permissionPagesforRole = getrolepagespermission.Result.Data!;
+   var permissionPagesforRole = getrolepagespermission.Data!;
    foreach (var permission in permissionPagesforRole)
    {
     var rolepageId = permission.PageId;
@@ -145,9 +145,9 @@ namespace HR.Application.Services
    AppUser? user = await userManager.FindByNameAsync (username);
    AppRole? role = await rolemanager.FindByIdAsync (roleId);
 
-   var getrolepagespermission = rolepagepermissionservice.GetAllAsync (rpp => rpp.RoleId==roleId);
+   var getrolepagespermission = await rolepagepermissionservice.GetAllAsync (rpp => rpp.RoleId==roleId);
 
-   var permissionPagesforRole = getrolepagespermission.Result.Data!;
+   var permissionPagesforRole = getrolepagespermission.Data!;
 
 
    foreach (var permission in permissionPagesforRole)

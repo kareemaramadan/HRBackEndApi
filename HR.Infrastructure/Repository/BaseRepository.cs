@@ -99,41 +99,34 @@ namespace HR.Infrastructure.Repository
 
   public async Task<IEnumerable<T>> FindAsync ( Expression<Func<T,bool>> criteria )
   {
-   IQueryable<T> query = dbSet.Where (criteria);
+   IQueryable<T> query = dbSet.AsNoTracking().Where (criteria);
    return await query.ToListAsync ();
   }
 
   public async Task<T> FindItemAsync ( Expression<Func<T,bool>> criteria )
   {
-   var item = await dbSet.FirstOrDefaultAsync (criteria);
+   var item = await dbSet.AsNoTracking().FirstOrDefaultAsync (criteria);
    return item??throw new NotImplementedException ("the item is not found");
   }
 
   public async Task<IEnumerable<T>> GetAllAsync ( )
   {
-   return await dbSet.ToListAsync ();
+   return await dbSet.AsNoTracking().ToListAsync ();
   }
 
   public async Task<IEnumerable<T>> GetAllAsync ( Expression<Func<T,bool>> filter )
   {
-   IQueryable<T> query = dbSet.Where (filter);
+   IQueryable<T> query = dbSet.AsNoTracking().Where (filter);
    return await query.ToListAsync ();
   }
 
   public async Task<IEnumerable<T>> GetAllAsync ( Expression<Func<T,bool>>? filter = null,
         Func<IQueryable<T>,IIncludableQueryable<T,object>>? include = null )
   {
-   IQueryable<T> query = dbSet;
+   IQueryable<T> query = dbSet.AsNoTracking();
 
-   if (include!=null)
-   {
-    query=include (query);
-   }
-
-   if (filter!=null)
-   {
-    query=query.Where (filter);
-   }
+   if (include!=null) query=include (query);
+   if (filter!=null) query=query.Where (filter);
 
    return await query.ToListAsync ();
   }
