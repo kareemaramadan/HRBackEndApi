@@ -12,7 +12,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
 {
  [ApiController]
  [Route ("api/RoleSubModules")]
- public class RoleSubModulesController ( IBaseService<Role_SubModules> roleSubModulesService,IMapper mapper,ILocalizationService localization ) : ControllerBase
+ public class RoleSubModulesController ( IBaseService<Role_SubModules> roleSubModulesService,IMapper mapper,ILocalizationService localization,IAuthRelations authRelations ) : ControllerBase
  {
   /// <summary>
   /// Retrieves all submodules assigned to the specified role.
@@ -87,8 +87,10 @@ namespace HRBackEndApi.Controllers.AuthControllers
       getAllCriteria: (rsm => (rsm.RoleId==role_SubModules.RoleId&&rsm.ModuleId==role_SubModules.SubModuleId)),
       include: (query => query.Include (rsm => rsm.Role!).Include (rsm => rsm.Module!).Include (msm => msm.SubModule!))
       );
+   var authRelationaddsubmoduletorole = authRelations.AddSubModuleToRole (role_SubModules.RoleId,role_SubModules.ModuleId,role_SubModules.SubModuleId);
 
    if (!createdItem.Success) { return BadRequest (createdItem); }
+   if (!authRelationaddsubmoduletorole.Result.Success) { return BadRequest (authRelationaddsubmoduletorole); }
    List<GetRoleSubModules> getfullcreateddata = [.. createdItem.Data!.Select (rsm => new GetRoleSubModules (rsm,createdItem.Language))];
    response.Success=true;
    response.Message=createdItem.Message;
@@ -129,7 +131,10 @@ namespace HRBackEndApi.Controllers.AuthControllers
       include: (query => query.Include (rsm => rsm.Role!).Include (rsm => rsm.Module!).Include (msm => msm.SubModule!))
       );
 
+   var authrelationremovesubmodulefromrole = await authRelations.RemoveSubModuleFromRole (role_SubModules.RoleId,role_SubModules.ModuleId,role_SubModules.SubModuleId);
+
    if (!deletedItem.Success) { return BadRequest (deletedItem); }
+   if (!authrelationremovesubmodulefromrole.Success) { return BadRequest (authrelationremovesubmodulefromrole); }
    List<GetRoleSubModules> getfullcreateddata = [.. deletedItem.Data!.Select (rsm => new GetRoleSubModules (rsm,deletedItem.Language))];
    response.Success=true;
    response.Message=deletedItem.Message;

@@ -130,7 +130,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// </example>
   /// <returns>ApiResponse with updated SubModulePagesDto collection.</returns>
   [HttpPut ("UpdateSubModulePage")]
-  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> UpdateModulePageAsync ( [FromBody] SubModulePagesDto updateSubModulePage )
+  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> UpdateSubModulePageAsync ( [FromBody] SubModulePagesDto updateSubModulePage )
   {
    ApiResponse<IEnumerable<SubModulePagesDto>> response = new ()
    {
@@ -155,7 +155,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <param name="pageName"></param>
   /// <param name="submoduleId"></param>
   [HttpDelete ("DeleteSubModulePage/{pageName}/{submoduleId}")]
-  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> DeleteModulePageAsync ( string pageName,int submoduleId )
+  public async Task<ActionResult<ApiResponse<IEnumerable<SubModulePagesDto>>>> DeleteSubModulePageAsync ( string pageName,int submoduleId )
   {
    ApiResponse<IEnumerable<SubModulePagesDto>> response = new ()
    {

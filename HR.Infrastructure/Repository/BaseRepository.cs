@@ -39,8 +39,8 @@ namespace HR.Infrastructure.Repository
   }
   public async Task<int> CUDUsingStoredProcedureAsync ( string spName,Dictionary<string,object> parameters )
   {
-   SqlParameter [ ] sqlParameters = parameters.Select (
-       p => new SqlParameter (p.Key.StartsWith ('@') ? p.Key : $"@{p.Key}",p.Value??DBNull.Value)).ToArray ();
+   SqlParameter [ ] sqlParameters = [.. parameters.Select (
+       p => new SqlParameter (p.Key.StartsWith ('@') ? p.Key : $"@{p.Key}",p.Value??DBNull.Value))];
    string parameterNames = string.Join (", ",sqlParameters.Select (p => p.ParameterName));
 
    int parametersCount = sqlParameters.Length;
@@ -63,8 +63,8 @@ namespace HR.Infrastructure.Repository
   public async Task<IEnumerable<T>> GetUsingStoredProcedureAsync ( string spName,Dictionary<string,object> parameters )
   {
 
-   SqlParameter [ ] sqlParameters = parameters.Select (
-       p => new SqlParameter (p.Key.StartsWith ('@') ? p.Key : $"@{p.Key}",p.Value??DBNull.Value)).ToArray ();
+   SqlParameter [ ] sqlParameters = [.. parameters.Select (
+       p => new SqlParameter (p.Key.StartsWith ('@') ? p.Key : $"@{p.Key}",p.Value??DBNull.Value))];
 
    int parametersCount = sqlParameters.Length;
    string sqlQuery = string.Empty;

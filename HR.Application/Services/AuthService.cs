@@ -12,7 +12,7 @@ namespace HR.Application.Services
  /// <summary>
  /// Service for handling user authentication, registration, role management, and account status operations.
  /// </summary>
- public class AuthService ( UserManager<AppUser> userManager,RoleManager<AppRole> roleManager,
+ public class AuthService ( UserManager<AppUser> userManager,RoleManager<AppRole> roleManager,IAuthRelations authRelations,
      SignInManager<AppUser> signInManager,IMapper mapper,IJwtTokenService jwtTokenService,ILocalizationService localization ) : IAuthService
  {
   /// <summary>
@@ -268,6 +268,7 @@ namespace HR.Application.Services
      return response;
     }
     IdentityResult addResult = await userManager.AddToRoleAsync (user.Data!,role: role.Name!);
+
     if (!addResult.Succeeded)
     {
      response.Success=false;
@@ -275,9 +276,17 @@ namespace HR.Application.Services
      response.Data=null;
      return response;
     }
-    response.Success=true;
-    response.Message=localization.Get ("RoleAddedSuccessfully");
-    response.Data=await userManager.GetRolesAsync (user.Data);
+    var authRelationAdduserToRole = await authRelations.AddUserToRole (user.Data!.UserName!,role.Id);
+    if (authRelationAdduserToRole.Success)
+    {
+     response.Success=true;
+     response.Message=localization.Get ("RoleAddedSuccessfully");
+     response.Data=await userManager.GetRolesAsync (user.Data);
+     return response;
+    }
+    response.Success=false;
+    response.Message=localization.Get ("RoleAddFailed");
+    response.Data=null;
     return response;
    }
    else
@@ -297,9 +306,18 @@ namespace HR.Application.Services
      response.Data=null;
      return response;
     }
-    response.Success=true;
-    response.Message=localization.Get ("RoleRemovedSuccessfully");
-    response.Data=await userManager.GetRolesAsync (user.Data);
+
+    var authRelationRemoveuserToRole = await authRelations.RemoveUserFromRole (user.Data!.UserName!,role.Id);
+    if (authRelationRemoveuserToRole.Success)
+    {
+     response.Success=true;
+     response.Message=localization.Get ("RoleRemovedSuccessfully");
+     response.Data=await userManager.GetRolesAsync (user.Data);
+     return response;
+    }
+    response.Success=false;
+    response.Message=localization.Get ("RoleRemoveFailed");
+    response.Data=null;
     return response;
    }
   }

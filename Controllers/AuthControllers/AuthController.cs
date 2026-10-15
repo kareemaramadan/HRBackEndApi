@@ -286,5 +286,11 @@ namespace HRBackEndApi.Controllers.AuthControllers
    ApiResponse<string> result = await authService.DeleteUserAccountAsync (username);
    return (!result.Success) ? BadRequest (result) : Ok (result);
   }
+  [HttpPost ("RevokeCurrentToken")]
+  public async Task<IActionResult> RevokeCurrentToken ( )
+  {
+   return Ok ();
+  }
+
  }
 }
