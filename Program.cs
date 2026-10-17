@@ -144,21 +144,21 @@ namespace HRBackEndApi
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 options.IncludeXmlComments(xmlPath);
                 // 
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "Enter your JWT token."
-                });
+                //options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                //{
+                //    Name = "Authorization",
+                //    Type = SecuritySchemeType.Http,
+                //    Scheme = "bearer",
+                //    BearerFormat = "JWT",
+                //    In = ParameterLocation.Header,
+                //    Description = "Enter your JWT token."
+                //});
 
-                options.AddSecurityRequirement(document =>
-                    new OpenApiSecurityRequirement
-                          {
-                              [new OpenApiSecuritySchemeReference("Bearer", document)] = []
-                          });
+                //options.AddSecurityRequirement(document =>
+                //    new OpenApiSecurityRequirement
+                //          {
+                //              [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+                //          });
 
             });
 
@@ -227,7 +227,8 @@ namespace HRBackEndApi
             builder.Services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<JwtOptions>>().Value);
             // e.g. after AddScoped<IJwtTokenService,...>
             // register DB-backed revocation service (scoped)
-            //builder.Services.AddScoped<ITokenRevocationService, DbTokenRevocationService>();
+            builder.Services.AddScoped<ITokenRevocationService, DbTokenRevocationService>();
+           
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
             builder.Services.AddAuthentication(options =>
             {

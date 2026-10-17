@@ -115,10 +115,10 @@ namespace HR.Application.Services
    var getrolepagespermission = await rolepagepermissionservice.GetAllAsync (rpp => rpp.RoleId==roleId);
 
    var permissionPagesforRole = getrolepagespermission.Data!;
-   foreach (var permission in permissionPagesforRole)
+   foreach (var rolepermission in permissionPagesforRole)
    {
-    var rolepageId = permission.PageId;
-    var rolepermissionId = permission.PermissionId;
+    var rolepageId = rolepermission.PageId;
+    var rolepermissionId = rolepermission.PermissionId;
     User_Page_Permissions user_Page_Permissions = new ()
     {
      PermissionId=rolepermissionId,
