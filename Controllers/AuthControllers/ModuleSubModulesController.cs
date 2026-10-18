@@ -49,7 +49,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
    response.Message=submodules.Message;
    response.Success=submodules.Success;
 
-   response.Data=submodules.Data!.Select (msm => new GetModule_SubModulesDto (msm,response.Language)).ToList ();
+   response.Data= [.. submodules.Data!.Select (msm => new GetModule_SubModulesDto (msm,response.Language))];
    return Ok (response);
 
   }
@@ -89,7 +89,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
       );
 
    if (!createdItem.Success) { return BadRequest (createdItem); }
-   List<GetModule_SubModulesDto> getfullcreateddata = createdItem.Data!.Select (msm => new GetModule_SubModulesDto (msm,createdItem.Language)).ToList ();
+   List<GetModule_SubModulesDto> getfullcreateddata = [.. createdItem.Data!.Select (msm => new GetModule_SubModulesDto (msm,createdItem.Language))];
    response.Success=true;
    response.Message=createdItem.Message;
    response.Data=getfullcreateddata;
@@ -132,7 +132,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
        );
 
    if (!deleteditem.Success) { return BadRequest (deleteditem); }
-   List<GetModule_SubModulesDto> getitems = deleteditem.Data!.Select (msm => new GetModule_SubModulesDto (msm,deleteditem.Language)).ToList ();
+   List<GetModule_SubModulesDto> getitems = [.. deleteditem.Data!.Select (msm => new GetModule_SubModulesDto (msm,deleteditem.Language))];
    response.Success=deleteditem.Success;
    response.Data=getitems;
    response.Message=deleteditem.Message;

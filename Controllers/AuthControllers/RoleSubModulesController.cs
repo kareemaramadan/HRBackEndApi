@@ -39,19 +39,20 @@ namespace HRBackEndApi.Controllers.AuthControllers
    if (!ModelState.IsValid||string.IsNullOrEmpty (roleId))
    {
     response.Message=localization.Get ("invaliddata");
-    return response;
+    return BadRequest (response);
    }
    ApiResponse<IEnumerable<Role_SubModules>> roleSubmodules = await roleSubModulesService.GetAllAsync (
     filter: rms => rms.RoleId==roleId,
     include: query => query.Include (rms => rms.Module).Include (rms => rms.SubModule!).Include (rms => rms.Role!)
     );
 
-   if (!roleSubmodules.Success) return BadRequest (roleSubmodules);
+   if (!roleSubmodules.Success)
+    return BadRequest (roleSubmodules);
 
    response.Message=roleSubmodules.Message;
    response.Success=roleSubmodules.Success;
 
-   response.Data= [.. roleSubmodules.Data!.Select (msm => new GetRoleSubModules (msm,response.Language))];
+   response.Data=roleSubmodules.Data!.Select (msm => new GetRoleSubModules (msm,response.Language)).ToList ();
    return Ok (response);
 
   }
@@ -79,19 +80,23 @@ namespace HRBackEndApi.Controllers.AuthControllers
    if (!ModelState.IsValid)
    {
     response.Message=localization.Get ("invaliddata");
-    return response;
+    return BadRequest (response);
    }
-   Role_SubModules role_SubModules = mapper.Map<Role_SubModules> (assign_SubModuleToRole);
-   ApiResponse<IEnumerable<Role_SubModules>> createdItem = await roleSubModulesService.CreateAsyncAndGetAll (role_SubModules,
-      checkCriteria: rsm => (rsm.RoleId==role_SubModules.RoleId&&rsm.SubModuleId==role_SubModules.SubModuleId),
-      getAllCriteria: (rsm => (rsm.RoleId==role_SubModules.RoleId&&rsm.ModuleId==role_SubModules.SubModuleId)),
-      include: (query => query.Include (rsm => rsm.Role!).Include (rsm => rsm.Module!).Include (msm => msm.SubModule!))
-      );
-   var authRelationaddsubmoduletorole = authRelations.AddSubModuleToRole (role_SubModules.RoleId,role_SubModules.ModuleId,role_SubModules.SubModuleId);
 
-   if (!createdItem.Success) { return BadRequest (createdItem); }
-   if (!authRelationaddsubmoduletorole.Result.Success) { return BadRequest (authRelationaddsubmoduletorole); }
-   List<GetRoleSubModules> getfullcreateddata = [.. createdItem.Data!.Select (rsm => new GetRoleSubModules (rsm,createdItem.Language))];
+   Role_SubModules role_SubModules = mapper.Map<Role_SubModules> (assign_SubModuleToRole);
+   ApiResponse<IEnumerable<Role_SubModules>> createdItem = await roleSubModulesService.CreateAsyncAndGetAll (
+       role_SubModules,
+       checkCriteria: rsm => (rsm.RoleId==role_SubModules.RoleId&&rsm.SubModuleId==role_SubModules.SubModuleId),
+       getAllCriteria: rsm => (rsm.RoleId==role_SubModules.RoleId&&rsm.ModuleId==role_SubModules.ModuleId),
+       include: query => query.Include (rsm => rsm.Role!).Include (rsm => rsm.Module!).Include (msm => msm.SubModule!)
+   );
+
+   var authRelationResult = await authRelations.AddSubModuleToRole (role_SubModules.RoleId,role_SubModules.ModuleId,role_SubModules.SubModuleId);
+
+   if (!createdItem.Success) return BadRequest (createdItem);
+   if (!authRelationResult.Success) return BadRequest (authRelationResult);
+
+   List<GetRoleSubModules> getfullcreateddata = createdItem.Data!.Select (rsm => new GetRoleSubModules (rsm,createdItem.Language)).ToList ();
    response.Success=true;
    response.Message=createdItem.Message;
    response.Data=getfullcreateddata;
@@ -121,21 +126,23 @@ namespace HRBackEndApi.Controllers.AuthControllers
    if (!ModelState.IsValid)
    {
     response.Message=localization.Get ("invaliddata");
-    return response;
+    return BadRequest (response);
    }
+
    Role_SubModules role_SubModules = mapper.Map<Role_SubModules> (remove_SubModuleFromRole);
 
    ApiResponse<IEnumerable<Role_SubModules>> deletedItem = await roleSubModulesService.DeleteAsyncAndGetAll (
-      filter: rsm => (rsm.RoleId==role_SubModules.RoleId&&rsm.SubModuleId==role_SubModules.SubModuleId),
-      GetAllCriteria: (rsm => (rsm.RoleId==role_SubModules.RoleId&&rsm.ModuleId==role_SubModules.SubModuleId)),
-      include: (query => query.Include (rsm => rsm.Role!).Include (rsm => rsm.Module!).Include (msm => msm.SubModule!))
-      );
+       filter: rsm => (rsm.RoleId==role_SubModules.RoleId&&rsm.SubModuleId==role_SubModules.SubModuleId),
+       GetAllCriteria: rsm => (rsm.RoleId==role_SubModules.RoleId&&rsm.ModuleId==role_SubModules.ModuleId),
+       include: query => query.Include (rsm => rsm.Role!).Include (rsm => rsm.Module!).Include (msm => msm.SubModule!)
+   );
 
    var authrelationremovesubmodulefromrole = await authRelations.RemoveSubModuleFromRole (role_SubModules.RoleId,role_SubModules.ModuleId,role_SubModules.SubModuleId);
 
-   if (!deletedItem.Success) { return BadRequest (deletedItem); }
-   if (!authrelationremovesubmodulefromrole.Success) { return BadRequest (authrelationremovesubmodulefromrole); }
-   List<GetRoleSubModules> getfullcreateddata = [.. deletedItem.Data!.Select (rsm => new GetRoleSubModules (rsm,deletedItem.Language))];
+   if (!deletedItem.Success) return BadRequest (deletedItem);
+   if (!authrelationremovesubmodulefromrole.Success) return BadRequest (authrelationremovesubmodulefromrole);
+
+   List<GetRoleSubModules> getfullcreateddata = deletedItem.Data!.Select (rsm => new GetRoleSubModules (rsm,deletedItem.Language)).ToList ();
    response.Success=true;
    response.Message=deletedItem.Message;
    response.Data=getfullcreateddata;

@@ -119,8 +119,8 @@ namespace HR.Application.Services
   /// It first checks if the role exists. 
   /// If it does, it updates the role's properties based on the provided UpdateRoleDto and the specified action (update,delete and recover).
   /// </summary>
-  /// <param name="updateRole"></param>
-  /// <param name="roleAction"></param>
+  /// <param name="id"></param>
+  /// <param name="UpdateRole"></param>
   /// <returns>
   /// A list of RoleDto objects representing the updated roles or an error message.
   /// </returns>

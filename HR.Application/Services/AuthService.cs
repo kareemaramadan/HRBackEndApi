@@ -212,7 +212,7 @@ namespace HR.Application.Services
   /// <summary>
   /// Adds a role to a user.
   /// </summary>
-  /// <param name="addRoleToUser"></param>
+  /// <param name="addRoleToUserDto"></param>
   /// <returns> 
   /// A message indicating the result of the operation, either success or an error message.
   /// </returns>
@@ -231,7 +231,7 @@ namespace HR.Application.Services
   /// Validates the existence of a user and role, checks if the user is activated, and determines if the user is already assigned to the role. 
   /// Depending on the action ("add" or "remove"), it either adds or removes the role from the user.
   /// </summary>
-  /// <param name="addRoleToUser"></param>
+  /// <param name="addRoleToUserDto"></param>
   /// <param name="action"></param>
   /// <returns>
   /// A message indicating the result of the validation, either null (if valid) or an error message.
@@ -549,6 +549,7 @@ namespace HR.Application.Services
   /// This method sets the IsActivatedAccount property of the user to true.
   /// </summary>
   /// <param name="Username"></param>
+  /// <param name="isActivated"></param>
   /// <returns>
   /// A boolean indicating whether the operation was successful.
   /// </returns>
