@@ -129,10 +129,15 @@ namespace HR.Application.Dtos.AppDtos
  public record UserProfile ( string FirstName,string LastName,string Email,string NormalizedEmail,string UserName,string NormalizedUserName,
   string PhoneNumber,byte [ ]? ProfilePicture );
 
- //Roles 
- //=====
- /// <summary>Role representation used in role management endpoints.</summary>
- public record RoleDto ( string RoleId,string Name,string? Description );
+    //Roles 
+    //=====
+    /// <summary>Role representation used in role management endpoints.</summary>
+    public class RoleDto
+    {
+        public int RoleId { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+    }
  /// <summary>DTO to assign or remove a role to/from a user.</summary>
  public record AssignRoleDto ( string UserName,string RoleName );
  /// <summary>DTO for creating or updating a role.</summary>

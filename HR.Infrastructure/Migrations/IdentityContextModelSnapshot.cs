@@ -17,7 +17,7 @@ namespace HR.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -98,6 +98,34 @@ namespace HR.Infrastructure.Migrations
                     b.ToTable("Permissions", "Auth");
                 });
 
+            modelBuilder.Entity("HR.Domain.Models.Authorization.RevokedToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("DateTime");
+
+                    b.Property<string>("Jti")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<DateTime>("RevokedAtUtc")
+                        .HasColumnType("DateTime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Jti")
+                        .IsUnique()
+                        .HasDatabaseName("IX_RevokedToken_Jti");
+
+                    b.ToTable("RevokedTokens", "Auth");
+                });
+
             modelBuilder.Entity("HR.Domain.Models.Authorization.Role_Page_Permissions", b =>
                 {
                     b.Property<string>("RoleId")
@@ -110,6 +138,9 @@ namespace HR.Infrastructure.Migrations
                     b.Property<int>("PermissionId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsAllowed")
+                        .HasColumnType("bit");
+
                     b.HasKey("RoleId", "PageId", "PermissionId");
 
                     b.HasIndex("PageId");
@@ -121,26 +152,6 @@ namespace HR.Infrastructure.Migrations
                         .HasDatabaseName("IX_RolePagePermission_RoleId");
 
                     b.ToTable("Role_Page_Permissions", "Auth");
-                });
-
-            modelBuilder.Entity("HR.Domain.Models.Authorization.Role_SubModulePages", b =>
-                {
-                    b.Property<string>("RoleId")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("PageId")
-                        .HasColumnType("int");
-
-                    b.HasKey("RoleId", "PageId");
-
-                    b.HasIndex("PageId");
-
-                    b.HasIndex("RoleId", "PageId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Role_ModulePages_RoleId_PageId");
-
-                    b.ToTable("Role_SubModulePages", "Auth");
                 });
 
             modelBuilder.Entity("HR.Domain.Models.Authorization.Role_SubModules", b =>
@@ -741,25 +752,6 @@ namespace HR.Infrastructure.Migrations
                     b.Navigation("SubModulePage");
                 });
 
-            modelBuilder.Entity("HR.Domain.Models.Authorization.Role_SubModulePages", b =>
-                {
-                    b.HasOne("HR.Domain.Models.Authorization.SubModulePages", "SubModulePage")
-                        .WithMany("Role_SubModulePages")
-                        .HasForeignKey("PageId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("HR.Domain.Models.Identity.AppRole", "Role")
-                        .WithMany("Role_SubModulePages")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-
-                    b.Navigation("SubModulePage");
-                });
-
             modelBuilder.Entity("HR.Domain.Models.Authorization.Role_SubModules", b =>
                 {
                     b.HasOne("HR.Domain.Models.Authorization.Module", "Module")
@@ -927,8 +919,6 @@ namespace HR.Infrastructure.Migrations
                 {
                     b.Navigation("Role_Page_Permissions");
 
-                    b.Navigation("Role_SubModulePages");
-
                     b.Navigation("User_Page_Permissions");
                 });
 
@@ -942,8 +932,6 @@ namespace HR.Infrastructure.Migrations
             modelBuilder.Entity("HR.Domain.Models.Identity.AppRole", b =>
                 {
                     b.Navigation("Role_Page_Permissions");
-
-                    b.Navigation("Role_SubModulePages");
 
                     b.Navigation("Role_SubModules");
                 });

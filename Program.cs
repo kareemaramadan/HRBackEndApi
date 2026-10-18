@@ -156,9 +156,9 @@ namespace HRBackEndApi
 
                 //options.AddSecurityRequirement(document =>
                 //    new OpenApiSecurityRequirement
-                //          {
-                //              [new OpenApiSecuritySchemeReference("Bearer", document)] = []
-                //          });
+                //    {
+                //        [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+                //    });
 
             });
 
