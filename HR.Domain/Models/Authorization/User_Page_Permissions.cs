@@ -6,7 +6,7 @@ namespace HR.Domain.Models.Authorization
  public class User_Page_Permissions
  {
   [Required]
-  public string UserId { get; set; } = Guid.NewGuid ().ToString ();
+  public string? UserId { get; set; }
   [Required]
   public int PageId { get; set; }
   [Required]
@@ -17,6 +17,7 @@ namespace HR.Domain.Models.Authorization
 
   public virtual Permission? Permission { get; set; }
   public virtual SubModulePages? SubModulePage { get; set; }
+
   public virtual AppUser? User { get; set; }
 
  }

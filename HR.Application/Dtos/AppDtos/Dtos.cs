@@ -24,7 +24,7 @@ namespace HR.Application.Dtos.AppDtos
  public class UserRequest
  {
   /// <summary>The unique identifier of the user.</summary>
-  public Guid UserId { get; set; } = Guid.NewGuid ();
+  public Guid Id { get; set; } = Guid.NewGuid ();
   /// <summary>The username/login identifier.</summary>
   public string UserName { get; set; } = string.Empty;
   /// <summary>User first name.</summary>
@@ -72,8 +72,8 @@ namespace HR.Application.Dtos.AppDtos
   public string? Message { get; set; }
 
   /// <summary>Refresh token used to obtain new access tokens. Not serialized in responses.</summary>
-  [JsonIgnore]
-  public string? RefreshToken { get; set; }
+  //[JsonIgnore]
+  //public string? RefreshToken { get; set; }
 
   /// <summary>Expiration time for the refresh token. Not serialized in responses.</summary>
   [JsonIgnore]
@@ -146,6 +146,7 @@ namespace HR.Application.Dtos.AppDtos
  /// </summary>
  public class UserProfile
  {
+  public Guid Id { get; set; }
   /// <summary>User first name.</summary>
   public string FirstName { get; set; } = string.Empty;
   /// <summary>User last name.</summary>

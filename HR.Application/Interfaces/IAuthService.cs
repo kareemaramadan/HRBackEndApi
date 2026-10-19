@@ -20,5 +20,6 @@ namespace HR.Application.Interfaces
   Task<ApiResponse<UserProfile>> UpdateUserProfileAsync ( UserProfile userProfile );
   Task<ApiResponse<string>> DeleteUserAccountAsync ( string Username );
 
+
  }
 }

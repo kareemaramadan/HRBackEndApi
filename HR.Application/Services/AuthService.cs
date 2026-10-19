@@ -70,7 +70,12 @@ namespace HR.Application.Services
      Data=null,
      Language=localization.GetLanguage ()
     };
-   AppUser? user = await userManager.FindByNameAsync (Username)??null;
+
+
+
+
+
+   AppUser? user = await userManager.FindByNameAsync (Username);
    if (user==null)
    {
     return new ApiResponse<UserProfile>
@@ -174,12 +179,16 @@ namespace HR.Application.Services
     Language=localization.GetLanguage ()
    };
 
-   if (string.IsNullOrEmpty (login.Username)||string.IsNullOrEmpty (login.Password))
+   var username = login.Username;
+   var password = login.Password;
+
+   if (string.IsNullOrEmpty (username)||string.IsNullOrEmpty (password))
    {
     errorsresponse.Message=localization.Get ("userInvalidCredentials");
     return errorsresponse;
    }
-   ApiResponse<AppUser> appUser = await GetUserDataAsync (login.Username);
+
+   ApiResponse<AppUser> appUser = await GetUserDataAsync (username);
    switch (appUser.Data)
    {
     case null:
@@ -652,6 +661,11 @@ namespace HR.Application.Services
    response.Success=true;
    return response;
   }
+
+
+
+
+
 
  }
 }
