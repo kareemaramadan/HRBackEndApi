@@ -8,5 +8,7 @@ namespace HR.Application.Interfaces
  {
   public Task<JwtSecurityToken> CreateNewJwtSecurityToken ( AppUser user );
   public Task<AuthDto> CreateToken ( AppUser user );
+  public string GenerateRefreshToken ( );
+  public string HashRefreshToken ( string token );
  }
 }

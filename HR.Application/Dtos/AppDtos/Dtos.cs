@@ -1,6 +1,5 @@
 ﻿using HR.Domain.Models.Authorization;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace HR.Application.Dtos.AppDtos
 {
@@ -59,7 +58,7 @@ namespace HR.Application.Dtos.AppDtos
   /// <summary>User summary information.</summary>
   public UserRequest User { get; set; } = new UserRequest ();
   /// <summary>List of role names assigned to the user.</summary>
-  public List<string> Roles { get; set; } = new List<string> ();
+  public List<string> Roles { get; set; } = [ ];
   /// <summary>JWT or similar access token.</summary>
   public string Token { get; set; } = string.Empty;
   /// <summary>Expiration date/time of the access token.</summary>
@@ -71,13 +70,8 @@ namespace HR.Application.Dtos.AppDtos
   /// <summary>Optional message about the authentication result.</summary>
   public string? Message { get; set; }
 
-  /// <summary>Refresh token used to obtain new access tokens. Not serialized in responses.</summary>
-  //[JsonIgnore]
-  //public string? RefreshToken { get; set; }
+  public RefreshToken? RefreshToken { get; set; }
 
-  /// <summary>Expiration time for the refresh token. Not serialized in responses.</summary>
-  [JsonIgnore]
-  public DateTime RefreshTokenExpiration { get; set; }
  }
 
  /// <summary>

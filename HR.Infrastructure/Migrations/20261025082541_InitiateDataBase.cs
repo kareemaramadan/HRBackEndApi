@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HR.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDb : Migration
+    public partial class InitiateDataBase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -276,6 +276,31 @@ namespace HR.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                schema: "Auth",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    TokenHash = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false),
+                    ExpiresAtUtc = table.Column<DateTime>(type: "DateTime", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "DateTime", nullable: false),
+                    RevokedAtUtc = table.Column<DateTime>(type: "DateTime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_Users_UserId",
+                        column: x => x.UserId,
+                        principalSchema: "Auth",
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserClaims",
                 schema: "Auth",
                 columns: table => new
@@ -399,7 +424,8 @@ namespace HR.Infrastructure.Migrations
                 {
                     RoleId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     PageId = table.Column<int>(type: "int", nullable: false),
-                    PermissionId = table.Column<int>(type: "int", nullable: false)
+                    PermissionId = table.Column<int>(type: "int", nullable: false),
+                    IsAllowed = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -420,33 +446,6 @@ namespace HR.Infrastructure.Migrations
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Role_Page_Permissions_SubModulePages_PageId",
-                        column: x => x.PageId,
-                        principalSchema: "Auth",
-                        principalTable: "SubModulePages",
-                        principalColumn: "PageId",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Role_SubModulePages",
-                schema: "Auth",
-                columns: table => new
-                {
-                    RoleId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
-                    PageId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Role_SubModulePages", x => new { x.RoleId, x.PageId });
-                    table.ForeignKey(
-                        name: "FK_Role_SubModulePages_Roles_RoleId",
-                        column: x => x.RoleId,
-                        principalSchema: "Auth",
-                        principalTable: "Roles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Role_SubModulePages_SubModulePages_PageId",
                         column: x => x.PageId,
                         principalSchema: "Auth",
                         principalTable: "SubModulePages",
@@ -639,6 +638,19 @@ namespace HR.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_RefreshedTokens_Expires",
+                schema: "Auth",
+                table: "RefreshTokens",
+                column: "ExpiresAtUtc",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_UserId",
+                schema: "Auth",
+                table: "RefreshTokens",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Role_Page_Permissions_PageId",
                 schema: "Auth",
                 table: "Role_Page_Permissions",
@@ -656,19 +668,6 @@ namespace HR.Infrastructure.Migrations
                 table: "Role_Page_Permissions",
                 columns: new[] { "RoleId", "PageId", "PermissionId" },
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Role_ModulePages_RoleId_PageId",
-                schema: "Auth",
-                table: "Role_SubModulePages",
-                columns: new[] { "RoleId", "PageId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Role_SubModulePages_PageId",
-                schema: "Auth",
-                table: "Role_SubModulePages",
-                column: "PageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Role_SubModules_ModuleId",
@@ -805,11 +804,11 @@ namespace HR.Infrastructure.Migrations
                 schema: "Auth");
 
             migrationBuilder.DropTable(
-                name: "Role_Page_Permissions",
+                name: "RefreshTokens",
                 schema: "Auth");
 
             migrationBuilder.DropTable(
-                name: "Role_SubModulePages",
+                name: "Role_Page_Permissions",
                 schema: "Auth");
 
             migrationBuilder.DropTable(

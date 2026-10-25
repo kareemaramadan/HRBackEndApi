@@ -237,7 +237,6 @@ namespace HRBackEndApi
    builder.Services.AddSingleton (resolver => resolver.GetRequiredService<IOptions<JwtOptions>> ().Value);
    // e.g. after AddScoped<IJwtTokenService,...>
    // register DB-backed revocation service (scoped)
-   builder.Services.AddScoped<ITokenRevocationService,DbTokenRevocationService> ();
 
    builder.Services.AddScoped<IJwtTokenService,JwtTokenService> ();
    builder.Services.AddAuthentication (options =>
@@ -266,7 +265,7 @@ namespace HRBackEndApi
      OnMessageReceived=ctx =>
               {
                var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILoggerFactory> ().CreateLogger ("Jwt");
-               logger.LogInformation ($"Jwt authentication Information: {ctx.Result?.ToString ()}");
+               logger.LogInformation ("Jwt authentication Information: {message}",ctx.Result?.ToString ());
                return Task.CompletedTask;
               },
      OnAuthenticationFailed=ctx =>
@@ -283,14 +282,6 @@ namespace HRBackEndApi
                {
                 logger.LogWarning ("Token missing JTI");
                 ctx.Fail ("Missing jti");
-                return;
-               }
-
-               var revocationService = ctx.HttpContext.RequestServices.GetService<HR.Application.Interfaces.ITokenRevocationService> ();
-               if (revocationService!=null&&await revocationService.IsRevokedAsync (jti))
-               {
-                logger.LogInformation ("Token revoked jti={jti}",jti);
-                ctx.Fail ("Token revoked");
                 return;
                }
 

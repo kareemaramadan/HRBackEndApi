@@ -98,7 +98,7 @@ namespace HR.Infrastructure.Migrations
                     b.ToTable("Permissions", "Auth");
                 });
 
-            modelBuilder.Entity("HR.Domain.Models.Authorization.RevokedToken", b =>
+            modelBuilder.Entity("HR.Domain.Models.Authorization.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -106,24 +106,34 @@ namespace HR.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("DateTime");
+
                     b.Property<DateTime>("ExpiresAtUtc")
                         .HasColumnType("DateTime");
 
-                    b.Property<string>("Jti")
+                    b.Property<DateTime?>("RevokedAtUtc")
+                        .HasColumnType("DateTime");
+
+                    b.Property<string>("TokenHash")
                         .IsRequired()
-                        .HasMaxLength(150)
+                        .HasMaxLength(4000)
                         .HasColumnType("nvarchar");
 
-                    b.Property<DateTime>("RevokedAtUtc")
-                        .HasColumnType("DateTime");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Jti")
+                    b.HasIndex("ExpiresAtUtc")
                         .IsUnique()
-                        .HasDatabaseName("IX_RevokedToken_Jti");
+                        .HasDatabaseName("IX_RefreshedTokens_Expires");
 
-                    b.ToTable("RevokedTokens", "Auth");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens", "Auth");
                 });
 
             modelBuilder.Entity("HR.Domain.Models.Authorization.Role_Page_Permissions", b =>
@@ -725,6 +735,17 @@ namespace HR.Infrastructure.Migrations
                     b.Navigation("SubModule");
                 });
 
+            modelBuilder.Entity("HR.Domain.Models.Authorization.RefreshToken", b =>
+                {
+                    b.HasOne("HR.Domain.Models.Identity.AppUser", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("HR.Domain.Models.Authorization.Role_Page_Permissions", b =>
                 {
                     b.HasOne("HR.Domain.Models.Authorization.SubModulePages", "SubModulePage")
@@ -938,6 +959,8 @@ namespace HR.Infrastructure.Migrations
 
             modelBuilder.Entity("HR.Domain.Models.Identity.AppUser", b =>
                 {
+                    b.Navigation("RefreshTokens");
+
                     b.Navigation("User_Page_Permissions");
                 });
 

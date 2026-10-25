@@ -289,35 +289,27 @@ namespace HRBackEndApi.Controllers.AuthControllers
    ApiResponse<string> result = await authService.DeleteUserAccountAsync (username);
    return (!result.Success) ? BadRequest (result) : Ok (result);
   }
-  [HttpPost ("RevokeCurrentToken")]
-  public async Task<ActionResult<ApiResponse<string>>> RevokeCurrentToken ( )
-  {
-   var response = new ApiResponse<string> { Success=false,Language=localization.GetLanguage () };
-   var jti = User?.FindFirst (System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti)?.Value;
-   if (string.IsNullOrEmpty (jti))
-   {
-    response.Message=localization.Get ("missingfields");
-    return BadRequest (response);
-   }
+  //[HttpPost ("RevokeCurrentToken")]
+  //public async Task<ActionResult<ApiResponse<string>>> RevokeCurrentToken ( )
+  //{
+  // var response = new ApiResponse<string> { Success=false,Language=localization.GetLanguage () };
+  // var jti = User?.FindFirst (System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti)?.Value;
+  // if (string.IsNullOrEmpty (jti))
+  // {
+  //  response.Message=localization.Get ("missingfields");
+  //  return BadRequest (response);
+  // }
 
-   var revocationService = HttpContext.RequestServices.GetService<HR.Application.Interfaces.ITokenRevocationService> ();
-   if (revocationService==null)
-   {
-    response.Message="Revocation service unavailable";
-    return StatusCode (500,response);
-   }
 
-   var expClaim = User?.FindFirst (System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Exp)?.Value;
-   DateTime? expiresAtUtc = null;
-   if (long.TryParse (expClaim,out var epoch))
-    expiresAtUtc=DateTimeOffset.FromUnixTimeSeconds (epoch).UtcDateTime;
-
-   await revocationService.RevokeAsync (jti,expiresAtUtc);
-   response.Success=true;
-   response.Message=localization.Get ("itemcreated");
-   response.Data=jti;
-   return Ok (response);
-  }
+  // var expClaim = User?.FindFirst (System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Exp)?.Value;
+  // //DateTime? expiresAtUtc = null;
+  // if (long.TryParse (expClaim,out var epoch))
+  //  expiresAtUtc=DateTimeOffset.FromUnixTimeSeconds (epoch).UtcDateTime;
+  // response.Success=true;
+  // response.Message=localization.Get ("itemcreated");
+  // response.Data=jti;
+  // return Ok (response);
+  //}
 
  }
 }

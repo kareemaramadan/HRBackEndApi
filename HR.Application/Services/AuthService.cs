@@ -2,6 +2,7 @@
 using HR.Application.Dtos.AppDtos;
 using HR.Application.Interfaces;
 using HR.Application.Response;
+using HR.Domain.Models.Authorization;
 using HR.Domain.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ namespace HR.Application.Services
  /// <summary>
  /// Service for handling user authentication, registration, role management, and account status operations.
  /// </summary>
- public class AuthService ( UserManager<AppUser> userManager,RoleManager<AppRole> roleManager,IAuthRelations authRelations,
+ public class AuthService ( UserManager<AppUser> userManager,RoleManager<AppRole> roleManager,IAuthRelations authRelations,IBaseRepository<RefreshToken> refreshTokenRep,
      SignInManager<AppUser> signInManager,IMapper mapper,IJwtTokenService jwtTokenService,ILocalizationService localization ) : IAuthService
  {
   /// <summary>
@@ -209,15 +210,48 @@ namespace HR.Application.Services
     errorsresponse.Message=localization.Get ("userInvalidCredentials");
     return errorsresponse;
    }
+
+   AuthDto tokenData = await jwtTokenService.CreateToken (appUser.Data);
+   RefreshToken refreshTokenData = await RefreshTokenAsync (appUser.Data);
+   tokenData.RefreshToken=refreshTokenData;
+
+
    return new ApiResponse<AuthDto>
    {
     Success=true,
     Message=string.Empty,
-
-    Data=await jwtTokenService.CreateToken (appUser.Data),
+    Data=tokenData,
     Language=localization.GetLanguage ()
    };
   }
+
+  private async Task<RefreshToken> RefreshTokenAsync ( AppUser user )
+  {
+   string refershToken = jwtTokenService.GenerateRefreshToken ();
+
+   RefreshToken refToken = new ()
+   {
+    UserId=user.Id,
+    TokenHash=jwtTokenService.HashRefreshToken (refershToken),
+    CreatedAtUtc=DateTime.UtcNow,
+    ExpiresAtUtc=DateTime.UtcNow.AddDays (1)
+   };
+
+   await refreshTokenRep.CreateAsync (refToken);
+
+   // ResponseCookies responseCookies = new ResponseCookies();
+   //CookieOptions cookieOptions = new ()
+   //{
+   // HttpOnly=true,
+   // Secure=true,
+   // SameSite=SameSiteMode.Strict
+   //};
+
+
+
+   return refToken;
+  }
+
   /// <summary>
   /// Adds a role to a user.
   /// </summary>

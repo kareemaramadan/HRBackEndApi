@@ -12,6 +12,12 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
        .WithOne (up => up.User)
        .HasForeignKey (up => up.UserId)
        .OnDelete (DeleteBehavior.Restrict);
+
+
+   builder.HasMany (T => T.RefreshTokens)
+    .WithOne (up => up.User).HasForeignKey (up => up.UserId).OnDelete (DeleteBehavior.Restrict);
+
+
   }
  }
 }
