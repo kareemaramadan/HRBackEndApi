@@ -6,9 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HRBackEndApi.Controllers.AuthControllers
 {
+ [Authorize]
  [Route ("api/[controller]")]
  [ApiController]
- public class AuthController ( IAuthService authService,ILocalizationService localization ) : ControllerBase
+ public class AuthController ( IAuthService authService,ILocalizationService localization,IJwtTokenService jwtTokenService ) : ControllerBase
  {
   /// <summary>
   /// Get the profile information of user
@@ -25,7 +26,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// </example>
   /// <param name="username">The username to retrieve profile for.</param>
   /// <returns>ApiResponse containing the UserProfile when successful.</returns>
-  [HttpGet ("GetUserProfile/{username}")]
+  [HttpGet ("UserProfile/{username}")]
   public async Task<ActionResult<ApiResponse<UserProfile>>> GetUserProfileAsync ( string username )
   {
    ApiResponse<UserProfile> result = await authService.GetUserProfileAsync (username);
@@ -43,7 +44,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// { "success": true, "data": [ "jdoe", "asmith" ], "message": "" }
   /// </example>
   /// <returns>ApiResponse with list of usernames.</returns>
-  [HttpGet ("GetAllUsers")]
+  [HttpGet ("AllUsers")]
   public async Task<ActionResult<ApiResponse<List<string>>>> GetAllUsers ( )
   {
    ApiResponse<List<string>> result = await authService.GetAllUsersAsync ();
@@ -66,7 +67,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// <param name="register">Registration request body.</param>
   /// <returns>ApiResponse containing AuthDto when registration succeeds.</returns>
   [AllowAnonymous]
-  [HttpPost ("RegisterUser")]
+  [HttpPost ("Register")]
   public async Task<ActionResult<ApiResponse<AuthDto>>> RegisterAsync ( [FromBody] RegisterDto register )
   {
    if (!ModelState.IsValid)
@@ -80,7 +81,14 @@ namespace HRBackEndApi.Controllers.AuthControllers
     });
    }
    ApiResponse<AuthDto> result = await authService.RegisterAsync (register);
-   return (!result.Success) ? BadRequest (result) : Created ("",result);
+   if (!result.Data!.IsAuthenticated)
+    return BadRequest (result);
+   else
+   {
+    SetRefreshTokenInCookies ("accessToken",result.Data!.Token!,result.Data.TokenExpiresIn);
+    SetRefreshTokenInCookies ("refreshToken",result.Data!.RefreshToken!,result.Data.RefreshTokenExpiration);
+    return Created ("",result);
+   }
   }
   /// <summary>
   /// Logs in a user and returns an authentication token
@@ -113,7 +121,16 @@ namespace HRBackEndApi.Controllers.AuthControllers
     });
    }
    var result = await authService.LoginAsync (login);
-   return (!result.Success) ? Unauthorized (result) : Ok (result);
+   if (!result.Success)
+   {
+    return Unauthorized (result);
+   }
+   else
+   {
+    SetRefreshTokenInCookies ("accessToken",result.Data!.Token!,result.Data.TokenExpiresIn);
+    SetRefreshTokenInCookies ("refreshToken",result.Data!.RefreshToken!,result.Data.RefreshTokenExpiration);
+    return Ok (result);
+   }
   }
   /// <summary>
   /// Gets a list of roles assigned to a specific user
@@ -130,7 +147,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
   /// </example>
   /// <param name="username">Username to query roles for.</param>
   /// <returns>ApiResponse with a list of role names.</returns>
-  [HttpGet ("GetUserRoles/{username}")]
+  [HttpGet ("UserRoles/{username}")]
   public async Task<ActionResult<ApiResponse<IList<string>>>> GetUserRoles ( string username )
   {
    ApiResponse<IList<string>> result = await authService.GetUserRolesAsync (username);
@@ -289,27 +306,67 @@ namespace HRBackEndApi.Controllers.AuthControllers
    ApiResponse<string> result = await authService.DeleteUserAccountAsync (username);
    return (!result.Success) ? BadRequest (result) : Ok (result);
   }
-  //[HttpPost ("RevokeCurrentToken")]
-  //public async Task<ActionResult<ApiResponse<string>>> RevokeCurrentToken ( )
-  //{
-  // var response = new ApiResponse<string> { Success=false,Language=localization.GetLanguage () };
-  // var jti = User?.FindFirst (System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti)?.Value;
-  // if (string.IsNullOrEmpty (jti))
-  // {
-  //  response.Message=localization.Get ("missingfields");
-  //  return BadRequest (response);
-  // }
+
+  [HttpPost ("RevokeCurrentToken")]
+  public async Task<ActionResult<ApiResponse<string>>> RevokeCurrentToken ( [FromBody] RevokeToken revokeToken )
+  {
+   var response = new ApiResponse<string> { Success=false,Language=localization.GetLanguage () };
+   var token = revokeToken.Token??Request.Cookies ["refreshToken"];
+
+   if (string.IsNullOrEmpty (token))
+   {
+    response.Message=localization.Get ("missingfields");
+    return BadRequest (response);
+   }
+
+   var result = await jwtTokenService.RevokeTokenAsync (token);
+
+   if (Request.Cookies ["refreshToken"]==token)
+    RemoveRefreshTokenFromCookies ("refreshToken");
+
+   return !result ? BadRequest ("Session is Expired!") : Ok ("session is revoked");
+
+  }
+
+  [HttpGet ("refreshToken")]
+  public async Task<IActionResult> RefreshToken ( )
+  {
+   var refreshToken = Request.Cookies ["refreshToken"];
+   if (string.IsNullOrEmpty (refreshToken))
+   {
+    return BadRequest ("Refresh token is missing.");
+   }
+   var result = await jwtTokenService.RefreshTokenAsync (refreshToken);
+   if (!result.IsAuthenticated)
+   {
+    return BadRequest (result.Message);
+   }
+   if (!string.IsNullOrEmpty (result.RefreshToken))
+   {
+    SetRefreshTokenInCookies ("accessToken",result.Token!,result.TokenExpiresIn);
+    SetRefreshTokenInCookies ("refreshToken",result.RefreshToken,result.RefreshTokenExpiration);
+   }
+   return Ok (result);
+  }
+
+  private void SetRefreshTokenInCookies ( string cookieKey,string cookievalue,DateTime cookieexpires )
+  {
+   var cookieOptions = new CookieOptions
+   {
+    HttpOnly=true,
+    SameSite=SameSiteMode.Strict,
+    Secure=true,
+    Expires=cookieexpires.ToLocalTime ()
+   };
+   Response.Cookies.Append (cookieKey,cookievalue,cookieOptions);
+  }
 
 
-  // var expClaim = User?.FindFirst (System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Exp)?.Value;
-  // //DateTime? expiresAtUtc = null;
-  // if (long.TryParse (expClaim,out var epoch))
-  //  expiresAtUtc=DateTimeOffset.FromUnixTimeSeconds (epoch).UtcDateTime;
-  // response.Success=true;
-  // response.Message=localization.Get ("itemcreated");
-  // response.Data=jti;
-  // return Ok (response);
-  //}
+  private void RemoveRefreshTokenFromCookies ( string cookieName )
+  {
+   Response.Cookies.Delete (cookieName);
+  }
+
 
  }
 }

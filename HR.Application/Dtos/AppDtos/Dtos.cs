@@ -70,7 +70,9 @@ namespace HR.Application.Dtos.AppDtos
   /// <summary>Optional message about the authentication result.</summary>
   public string? Message { get; set; }
 
-  public RefreshToken? RefreshToken { get; set; }
+  //  [JsonIgnore]
+  public string? RefreshToken { get; set; }
+  public DateTime RefreshTokenExpiration { get; set; }
 
  }
 
@@ -115,6 +117,11 @@ namespace HR.Application.Dtos.AppDtos
   public bool IsActivatedAccount { get; set; } = true;
   /// <summary>Account creation date.</summary>
   public DateTime CreatedOn { get; set; } = DateTime.Today;
+ }
+
+ public class RevokeToken ( )
+ {
+  public string? Token { get; set; }
  }
 
  /// <summary>

@@ -67,7 +67,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
      Language=localization.GetLanguage ()
     });
 
-   ApiResponse<Module> item = await moduleService.FindItemAsync (m => m.ModuleName_en==moduleName||m.ModuleName_ar==moduleName);
+   ApiResponse<Module?> item = await moduleService.FindItemAsync (m => m.ModuleName_en==moduleName||m.ModuleName_ar==moduleName);
    return (!item.Success) ? NotFound (item) : Ok (new ApiResponse<ModuleDto>
    {
     Success=item.Success,
@@ -177,7 +177,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
      Data=0,
      Language=localization.GetLanguage ()
     });
-   ApiResponse<Module> deleteditem = await moduleService.FindItemAsync (m => (m.ModuleName_en==moduleName||m.ModuleName_ar==moduleName));
+   ApiResponse<Module?> deleteditem = await moduleService.FindItemAsync (m => (m.ModuleName_en==moduleName||m.ModuleName_ar==moduleName));
    if (!deleteditem.Success) return BadRequest (deleteditem);
    ApiResponse<int> rowsaffected = await moduleService.DeleteAsync (deleteditem.Data!);
    return (!rowsaffected.Success) ? BadRequest (rowsaffected) : Ok (rowsaffected);
@@ -195,7 +195,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
    int deletedrowsAffected = 0;
    foreach (var moduleName in deletedmodules)
    {
-    ApiResponse<Module> deleteditem = await moduleService.FindItemAsync (m => (m.ModuleName_en==moduleName||m.ModuleName_ar==moduleName));
+    ApiResponse<Module?> deleteditem = await moduleService.FindItemAsync (m => (m.ModuleName_en==moduleName||m.ModuleName_ar==moduleName));
     if (!deleteditem.Success) return BadRequest (deleteditem);
     ApiResponse<int> rowsaffected = await moduleService.DeleteAsync (deleteditem.Data!);
     deletedrowsAffected+=rowsaffected.Data;

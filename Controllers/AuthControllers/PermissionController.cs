@@ -60,7 +60,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
      Data=null,
      Language=localization.GetLanguage ()
     });
-   ApiResponse<Permission> permission = await PermissionService.FindItemAsync (p => p.PermissionName==permissionName);
+   ApiResponse<Permission?> permission = await PermissionService.FindItemAsync (p => p.PermissionName==permissionName);
    return (!permission.Success) ? NotFound (permission) : Ok (new ApiResponse<PermissionDto>
    {
     Success=permission.Success,
@@ -190,7 +190,7 @@ namespace HRBackEndApi.Controllers.AuthControllers
    int deletedrowsAffected = 0;
    foreach (var permissionName in deletedpermissions)
    {
-    ApiResponse<Permission> deleteditem = await PermissionService.FindItemAsync (p => p.PermissionName==permissionName);
+    ApiResponse<Permission?> deleteditem = await PermissionService.FindItemAsync (p => p.PermissionName==permissionName);
     if (!deleteditem.Success) return BadRequest (deleteditem);
     ApiResponse<int> rowsaffected = await PermissionService.DeleteAsync (deleteditem.Data!);
 

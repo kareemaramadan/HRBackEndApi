@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HR.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitiateDataBase : Migration
+    public partial class InitDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -283,10 +283,10 @@ namespace HR.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
-                    TokenHash = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false),
+                    TokenRefreshed = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false),
                     ExpiresAtUtc = table.Column<DateTime>(type: "DateTime", nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "DateTime", nullable: false),
-                    RevokedAtUtc = table.Column<DateTime>(type: "DateTime", nullable: true)
+                    RevokedOn = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {

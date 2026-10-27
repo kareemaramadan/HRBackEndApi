@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HR.Infrastructure.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    [Migration("20261025082541_InitiateDataBase")]
-    partial class InitiateDataBase
+    [Migration("20261027044306_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -115,10 +115,10 @@ namespace HR.Infrastructure.Migrations
                     b.Property<DateTime>("ExpiresAtUtc")
                         .HasColumnType("DateTime");
 
-                    b.Property<DateTime?>("RevokedAtUtc")
-                        .HasColumnType("DateTime");
+                    b.Property<DateTime?>("RevokedOn")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("TokenHash")
+                    b.Property<string>("TokenRefreshed")
                         .IsRequired()
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar");

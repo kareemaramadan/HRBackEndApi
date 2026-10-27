@@ -13,6 +13,8 @@ namespace HR.Application.Helpers
   public string? Audience { get; set; }
   [Required]
   public double? ExpireAt { get; set; }
+  [Required]
+  public double? RefreshExpiresAt { get; set; }
 
  }
 }

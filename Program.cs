@@ -246,7 +246,7 @@ namespace HRBackEndApi
    }).AddJwtBearer (JwtBearerDefaults.AuthenticationScheme,o =>
    {
     o.RequireHttpsMetadata=true;
-    o.SaveToken=false;
+    o.SaveToken=true;
     o.TokenValidationParameters=new TokenValidationParameters
     {
      ValidateIssuerSigningKey=true,
@@ -341,6 +341,7 @@ namespace HRBackEndApi
    builder.Services.AddAutoMapper (m => { },typeof (AuthMappingProfile));
 
    #endregion
+
 
    var app = builder.Build ();
 

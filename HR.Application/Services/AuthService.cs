@@ -13,7 +13,7 @@ namespace HR.Application.Services
  /// <summary>
  /// Service for handling user authentication, registration, role management, and account status operations.
  /// </summary>
- public class AuthService ( UserManager<AppUser> userManager,RoleManager<AppRole> roleManager,IAuthRelations authRelations,IBaseRepository<RefreshToken> refreshTokenRep,
+ public class AuthService ( UserManager<AppUser> userManager,RoleManager<AppRole> roleManager,IAuthRelations authRelations,
      SignInManager<AppUser> signInManager,IMapper mapper,IJwtTokenService jwtTokenService,ILocalizationService localization ) : IAuthService
  {
   /// <summary>
@@ -212,8 +212,8 @@ namespace HR.Application.Services
    }
 
    AuthDto tokenData = await jwtTokenService.CreateToken (appUser.Data);
-   RefreshToken refreshTokenData = await RefreshTokenAsync (appUser.Data);
-   tokenData.RefreshToken=refreshTokenData;
+   //RefreshToken refreshTokenData = await RefreshTokenAsync (appUser.Data);
+   //tokenData.RefreshToken=refreshTokenData.TokenRefreshed;
 
 
    return new ApiResponse<AuthDto>
@@ -224,34 +224,6 @@ namespace HR.Application.Services
     Language=localization.GetLanguage ()
    };
   }
-
-  private async Task<RefreshToken> RefreshTokenAsync ( AppUser user )
-  {
-   string refershToken = jwtTokenService.GenerateRefreshToken ();
-
-   RefreshToken refToken = new ()
-   {
-    UserId=user.Id,
-    TokenHash=jwtTokenService.HashRefreshToken (refershToken),
-    CreatedAtUtc=DateTime.UtcNow,
-    ExpiresAtUtc=DateTime.UtcNow.AddDays (1)
-   };
-
-   await refreshTokenRep.CreateAsync (refToken);
-
-   // ResponseCookies responseCookies = new ResponseCookies();
-   //CookieOptions cookieOptions = new ()
-   //{
-   // HttpOnly=true,
-   // Secure=true,
-   // SameSite=SameSiteMode.Strict
-   //};
-
-
-
-   return refToken;
-  }
-
   /// <summary>
   /// Adds a role to a user.
   /// </summary>
@@ -467,6 +439,14 @@ namespace HR.Application.Services
    user.Data.AccessFailedCount=5;
    user.Data.IsActivatedAccount=false;
    // user.Data.LockoutEnd=DateTimeOffset.Now.Add(lockoutDuration);
+
+   RefreshToken? userRefreshToken = user.Data!.RefreshTokens.FirstOrDefault (t => t.IsActive);
+   if (userRefreshToken is not null)
+   {
+    await jwtTokenService.RevokeTokenAsync (userRefreshToken.TokenRefreshed);
+   }
+
+
    IdentityResult result = await userManager.UpdateAsync (user.Data);
    if (!result.Succeeded)
    {

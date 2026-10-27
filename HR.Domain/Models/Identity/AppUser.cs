@@ -18,9 +18,7 @@ namespace HR.Domain.Models.Identity
   [NotMapped]
   public string FullName => $"{FirstName} {LastName}";
 
-
-  //  [JsonIgnore]
   public virtual ICollection<User_Page_Permissions>? User_Page_Permissions { get; set; }
-  public virtual ICollection<RefreshToken>? RefreshTokens { get; set; }
+  public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = [ ];
  }
 }

@@ -99,31 +99,31 @@ namespace HR.Infrastructure.Repository
 
   public async Task<IEnumerable<T>> FindAsync ( Expression<Func<T,bool>> criteria )
   {
-   IQueryable<T> query = dbSet.AsNoTracking().Where (criteria);
+   IQueryable<T> query = dbSet.AsNoTracking ().Where (criteria);
    return await query.ToListAsync ();
   }
 
-  public async Task<T> FindItemAsync ( Expression<Func<T,bool>> criteria )
+  public async Task<T?> FindItemAsync ( Expression<Func<T,bool>> criteria )
   {
-   var item = await dbSet.AsNoTracking().FirstOrDefaultAsync (criteria);
-   return item??throw new NotImplementedException ("the item is not found");
+   var item = await dbSet.AsNoTracking ().FirstOrDefaultAsync (criteria);
+   return item??null;
   }
 
   public async Task<IEnumerable<T>> GetAllAsync ( )
   {
-   return await dbSet.AsNoTracking().ToListAsync ();
+   return await dbSet.AsNoTracking ().ToListAsync ();
   }
 
   public async Task<IEnumerable<T>> GetAllAsync ( Expression<Func<T,bool>> filter )
   {
-   IQueryable<T> query = dbSet.AsNoTracking().Where (filter);
+   IQueryable<T> query = dbSet.AsNoTracking ().Where (filter);
    return await query.ToListAsync ();
   }
 
   public async Task<IEnumerable<T>> GetAllAsync ( Expression<Func<T,bool>>? filter = null,
         Func<IQueryable<T>,IIncludableQueryable<T,object>>? include = null )
   {
-   IQueryable<T> query = dbSet.AsNoTracking();
+   IQueryable<T> query = dbSet.AsNoTracking ();
 
    if (include!=null) query=include (query);
    if (filter!=null) query=query.Where (filter);
@@ -131,13 +131,13 @@ namespace HR.Infrastructure.Repository
    return await query.ToListAsync ();
   }
 
-  public async Task<T> UpdateAsync ( T entity,Expression<Func<T,bool>> criteria )
-  {
-   var existingEntity = await dbSet.FirstOrDefaultAsync (criteria)??throw new NotImplementedException ("the item is not found");
-   dbContext.Update (entity);
-   await dbContext.SaveChangesAsync ();
-   return entity;
-  }
+  //public async Task<T> UpdateAsync ( T entity,Expression<Func<T,bool>> criteria )
+  //{
+  // var existingEntity = await dbSet.FirstOrDefaultAsync (criteria)??throw new NotImplementedException ("the item is not found");
+  // dbContext.Update (entity);
+  // await dbContext.SaveChangesAsync ();
+  // return entity;
+  //}
 
   public async Task<T> UpdateAsync ( T entity )
   {
@@ -145,6 +145,30 @@ namespace HR.Infrastructure.Repository
    await dbContext.SaveChangesAsync ();
    return entity;
   }
+
+  public async Task<T> PartialUpdateAsync ( T entity,params Expression<Func<T,object>> [ ] includedProperties )
+  {
+   // Get the EF Core entity entry.
+   var entry = dbContext.Entry (entity);
+
+   // Attach the entity if it is not already tracked.
+   if (entry.State==EntityState.Detached)
+   {
+    dbContext.Attach (entity);
+   }
+
+   // Mark only the specified properties as modified.
+   foreach (var property in includedProperties)
+   {
+    entry.Property (property).IsModified=true;
+   }
+
+   // Save changes to the database.
+   await dbContext.SaveChangesAsync ();
+
+   return entity;
+  }
+
  }
 }
 

@@ -12,10 +12,10 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
    builder.HasKey (T => T.Id);
    builder.Property (T => T.Id).UseIdentityColumn (1,1).HasColumnType ("int");
    builder.Property (T => T.UserId).HasColumnType ("nvarchar").HasMaxLength (450).IsRequired ();
-   builder.Property (T => T.TokenHash).HasColumnType ("nvarchar").HasMaxLength (4000).IsRequired ();
+   builder.Property (T => T.TokenRefreshed).HasColumnType ("nvarchar").HasMaxLength (4000).IsRequired ();
    builder.Property (T => T.ExpiresAtUtc).HasColumnType ("DateTime");
    builder.Property (T => T.CreatedAtUtc).HasColumnType ("DateTime");
-   builder.Property (T => T.RevokedAtUtc).HasColumnType ("DateTime");
+
 
 
    builder.HasIndex (T => T.ExpiresAtUtc).HasDatabaseName ("IX_RefreshedTokens_Expires").IsUnique ();
@@ -24,7 +24,6 @@ namespace HR.Infrastructure.Configuration.AuthConfiguration
     .WithMany (up => up.RefreshTokens)
     .HasForeignKey (T => T.UserId)
     .OnDelete (DeleteBehavior.Restrict);
-
   }
  }
 }
