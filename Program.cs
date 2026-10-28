@@ -153,22 +153,22 @@ namespace HRBackEndApi
      if (File.Exists (xmlPath))
       options.IncludeXmlComments (xmlPath);
     }
-    // 
-    //options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    //{
-    //    Name = "Authorization",
-    //    Type = SecuritySchemeType.Http,
-    //    Scheme = "bearer",
-    //    BearerFormat = "JWT",
-    //    In = ParameterLocation.Header,
-    //    Description = "Enter your JWT token."
-    //});
 
-    //options.AddSecurityRequirement(document =>
-    //    new OpenApiSecurityRequirement
-    //    {
-    //        [new OpenApiSecuritySchemeReference("Bearer", document)] = []
-    //    });
+    options.AddSecurityDefinition ("Bearer",new OpenApiSecurityScheme
+    {
+     Name="Authorization",
+     Type=SecuritySchemeType.Http,
+     Scheme="bearer",
+     BearerFormat="JWT",
+     In=ParameterLocation.Header,
+     Description="Enter your JWT token."
+    });
+
+    options.AddSecurityRequirement (document =>
+        new OpenApiSecurityRequirement
+        {
+         [new OpenApiSecuritySchemeReference ("Bearer",document)]= [ ]
+        });
 
    });
 
