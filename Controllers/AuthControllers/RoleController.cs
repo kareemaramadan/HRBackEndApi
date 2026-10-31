@@ -7,46 +7,156 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HRBackEndApi.Controllers.AuthControllers
 {
+ /// <summary>
+ /// Role Management API
+ /// </summary>
+ /// <remarks>
+ /// Manages system roles including creation, retrieval, updating, and deletion.
+ /// 
+ /// **Base Route:** `/api/Role`
+ /// **Authentication:** Required (Bearer token)
+ /// **Authorization:** Typically requires Admin role
+ /// **Content Type:** application/json
+ /// 
+ /// **Role Hierarchy:**
+ /// Roles are security containers that group permissions and can be assigned to users.
+ /// Each role can have multiple permissions and users can be assigned multiple roles.
+ /// 
+ /// **Common Roles:**
+ /// - Admin: Full system access
+ /// - Manager: Department/team management
+ /// - User: Standard user access
+ /// - Guest: Limited read-only access
+ /// </remarks>
  [Authorize]
  [ApiController]
  [Route ("api/[controller]")]
+ [Produces ("application/json")]
 
  public class RoleController ( IRoleService roleService,ILocalizationService localization ) : ControllerBase
  {
   /// <summary>
-  /// Gets a list of all roles in the system
+  /// Retrieve all roles available in the system
   /// </summary>
   /// <remarks>
-  /// Returns available roles. Results are returned with role id, name and description.
+  /// Returns a complete list of all roles with their identifiers and descriptions.
+  /// 
+  /// **Authorization:** Requires authenticated user (typically Admin or Manager role)
+  /// 
+  /// **Response Format:**
+  /// Each role includes:
+  /// - RoleId: Unique role identifier
+  /// - Name: Role display name (e.g., "Admin", "Manager", "User")
+  /// - Description: Purpose and permissions summary
+  /// 
+  /// **Use Cases:**
+  /// - Display roles in an admin UI for role assignment
+  /// - Get list of available roles for filtering/searching
+  /// - Populate role dropdown in user management forms
+  /// 
+  /// **Performance Note:** Results are ordered by RoleId
   /// </remarks>
   /// <example>
+  /// Request:
   /// GET /api/Role/GetAllRoles
-  /// // Success (200)
-  /// { "success": true, "data": [ { "RoleId":"1","Name":"Admin","Description":"" } ], "message": "" }
+  /// Header: Authorization: Bearer {valid_jwt_token}
+  /// 
+  /// Success Response (200 OK):
+  /// {
+  ///   "success": true,
+  ///   "data": [
+  ///     {
+  ///       "roleId": "1",
+  ///       "name": "Admin",
+  ///       "description": "Administrator with full system access and all permissions"
+  ///     },
+  ///     {
+  ///       "roleId": "2",
+  ///       "name": "Manager",
+  ///       "description": "Manager can oversee team and approve requests"
+  ///     },
+  ///     {
+  ///       "roleId": "3",
+  ///       "name": "User",
+  ///       "description": "Standard user with basic read and limited write permissions"
+  ///     }
+  ///   ],
+  ///   "message": ""
+  /// }
+  /// 
+  /// Database Error (400):
+  /// {
+  ///   "success": false,
+  ///   "message": "Failed to retrieve roles from database",
+  ///   "data": null
+  /// }
   /// </example>
-  /// <returns>ApiResponse with the collection of roles.</returns>
+  /// <returns>ApiResponse containing collection of RoleDto objects</returns>
+  /// <response code="200">Roles retrieved successfully</response>
+  /// <response code="400">Database error or retrieval failed</response>
+  /// <response code="401">Unauthorized - authentication token required or invalid</response>
   [HttpGet ("GetAllRoles")]
+  [ProducesResponseType (typeof (ApiResponse<IEnumerable<RoleDto>>),StatusCodes.Status200OK)]
+  [ProducesResponseType (typeof (ApiResponse<object>),StatusCodes.Status400BadRequest)]
+  [ProducesResponseType (typeof (ApiResponse<object>),StatusCodes.Status401Unauthorized)]
   public async Task<ActionResult<ApiResponse<IEnumerable<RoleDto>>>> GetAllRolesAsync ( )
   {
    ApiResponse<IEnumerable<RoleDto>> roles = await roleService.GetAllRolesAsync ();
    return (roles.Success) ? Ok (roles) : BadRequest (roles);
   }
   /// <summary>
-  /// Gets a specific role by its name
+  /// Retrieve a specific role by name
   /// </summary>
   /// <remarks>
-  /// Returns the role DTO matching the provided role name. If not found a BadRequest is returned.
+  /// Finds and returns a single role matching the provided name.
+  /// 
+  /// **Authorization:** Requires authenticated user
+  /// 
+  /// **Search Behavior:**
+  /// - Search is case-insensitive by default
+  /// - Returns exactly one role or not found
+  /// - Useful for validation and role lookups
+  /// 
+  /// **Error Scenarios:**
+  /// - 400 Bad Request: Role with name does not exist
+  /// - 401 Unauthorized: Invalid or missing authentication token
   /// </remarks>
   /// <example>
+  /// Request:
   /// GET /api/Role/GetRoleByName?roleName=Admin
-  /// // Success (200)
-  /// { "success": true, "data": { "RoleId":"1","Name":"Admin" }, "message": "" }
-  /// // Error (400)
-  /// { "success": false, "message": "role not found" }
+  /// Header: Authorization: Bearer {token}
+  /// 
+  /// Success Response (200):
+  /// {
+  ///   "success": true,
+  ///   "data": {
+  ///     "roleId": "1",
+  ///     "name": "Admin",
+  ///     "description": "Administrator with full system access"
+  ///   },
+  ///   "message": ""
+  /// }
+  /// 
+  /// Not Found Response (400):
+  /// {
+  ///   "success": false,
+  ///   "message": "role not found",
+  ///   "data": null
+  /// }
   /// </example>
-  /// <param name="roleName">Role name to lookup.</param>
-  /// <returns>ApiResponse with the RoleDto when found.</returns>
+  /// <param name="roleName">
+  /// The role name to search for.
+  /// Case-insensitive, must be exact match.
+  /// Example: "Admin", "Manager", "User"
+  /// </param>
+  /// <returns>ApiResponse with RoleDto when found, null data if not found</returns>
+  /// <response code="200">Role found and returned</response>
+  /// <response code="400">Role not found with this name</response>
+  /// <response code="401">Unauthorized - authentication required</response>
   [HttpGet ("GetRoleByName")]
+  [ProducesResponseType (typeof (ApiResponse<RoleDto>),StatusCodes.Status200OK)]
+  [ProducesResponseType (typeof (ApiResponse<object>),StatusCodes.Status400BadRequest)]
+  [ProducesResponseType (typeof (ApiResponse<object>),StatusCodes.Status401Unauthorized)]
   public async Task<ActionResult<ApiResponse<RoleDto>>> GetRoleByNameAsync ( string roleName )
   {
    ApiResponse<RoleDto> role = await roleService.GetRoleByNameAsync (roleName);

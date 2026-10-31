@@ -3,6 +3,7 @@ using HR.Application.Dtos.AppDtos;
 using HR.Application.Interfaces;
 using HR.Application.Response;
 using HR.Domain.Models.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HRBackEndApi.Controllers.AuthControllers
 {
-
+ [Authorize]
  [Route ("api/[controller]")]
  [ApiController]
  public class ModulesController ( IBaseService<Module> moduleService,IMapper mapper,ILocalizationService localization ) : ControllerBase
